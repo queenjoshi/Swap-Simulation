@@ -565,14 +565,16 @@ export function SwapCard() {
                             </div>
 
                             {/* Flip */}
-                            <button
-                                type="button"
-                                onClick={flipTokens}
-                                className="mx-auto -my-1 flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(212,175,55,0.25)] bg-black/35 text-[rgba(212,175,55,0.9)] hover:border-[rgba(212,175,55,0.5)] transition"
-                                aria-label="Flip tokens"
-                            >
-                                ⇅
-                            </button>
+                            <div className="relative z-10 flex justify-center -my-3">
+                                <button
+                                    type="button"
+                                    onClick={flipTokens}
+                                    className="flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(212,175,55,0.3)] bg-[#111114] text-[rgba(212,175,55,0.9)] hover:border-[rgba(212,175,55,0.6)] hover:bg-[#1a1a1e] transition shadow-md"
+                                    aria-label="Flip tokens"
+                                >
+                                    ⇅
+                                </button>
+                            </div>
 
                             {/* Buy panel */}
                             <div className="hoj-panel rounded-3xl p-4">
