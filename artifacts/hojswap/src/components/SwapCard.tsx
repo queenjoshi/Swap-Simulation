@@ -565,11 +565,11 @@ export function SwapCard() {
                             </div>
 
                             {/* Flip */}
-                            <div className="relative z-10 flex justify-center -my-3">
+                            <div className="flex justify-center py-1">
                                 <button
                                     type="button"
                                     onClick={flipTokens}
-                                    className="flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(212,175,55,0.3)] bg-[#111114] text-[rgba(212,175,55,0.9)] hover:border-[rgba(212,175,55,0.6)] hover:bg-[#1a1a1e] transition shadow-md"
+                                    className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(212,175,55,0.3)] bg-black/40 text-[rgba(212,175,55,0.9)] hover:border-[rgba(212,175,55,0.6)] hover:bg-black/60 transition shadow-sm text-lg"
                                     aria-label="Flip tokens"
                                 >
                                     ⇅
