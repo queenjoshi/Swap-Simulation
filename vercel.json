@@ -1,9 +1,7 @@
 {
   "version": 2,
+  "framework": "nextjs",
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm --filter @workspace/hojswap run build",
-  "outputDirectory": "artifacts/hojswap/dist/public",
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" }
-  ]
+  "buildCommand": "pnpm --filter hojswap-next run build",
+  "outputDirectory": "hojswap-next/.next"
 }
