@@ -33,7 +33,7 @@ const DEBOUNCE_MS = 750;
 type ActiveTab = "swap" | "bridge" | "transactions";
 type ApiKeyError = "api_key_missing" | "api_key_invalid" | null;
 
-export function SwapCard() {
+function SwapCardInner() {
     const searchParams = useSearchParams();
     const { showToast } = useToast();
     const chainId = useChainId();
@@ -780,4 +780,8 @@ export function SwapCard() {
             </div>
         </div>
     );
+}
+
+export function SwapCard() {
+    return <SwapCardInner />;
 }
