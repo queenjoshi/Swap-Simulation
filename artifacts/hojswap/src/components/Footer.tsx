@@ -1,12 +1,17 @@
+const SWAP_PAIRS = [
+  { label: "SHIB / ETH", sell: "SHIB", buy: "ETH" },
+  { label: "BONE / ETH", sell: "BONE", buy: "ETH" },
+  { label: "USDC / ETH", sell: "USDC", buy: "ETH" },
+  { label: "BASE / ETH", sell: "BASE", buy: "ETH" },
+];
+
 const FOOTER_LINKS = [
   {
     heading: "Swap",
-    items: [
-      { label: "BONE / ETH", href: "/" },
-      { label: "TREAT / ETH", href: "/" },
-      { label: "OSCAR / ETH", href: "/" },
-      { label: "QUEENJOSHI / ETH", href: "/" },
-    ],
+    items: SWAP_PAIRS.map(pair => ({ 
+      label: pair.label, 
+      href: `/?sell=${pair.sell}&buy=${pair.buy}` 
+    })),
   },
   {
     heading: "Company",

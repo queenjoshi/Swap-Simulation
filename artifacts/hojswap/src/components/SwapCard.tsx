@@ -43,8 +43,26 @@ export function SwapCard() {
 
     const availableTokens = useMemo(() => tokensForChain(selectedChainId), [selectedChainId]);
 
-    const [sellToken, setSellToken] = useState<Token>(() => defaultSellForChain(base.id));
-    const [buyToken, setBuyToken] = useState<Token>(() => defaultBuyForChain(base.id));
+    // Parse URL params to set initial tokens
+    const [sellToken, setSellToken] = useState<Token>(() => {
+        const params = new URLSearchParams(window.location.search);
+        const sellSymbol = params.get("sell");
+        if (sellSymbol) {
+            const token = availableTokens.find(t => t.symbol === sellSymbol);
+            if (token) return token;
+        }
+        return defaultSellForChain(base.id);
+    });
+    
+    const [buyToken, setBuyToken] = useState<Token>(() => {
+        const params = new URLSearchParams(window.location.search);
+        const buySymbol = params.get("buy");
+        if (buySymbol) {
+            const token = availableTokens.find(t => t.symbol === buySymbol);
+            if (token) return token;
+        }
+        return defaultBuyForChain(base.id);
+    });
     const [slippageBps, setSlippageBps] = useState<number>(loadSlippageBps);
     const [sellAmountInput, setSellAmountInput] = useState<string>("");
 

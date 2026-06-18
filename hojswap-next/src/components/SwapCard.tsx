@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
     useAccount,
     useBalance,
@@ -33,6 +34,7 @@ type ActiveTab = "swap" | "bridge" | "transactions";
 type ApiKeyError = "api_key_missing" | "api_key_invalid" | null;
 
 export function SwapCard() {
+    const searchParams = useSearchParams();
     const { showToast } = useToast();
     const chainId = useChainId();
     const { address, isConnected } = useAccount();
@@ -44,8 +46,25 @@ export function SwapCard() {
 
     const availableTokens = useMemo(() => tokensForChain(selectedChainId), [selectedChainId]);
 
-    const [sellToken, setSellToken] = useState<Token>(() => defaultSellForChain(base.id));
-    const [buyToken, setBuyToken] = useState<Token>(() => defaultBuyForChain(base.id));
+    const [sellToken, setSellToken] = useState<Token>(() => {
+        const sellSymbol = searchParams.get("sell");
+        const initialTokens = tokensForChain(base.id);
+        if (sellSymbol) {
+            const token = initialTokens.find(t => t.symbol === sellSymbol);
+            if (token) return token;
+        }
+        return defaultSellForChain(base.id);
+    });
+    
+    const [buyToken, setBuyToken] = useState<Token>(() => {
+        const buySymbol = searchParams.get("buy");
+        const initialTokens = tokensForChain(base.id);
+        if (buySymbol) {
+            const token = initialTokens.find(t => t.symbol === buySymbol);
+            if (token) return token;
+        }
+        return defaultBuyForChain(base.id);
+    });
     const [slippageBps, setSlippageBps] = useState<number>(loadSlippageBps);
     const [sellAmountInput, setSellAmountInput] = useState<string>("");
 
