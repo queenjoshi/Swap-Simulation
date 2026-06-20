@@ -124,6 +124,64 @@ export const TOKENS: Token[] = [
     decimals: 9,
   },
 
+  // ─── Popular Trending Tokens ─────────────────────────────
+  {
+    symbol: "PEPE",
+    name: "Pepe",
+    address: getAddress("0x6982508145454ce894eaff96994f0eea27afd713"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "DOGE",
+    name: "Dogecoin",
+    address: getAddress("0xba2ef195f25f33f9f642ff0e8c2f8ff5ff7b3af1"),
+    chainId: mainnet.id,
+    decimals: 8,
+  },
+  {
+    symbol: "APE",
+    name: "ApeCoin",
+    address: getAddress("0x4d224452801aced8b2f0aebe155379bb5d594381"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "AAVE",
+    name: "Aave",
+    address: getAddress("0x7fc66500c84a76ad7e9c93437e434122a1f9adf9"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "UNI",
+    name: "Uniswap",
+    address: getAddress("0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "LINK",
+    name: "Chainlink",
+    address: getAddress("0x514910771af9ca656af840dff83e8264ecf986ca"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "ARB",
+    name: "Arbitrum",
+    address: getAddress("0xb50721bcf8d664c30412cfbc6cf7a15145234ad1"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "OP",
+    name: "Optimism",
+    address: getAddress("0x4200000000000000000000000000000000000042"),
+    chainId: base.id,
+    decimals: 18,
+  },
+
   // ─── Cronos ─────────────────────────────────────────────
   {
     symbol: "CRO",
