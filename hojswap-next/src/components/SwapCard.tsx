@@ -132,9 +132,16 @@ function SwapCardInner() {
                 setQuote(null);
                 setPrice(null);
                 setQuoteError(null);
+            } else {
+                // Token not available on this chain, show toast
+                showToast({ 
+                    kind: "error", 
+                    title: "Token not available", 
+                    message: `${tokenSymbol} is not available to swap on this chain` 
+                });
             }
         },
-        [availableTokens, sellToken],
+        [availableTokens, sellToken, showToast],
     );
 
     function flipTokens() {
