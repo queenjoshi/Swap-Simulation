@@ -19,39 +19,48 @@ export default async function handler(req: any, res: any) {
   try {
     const { chainId = "8453" } = req.query; // Default to Base (8453)
 
-    // Map chainId to CoinGecko category
-    const categoryMap: { [key: string]: string } = {
-      "8453": "base-ecosystem", // Base
-      "1": "ethereum-ecosystem", // Ethereum
-      "25": "cronos-ecosystem", // Cronos
+    // Map chainId to CoinGecko category with fallback
+    const categoryMap: { [key: string]: string[] } = {
+      "8453": ["base-ecosystem"], // Base
+      "1": ["ethereum-ecosystem", "defi"], // Ethereum - with fallback to DeFi
+      "25": ["cronos-ecosystem", "defi"], // Cronos - with fallback to DeFi
     };
 
-    const category = categoryMap[String(chainId)] || "base-ecosystem";
+    const categories = categoryMap[String(chainId)] || ["base-ecosystem"];
 
-    const response = await fetch(
-      `${COINGECKO_API_URL}/coins/markets?` +
-        new URLSearchParams({
-          vs_currency: "usd",
-          category: category,
-          order: "volume_desc",
-          per_page: "10",
-          sparkline: "false",
-          locale: "en",
-        }).toString(),
-      {
-        headers: {
-          Accept: "application/json",
-        },
+    let response = null;
+    let data = null;
+
+    // Try each category until one works
+    for (const category of categories) {
+      response = await fetch(
+        `${COINGECKO_API_URL}/coins/markets?` +
+          new URLSearchParams({
+            vs_currency: "usd",
+            category: category,
+            order: "volume_desc",
+            per_page: "10",
+            sparkline: "false",
+            locale: "en",
+          }).toString(),
+        {
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        data = await response.json();
+        if (data && data.length > 0) {
+          break; // Successfully got data
+        }
       }
-    );
-
-    if (!response.ok) {
-      return res.status(response.status).json({
-        error: `CoinGecko API error: ${response.statusText}`,
-      });
     }
 
-    const data = await response.json();
+    if (!data || data.length === 0) {
+      return res.status(200).json([]); // Return empty array instead of error
+    }
 
     // Format the response to include only necessary fields
     const formatted: TrendingToken[] = data.map((token: any) => ({
@@ -70,8 +79,6 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json(formatted);
   } catch (error) {
     console.error("[TRENDING API] Error:", error);
-    return res.status(500).json({
-      error: "Failed to fetch trending tokens",
-    });
+    return res.status(200).json([]); // Return empty array on error instead of 500
   }
 }

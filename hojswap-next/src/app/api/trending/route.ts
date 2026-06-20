@@ -5,40 +5,51 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const chainId = searchParams.get('chainId') || '8453'; // Default to Base
 
-    // Map chainId to CoinGecko category
-    const categoryMap: { [key: string]: string } = {
-      '8453': 'base-ecosystem',
-      '1': 'ethereum-ecosystem',
-      '25': 'cronos-ecosystem',
+    // Map chainId to CoinGecko category with fallback
+    const categoryMap: { [key: string]: string[] } = {
+      '8453': ['base-ecosystem'],
+      '1': ['ethereum-ecosystem', 'defi'], // Ethereum - with fallback to DeFi
+      '25': ['cronos-ecosystem', 'defi'], // Cronos - with fallback to DeFi
     };
 
-    const category = categoryMap[chainId] || 'base-ecosystem';
+    const categories = categoryMap[chainId] || ['base-ecosystem'];
 
-    const params = new URLSearchParams({
-      vs_currency: 'usd',
-      category: category,
-      order: 'volume_desc',
-      per_page: '10',
-      sparkline: 'false',
-    });
+    let data = null;
 
-    const res = await fetch(
-      `https://api.coingecko.com/api/v3/coins/markets?${params.toString()}`,
-      {
-        headers: {
-          Accept: 'application/json',
-        },
-      }
-    );
+    // Try each category until one works
+    for (const category of categories) {
+      const params = new URLSearchParams({
+        vs_currency: 'usd',
+        category: category,
+        order: 'volume_desc',
+        per_page: '10',
+        sparkline: 'false',
+      });
 
-    if (!res.ok) {
-      return NextResponse.json(
-        { error: 'Failed to fetch from CoinGecko' },
-        { status: res.status }
+      const res = await fetch(
+        `https://api.coingecko.com/api/v3/coins/markets?${params.toString()}`,
+        {
+          headers: {
+            Accept: 'application/json',
+          },
+        }
       );
+
+      if (res.ok) {
+        const responseData = await res.json();
+        if (responseData && responseData.length > 0) {
+          data = responseData;
+          break; // Successfully got data
+        }
+      }
     }
 
-    const data = await res.json();
+    // If no data found, return empty array
+    if (!data || data.length === 0) {
+      const response = NextResponse.json([]);
+      response.headers.set('Cache-Control', 'public, max-age=300');
+      return response;
+    }
 
     // Format the response
     const formatted = data.map((token: any) => ({
@@ -58,9 +69,9 @@ export async function GET(request: Request) {
     return response;
   } catch (error) {
     console.error('[TRENDING API] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch trending tokens' },
-      { status: 500 }
-    );
+    // Return empty array on error instead of 500
+    const response = NextResponse.json([]);
+    response.headers.set('Cache-Control', 'public, max-age=300');
+    return response;
   }
 }
