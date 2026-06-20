@@ -1,0 +1,115 @@
+"use client";
+import { useEffect, useState, useCallback } from "react";
+
+interface TrendingToken {
+  id: string;
+  symbol: string;
+  name: string;
+  image: string;
+  current_price: number;
+  market_cap_rank: number;
+  total_volume: number;
+  price_change_percentage_24h: number;
+}
+
+interface TrendingTokensProps {
+  chainId: number;
+  onSelectToken: (symbol: string) => void;
+}
+
+export function TrendingTokens({ chainId, onSelectToken }: TrendingTokensProps) {
+  const [tokens, setTokens] = useState<TrendingToken[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchTrendingTokens = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/trending?chainId=${chainId}`);
+      if (!res.ok) throw new Error("Failed to fetch trending tokens");
+      const data = await res.json();
+      setTokens(data);
+    } catch (err) {
+      console.error("Error fetching trending tokens:", err);
+      setError("Failed to load trending tokens");
+    } finally {
+      setLoading(false);
+    }
+  }, [chainId]);
+
+  // Fetch on mount and set up auto-refresh every 60 seconds
+  useEffect(() => {
+    fetchTrendingTokens();
+    const interval = setInterval(fetchTrendingTokens, 60000);
+    return () => clearInterval(interval);
+  }, [fetchTrendingTokens]);
+
+  if (error) {
+    return (
+      <div className="text-xs text-red-400/60 text-center py-2">
+        {error}
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full">
+      <div className="mb-2 flex items-center gap-2">
+        <p className="text-[11px] uppercase tracking-[0.18em] text-white/55 font-semibold">
+          Trending on {chainId === 1 ? "Ethereum" : chainId === 25 ? "Cronos" : "Base"}
+        </p>
+        {loading && <span className="text-[10px] text-white/30">Updating...</span>}
+      </div>
+
+      <div className="overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 pb-2">
+          {tokens.length === 0 ? (
+            <p className="text-xs text-white/40">No trending tokens available</p>
+          ) : (
+            tokens.map((token) => (
+              <button
+                key={token.id}
+                onClick={() => onSelectToken(token.symbol)}
+                className="flex-shrink-0 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 hover:bg-white/[0.08] hover:border-[rgba(212,175,55,0.3)] transition cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <img
+                    src={token.image}
+                    alt={token.symbol}
+                    className="h-5 w-5 rounded-full"
+                  />
+                  <div className="text-left">
+                    <p className="text-xs font-semibold text-white">
+                      {token.symbol}
+                    </p>
+                    <p
+                      className={`text-[10px] ${
+                        token.price_change_percentage_24h >= 0
+                          ? "text-green-400/70"
+                          : "text-red-400/70"
+                      }`}
+                    >
+                      {token.price_change_percentage_24h >= 0 ? "+" : ""}
+                      {token.price_change_percentage_24h.toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+      </div>
+
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+    </div>
+  );
+}

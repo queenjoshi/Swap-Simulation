@@ -25,6 +25,7 @@ import { TokenBalance } from "@/components/TokenBalance";
 import { TokenSelect } from "@/components/TokenSelect";
 import { TransactionsPanel } from "@/components/TransactionsPanel";
 import { BridgeTab } from "@/components/BridgeTab";
+import { TrendingTokens } from "@/components/TrendingTokens";
 import { useToast } from "@/components/Toast";
 import { saveTransaction } from "@/lib/transactions";
 import { useNativeTokenPrice, getNativeSymbol, formatNetworkFee } from "@/lib/gas";
@@ -117,6 +118,23 @@ function SwapCardInner() {
             setQuoteError(null);
         },
         [sellToken, availableTokens],
+    );
+
+    const onSelectTrendingToken = useCallback(
+        (tokenSymbol: string) => {
+            const token = availableTokens.find(t => t.symbol === tokenSymbol);
+            if (token) {
+                // Set as buy token, keep sell token
+                setBuyToken(token);
+                if (isSameToken(token, sellToken)) {
+                    setSellToken(otherToken(token, sellToken, availableTokens));
+                }
+                setQuote(null);
+                setPrice(null);
+                setQuoteError(null);
+            }
+        },
+        [availableTokens, sellToken],
     );
 
     function flipTokens() {
@@ -752,6 +770,13 @@ function SwapCardInner() {
                         <TransactionsPanel key={txHistoryVersion} walletAddress={address} selectedChainId={selectedChainId} />
                     )}
                 </div>
+
+                {/* Trending Tokens Section */}
+                {activeTab === "swap" && (
+                    <div className="mt-4 hoj-card rounded-3xl p-4 sm:p-6">
+                        <TrendingTokens chainId={selectedChainId} onSelectToken={onSelectTrendingToken} />
+                    </div>
+                )}
 
                 <div className="mt-5 grid grid-cols-3 gap-3 text-center">
                     {[
