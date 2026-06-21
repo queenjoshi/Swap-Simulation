@@ -6,10 +6,25 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const NAV_LINKS = [
   { label: "Swap & Bridge", href: "/" },
+  { label: "Prices", href: "/prices" },
   { label: "About", href: "/about" },
   { label: "Community", href: "https://thehouseofjoshi.com", external: true },
   { label: "Contact", href: "https://thehouseofjoshi.com/contact", external: true },
 ];
+
+const PAGE_TITLES: Record<string, string> = {
+  "/": "Swap & Bridge",
+  "/about": "About",
+  "/prices": "Prices",
+};
+
+function getPageTitle(location: string): string {
+  for (const [path, title] of Object.entries(PAGE_TITLES)) {
+    if (path === "/" && (location === "/" || location === "")) return title;
+    if (path !== "/" && location.startsWith(path)) return title;
+  }
+  return "House of Joshi";
+}
 
 function isActive(linkHref: string, location: string) {
   if (linkHref === "/") return location === "/" || location === "";
@@ -69,6 +84,10 @@ export function Header() {
             ),
           )}
         </nav>
+
+        <div className="ml-auto flex items-center gap-3 md:hidden">
+          <span className="text-[13px] text-white/40">{getPageTitle(location)}</span>
+        </div>
 
         <div className="flex items-center gap-2">
           <ConnectButton accountStatus="avatar" chainStatus="icon" showBalance={false} />

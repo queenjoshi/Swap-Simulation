@@ -27,12 +27,21 @@ export function TrendingTokens({ chainId, onSelectToken }: TrendingTokensProps) 
     setError(null);
     try {
       const res = await fetch(`/api/trending?chainId=${chainId}`);
-      if (!res.ok) throw new Error("Failed to fetch trending tokens");
+      if (!res.ok) {
+        setError(null); // Silently fail
+        setTokens([]);
+        return;
+      }
       const data = await res.json();
-      setTokens(data);
+      if (Array.isArray(data)) {
+        setTokens(data);
+      } else {
+        setTokens([]);
+      }
     } catch (err) {
       console.error("Error fetching trending tokens:", err);
-      setError("Failed to load trending tokens");
+      setTokens([]); // Clear tokens on error
+      setError(null); // Don't show error to user
     } finally {
       setLoading(false);
     }
@@ -45,16 +54,14 @@ export function TrendingTokens({ chainId, onSelectToken }: TrendingTokensProps) 
     return () => clearInterval(interval);
   }, [fetchTrendingTokens]);
 
-  if (error) {
-    return (
-      <div className="text-xs text-red-400/60 text-center py-2">
-        {error}
-      </div>
-    );
+  // If no tokens, don't render anything
+  if (tokens.length === 0 && !loading) {
+    return null;
   }
 
   return (
-    <div className="w-full">
+    <div className="mt-4 hoj-card rounded-3xl p-4 sm:p-6">
+      <div className="w-full">
       <div className="mb-2 flex items-center gap-2">
         <p className="text-[11px] uppercase tracking-[0.18em] text-white/55 font-semibold">
           Trending on {chainId === 1 ? "Ethereum" : chainId === 25 ? "Cronos" : "Base"}
@@ -64,40 +71,45 @@ export function TrendingTokens({ chainId, onSelectToken }: TrendingTokensProps) 
 
       <div className="overflow-x-auto scrollbar-hide">
         <div className="flex gap-2 pb-2">
-          {tokens.length === 0 ? (
-            <p className="text-xs text-white/40">No trending tokens available</p>
-          ) : (
-            tokens.map((token) => (
-              <button
-                key={token.id}
-                onClick={() => onSelectToken(token.symbol)}
-                className="flex-shrink-0 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 hover:bg-white/[0.08] hover:border-[rgba(212,175,55,0.3)] transition cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <img
-                    src={token.image}
-                    alt={token.symbol}
-                    className="h-5 w-5 rounded-full"
-                  />
-                  <div className="text-left">
-                    <p className="text-xs font-semibold text-white">
-                      {token.symbol}
-                    </p>
-                    <p
-                      className={`text-[10px] ${
-                        token.price_change_percentage_24h >= 0
-                          ? "text-green-400/70"
-                          : "text-red-400/70"
-                      }`}
-                    >
-                      {token.price_change_percentage_24h >= 0 ? "+" : ""}
-                      {token.price_change_percentage_24h.toFixed(1)}%
-                    </p>
-                  </div>
+          {tokens.map((token) => (
+            <button
+              key={token.id}
+              onClick={() => {
+                try {
+                  onSelectToken(token.symbol);
+                } catch (e) {
+                  console.error("Error selecting token:", e);
+                }
+              }}
+              className="flex-shrink-0 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 hover:bg-white/[0.08] hover:border-[rgba(212,175,55,0.3)] transition cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <img
+                  src={token.image}
+                  alt={token.symbol}
+                  className="h-5 w-5 rounded-full"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+                <div className="text-left">
+                  <p className="text-xs font-semibold text-white">
+                    {token.symbol}
+                  </p>
+                  <p
+                    className={`text-[10px] ${
+                      token.price_change_percentage_24h >= 0
+                        ? "text-green-400/70"
+                        : "text-red-400/70"
+                    }`}
+                  >
+                    {token.price_change_percentage_24h >= 0 ? "+" : ""}
+                    {token.price_change_percentage_24h.toFixed(1)}%
+                  </p>
                 </div>
-              </button>
-            ))
-          )}
+              </div>
+            </button>
+          ))}
         </div>
       </div>
 
@@ -110,6 +122,7 @@ export function TrendingTokens({ chainId, onSelectToken }: TrendingTokensProps) 
           scrollbar-width: none;
         }
       `}</style>
+      </div>
     </div>
   );
 }
