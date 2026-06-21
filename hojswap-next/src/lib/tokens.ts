@@ -123,6 +123,20 @@ export const TOKENS: Token[] = [
     chainId: mainnet.id,
     decimals: 9,
   },
+  {
+    symbol: "BTC",
+    name: "Bitcoin",
+    address: getAddress("0x2260fac5e5542a773aa44fbcff022c5ad373b40c"),
+    chainId: mainnet.id,
+    decimals: 8,
+  },
+  {
+    symbol: "BNB",
+    name: "Binance Coin",
+    address: getAddress("0xb8c77482e45f1f44de1745f52c74426c631bdd52"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
 
   // ─── Cronos ─────────────────────────────────────────────
   {
