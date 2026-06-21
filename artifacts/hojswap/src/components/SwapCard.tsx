@@ -776,12 +776,10 @@ export function SwapCard() {
                     )}
                 </div>
 
-                {/* Trending Tokens Section */}
-                {activeTab === "swap" && (
-                    <div className="mt-4 hoj-card rounded-3xl p-4 sm:p-6">
-                        <TrendingTokens chainId={selectedChainId} onSelectToken={onSelectTrendingToken} />
-                    </div>
-                )}
+                {/* Trending Tokens Section - Disabled for now */}
+                {/* {activeTab === "swap" && (
+                    <TrendingTokens chainId={selectedChainId} onSelectToken={onSelectTrendingToken} />
+                )} */}
 
                 <div className="mt-5 grid grid-cols-3 gap-3 text-center">
                     {[
