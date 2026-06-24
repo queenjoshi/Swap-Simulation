@@ -778,10 +778,10 @@ function SwapCardInner() {
                     )}
                 </div>
 
-                {/* Trending Tokens Section - Disabled for now */}
-                {/* {activeTab === "swap" && (
+                {/* Trending Tokens Section */}
+                {activeTab === "swap" && (
                     <TrendingTokens chainId={selectedChainId} onSelectToken={onSelectTrendingToken} />
-                )} */}
+                )}
 
                 <div className="mt-5 grid grid-cols-3 gap-3 text-center">
                     {[
