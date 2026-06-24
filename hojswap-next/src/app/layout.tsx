@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cinzel, DM_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/Header";
@@ -31,6 +32,12 @@ export default function RootLayout({
       className={`${displayFont.variable} ${sansFont.variable} antialiased`}
     >
       <body className="flex min-h-dvh flex-col bg-[#0b0b0d] text-[#f5f1e6] font-sans">
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8905064413166970"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         <Providers>
           <Header />
           <main className="flex-1">

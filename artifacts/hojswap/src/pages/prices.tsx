@@ -1,4 +1,12 @@
+"use client";
+
 import { useEffect, useState } from "react";
+
+declare global {
+  interface Window {
+    adsbygoogle: any[];
+  }
+}
 
 interface CryptoPrice {
   symbol: string;
@@ -61,6 +69,34 @@ export default function PricesPage() {
     return () => clearInterval(interval);
   }, []);
 
+  // Load AdSense script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8905064413166970';
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+    document.head.appendChild(script);
+
+    return () => {
+      // Clean up script on unmount
+      const existingScript = document.querySelector('script[src*="pagead2.googlesyndication.com"]');
+      if (existingScript) {
+        document.head.removeChild(existingScript);
+      }
+    };
+  }, []);
+
+  // Push ads after component mounts
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.adsbygoogle) {
+      try {
+        window.adsbygoogle.push({});
+      } catch (e) {
+        console.error('AdSense push error:', e);
+      }
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#0b0b0d] text-white">
       {/* Header */}
@@ -72,6 +108,20 @@ export default function PricesPage() {
           <p className="mt-2 text-white/60">
             Real-time prices powered by CoinGecko
           </p>
+        </div>
+      </div>
+
+      {/* AdSense Banner */}
+      <div className="border-b border-[rgba(212,175,55,0.12)]">
+        <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6">
+          <div className="flex justify-center">
+            <ins
+              className="adsbygoogle"
+              style={{ display: 'inline-block', width: '100%', maxWidth: '1000px', height: '90px' }}
+              data-ad-client="ca-pub-8905064413166970"
+              data-ad-slot="4854619850"
+            ></ins>
+          </div>
         </div>
       </div>
 
