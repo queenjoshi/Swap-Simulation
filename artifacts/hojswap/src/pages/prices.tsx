@@ -112,9 +112,9 @@ export default function PricesPage() {
       </div>
 
       {/* AdSense Banner */}
-      <div className="border-b border-[rgba(212,175,55,0.12)] bg-[#0b0b0d]">
+      <div className="border-b border-[rgba(212,175,55,0.12)]">
         <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6">
-          <div className="flex justify-center rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          <div className="flex justify-center">
             <ins
               className="adsbygoogle"
               style={{ display: 'inline-block', width: '100%', maxWidth: '1000px', height: '90px' }}
