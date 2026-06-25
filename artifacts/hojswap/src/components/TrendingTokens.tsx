@@ -15,9 +15,10 @@ interface TrendingToken {
 interface TrendingTokensProps {
   chainId: number;
   onSelectToken: (symbol: string) => void;
+  availableTokens?: string[]; // List of available token symbols for this chain
 }
 
-export function TrendingTokens({ chainId, onSelectToken }: TrendingTokensProps) {
+export function TrendingTokens({ chainId, onSelectToken, availableTokens = [] }: TrendingTokensProps) {
   const [tokens, setTokens] = useState<TrendingToken[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +35,11 @@ export function TrendingTokens({ chainId, onSelectToken }: TrendingTokensProps) 
       }
       const data = await res.json();
       if (Array.isArray(data)) {
-        setTokens(data);
+        // Filter to only show tokens that are available on this chain
+        const filteredTokens = data.filter(token => 
+          availableTokens.includes(token.symbol.toUpperCase())
+        );
+        setTokens(filteredTokens);
       } else {
         setTokens([]);
       }
@@ -45,7 +50,7 @@ export function TrendingTokens({ chainId, onSelectToken }: TrendingTokensProps) 
     } finally {
       setLoading(false);
     }
-  }, [chainId]);
+  }, [chainId, availableTokens]);
 
   // Fetch on mount and set up auto-refresh every 60 seconds
   useEffect(() => {

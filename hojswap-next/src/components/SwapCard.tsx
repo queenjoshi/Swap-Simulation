@@ -780,7 +780,11 @@ function SwapCardInner() {
 
                 {/* Trending Tokens Section */}
                 {activeTab === "swap" && (
-                    <TrendingTokens chainId={selectedChainId} onSelectToken={onSelectTrendingToken} />
+                    <TrendingTokens 
+                        chainId={selectedChainId} 
+                        onSelectToken={onSelectTrendingToken}
+                        availableTokens={availableTokens.map(t => t.symbol)}
+                    />
                 )}
 
                 <div className="mt-5 grid grid-cols-3 gap-3 text-center">
