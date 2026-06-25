@@ -31,10 +31,23 @@ function NotFound() {
   );
 }
 
+function SwapPage() {
+  return (
+    <div className="flex flex-col items-center px-4 py-8 sm:py-12">
+      <div className="w-full max-w-[480px]">
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-white mb-2">Swap & Bridge</h1>
+        </div>
+        <SwapCard />
+      </div>
+    </div>
+  );
+}
+
 function AppRoutes() {
   return (
     <Switch>
-      <Route path="/" component={SwapCard} />
+      <Route path="/" component={SwapPage} />
       <Route path="/about" component={About} />
       <Route component={NotFound} />
     </Switch>

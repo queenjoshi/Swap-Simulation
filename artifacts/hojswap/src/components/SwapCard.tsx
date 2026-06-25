@@ -551,29 +551,28 @@ export function SwapCard() {
     ];
 
     return (
-        <div className="flex flex-col items-center px-4 py-8 sm:py-12">
-            <div className="w-full max-w-[480px]">
-                <div className="mb-4 text-center">
-                    <p className="text-[13px] text-white/50 leading-relaxed">
-                        Swap and bridge HOJ community tokens across Ethereum, Base, Cronos, and XRP EVM —
-                        best rates from <strong>0x</strong> + <strong>Stargate</strong>.
-                    </p>
-                    <div className="mt-3 flex justify-center gap-6 text-[11px]">
-                        {[
-                            { value: "4", label: "Chains" },
-                            { value: "10+", label: "Tokens" },
-                            { value: "1%", label: "House Fee" },
-                            { value: "0x / SG", label: "Powered By" },
-                        ].map(({ value, label }) => (
-                            <div key={label} className="flex flex-col items-center gap-0.5">
-                                <span className="text-base font-bold text-[rgba(212,175,55,0.9)]">{value}</span>
-                                <span className="text-white/35">{label}</span>
-                            </div>
-                        ))}
-                    </div>
+        <div className="w-full max-w-[480px]">
+            <div className="mb-4 text-center">
+                <p className="text-[13px] text-white/50 leading-relaxed">
+                    Swap and bridge HOJ community tokens across Ethereum, Base, Cronos, and XRP EVM —
+                    best rates from <strong>0x</strong> + <strong>Stargate</strong>.
+                </p>
+                <div className="mt-3 flex justify-center gap-6 text-[11px]">
+                    {[
+                        { value: "4", label: "Chains" },
+                        { value: "10+", label: "Tokens" },
+                        { value: "1%", label: "House Fee" },
+                        { value: "0x / SG", label: "Powered By" },
+                    ].map(({ value, label }) => (
+                        <div key={label} className="flex flex-col items-center gap-0.5">
+                            <span className="text-base font-bold text-[rgba(212,175,55,0.9)]">{value}</span>
+                            <span className="text-white/35">{label}</span>
+                        </div>
+                    ))}
                 </div>
+            </div>
 
-                {apiKeyError && (
+            {apiKeyError && (
                     <div className="mb-4 flex items-start gap-3 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3">
                         <span className="mt-0.5 shrink-0 text-amber-300">⚠</span>
                         <div className="text-xs leading-relaxed text-amber-200/90">
@@ -599,13 +598,6 @@ export function SwapCard() {
                 )}
 
                 <div className="hoj-card space-y-3 rounded-3xl p-4 sm:p-6">
-                    {/* Heading */}
-                    <div className="text-center">
-                        <h1 className="text-2xl font-bold text-white">
-                            {activeTab === "swap" ? "Swap" : activeTab === "bridge" ? "Bridge" : "Transactions"}
-                        </h1>
-                    </div>
-
                     {/* Chain selector */}
                     <div className="flex flex-wrap justify-center gap-2">
                         {CHAINS.map(({ id, label }) => (
