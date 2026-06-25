@@ -111,7 +111,7 @@ export const TOKENS: Token[] = [
   },
   {
     symbol: "TREAT",
-    name: "Treat",
+    name: "Treat146b",
     address: getAddress("0xfbd5fd3f85e9f4c5e8b40eec9f8b8ab1caaa146b"),
     chainId: mainnet.id,
     decimals: 18,

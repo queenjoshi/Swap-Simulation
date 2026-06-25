@@ -65,8 +65,8 @@ export default function About() {
             <div className="mb-3 text-[11px] uppercase tracking-widest text-[rgba(212,175,55,0.7)]">HOJ Tokens — Base Network</div>
             <div className="grid gap-3 sm:grid-cols-2">
               {[
-                { symbol: "QUEENJOSHI", name: "Queen Joshi", desc: "The royal token of the House of Joshi community on Base." },
-                { symbol: "KINGJOSHI", name: "King Joshi", desc: "The king counterpart in the HOJ ecosystem on Base." },
+                { symbol: "QUEENJOSHI", name: "Queen Joshi" },
+                { symbol: "KINGJOSHI", name: "King Joshi" },
               ].map((t) => <TokenRow key={t.symbol} {...t} />)}
             </div>
           </div>
@@ -74,10 +74,11 @@ export default function About() {
             <div className="mb-3 text-[11px] uppercase tracking-widest text-[rgba(212,175,55,0.7)]"> Ethereum</div>
             <div className="grid gap-3 sm:grid-cols-2">
               {[
-                { symbol: "SHIB", name: "Shiba Inu", desc: "The original Shiba Inu token on Ethereum mainnet." },
-                { symbol: "BONE", name: "Bone ShibaSwap", desc: "Governance token for the ShibaSwap ecosystem." },
-                { symbol: "TREAT", name: "Treat146b", desc: "Reward token in the Shiba Inu ecosystem." },
-                { symbol: "OSCAR", name: "Oscar", desc: "Community token on Ethereum mainnet." },
+                { symbol: "SHIB", name: "Shiba Inu" },
+                { symbol: "BONE", name: "Bone ShibaSwap" },
+                { symbol: "TREAT", name: "Treat146b" },
+                { symbol: "OSCAR", name: "Oscar" },
+                { symbol: "BNB", name: "Binance Coin" },
               ].map((t) => <TokenRow key={t.symbol} {...t} />)}
             </div>
           </div>
@@ -85,9 +86,9 @@ export default function About() {
             <div className="mb-3 text-[11px] uppercase tracking-widest text-[rgba(212,175,55,0.7)]">Stablecoins &amp; Bridgeable — All Chains</div>
             <div className="grid gap-3 sm:grid-cols-2">
               {[
-                { symbol: "USDC", name: "USD Coin", desc: "Circle's regulated USD stablecoin. Bridge Eth↔Base via Stargate V2, or Eth/Base↔Cronos via Li.Fi — fully in-app." },
-                { symbol: "USDT", name: "Tether USD", desc: "The world's largest stablecoin. Bridge Eth↔Cronos via Li.Fi directly in-app." },
-                { symbol: "ETH", name: "Ether", desc: "Native asset of Ethereum & Base. Bridge Eth↔Base via Stargate V2, or Eth/Base↔Cronos via Li.Fi — fully in-app." },
+                { symbol: "USDC", name: "USD Coin" },
+                { symbol: "USDT", name: "Tether USD" },
+                { symbol: "ETH", name: "Ether" },
               ].map((t) => <TokenRow key={t.symbol} {...t} />)}
             </div>
           </div>
@@ -95,10 +96,10 @@ export default function About() {
             <div className="mb-3 text-[11px] uppercase tracking-widest text-[rgba(212,175,55,0.7)]">Chain-Native Tokens</div>
             <div className="grid gap-3 sm:grid-cols-2">
               {[
-                { symbol: "CRO", name: "Cronos", desc: "Native token of the Cronos chain. Swap on Cronos." },
-                { symbol: "XRP", name: "XRP", desc: "Native asset of the XRP Ledger EVM Sidechain. Swap on XRP EVM." },
-                { symbol: "KIND", name: "Kindred", desc: "Community token on Cronos." },
-                { symbol: "NBAA", name: "NBAA", desc: "Community token on Cronos." },
+                { symbol: "CRO", name: "Cronos" },
+                { symbol: "XRP", name: "XRP" },
+                { symbol: "KIND", name: "Kindred" },
+                { symbol: "NBAA", name: "NBAA" },
               ].map((t) => <TokenRow key={t.symbol} {...t} />)}
             </div>
           </div>
@@ -111,7 +112,7 @@ export default function About() {
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {[
-            { name: "Ethereum", badge: "Swap + Bridge", desc: "Home chain for SHIB, BONE, TREAT, OSCAR, USDC, USDT, and ETH. Bridge to Base (Stargate V2) or Cronos (Li.Fi) directly in-app." },
+            { name: "Ethereum", badge: "Swap + Bridge", desc: "Home chain for SHIB, BONE, TREAT, OSCAR, BNB, USDC, USDT, and ETH. Bridge to Base (Stargate V2) or Cronos (Li.Fi) directly in-app." },
             { name: "Base", badge: "Swap + Bridge", desc: "Coinbase's L2 — home of QUEENJOSHI and KINGJOSHI. Lower fees, faster confirmations. Bridge to Ethereum (Stargate V2) or Cronos (Li.Fi) directly in-app." },
             { name: "Cronos", badge: "Swap + Bridge", desc: "High-throughput EVM chain. Swap CRO, ETH, USDC, USDT, KIND, and NBAA. Bridge USDC/USDT/ETH to Ethereum or Base via Li.Fi — fully in-app, no redirects." },
             { name: "XRP Ledger EVM", badge: "Swap Only", desc: "XRP's EVM sidechain. Trade XRP alongside ETH, USDC, and USDT. In-app bridging to/from XRP EVM is coming soon." },
@@ -178,7 +179,7 @@ export default function About() {
   );
 }
 
-function TokenRow({ symbol, name, desc }: { symbol: string; name: string; desc: string }) {
+function TokenRow({ symbol, name }: { symbol: string; name: string }) {
   return (
     <div className="flex items-start gap-3">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[rgba(212,175,55,0.3)] bg-[rgba(212,175,55,0.08)] text-[10px] font-bold text-[rgba(212,175,55,0.9)]">
@@ -187,7 +188,6 @@ function TokenRow({ symbol, name, desc }: { symbol: string; name: string; desc: 
       <div>
         <div className="text-sm font-semibold text-white/90">{symbol}</div>
         <div className="text-[11px] text-white/45">{name}</div>
-        <p className="mt-0.5 text-[11px] leading-relaxed text-white/55">{desc}</p>
       </div>
     </div>
   );
