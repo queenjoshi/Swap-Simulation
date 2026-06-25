@@ -74,10 +74,10 @@ export default function About() {
             <div className="mb-3 text-[11px] uppercase tracking-widest text-[rgba(212,175,55,0.7)]"> Ethereum</div>
             <div className="grid gap-3 sm:grid-cols-2">
               {[
-                { symbol: "SHIB", name: "Shiba Inu" },
-                { symbol: "BONE", name: "Bone ShibaSwap" },
-                { symbol: "TREAT", name: "Treat146b", },
-                { symbol: "OSCAR", name: "Oscar", },
+                { symbol: "SHIB", name: "Shiba Inu", desc: "The original Shiba Inu token on Ethereum mainnet." },
+                { symbol: "BONE", name: "Bone ShibaSwap", desc: "Governance token for the ShibaSwap ecosystem." },
+                { symbol: "TREAT", name: "Treat146b", desc: "Reward token in the Shiba Inu ecosystem." },
+                { symbol: "OSCAR", name: "Oscar", desc: "Community token on Ethereum mainnet." },
               ].map((t) => <TokenRow key={t.symbol} {...t} />)}
             </div>
           </div>
