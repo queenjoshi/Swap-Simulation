@@ -11,7 +11,7 @@ export default function About() {
         <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/65">
           The <strong className="text-white/85">House of Joshi</strong> is a decentralised
           token exchange and cross-chain bridge built for the HOJ community. Trade and bridge
-          ETH, USDC, USDT, SHIB, BONE, TREAT, OSCAR, and HOJ tokens — directly from your
+          ETH, USDC, USDT, SHIB, BONE, TREAT, OSCAR, BNB and HOJ tokens — directly from your
           wallet, with no custodian and no sign-up required.
         </p>
       </div>
@@ -71,13 +71,13 @@ export default function About() {
             </div>
           </div>
           <div className="hoj-panel rounded-2xl p-4">
-            <div className="mb-3 text-[11px] uppercase tracking-widest text-[rgba(212,175,55,0.7)]">Shib Ecosystem — Ethereum</div>
+            <div className="mb-3 text-[11px] uppercase tracking-widest text-[rgba(212,175,55,0.7)]"> Ethereum</div>
             <div className="grid gap-3 sm:grid-cols-2">
               {[
-                { symbol: "SHIB", name: "Shiba Inu", desc: "The flagship meme coin on Ethereum." },
-                { symbol: "BONE", name: "Bone ShibaSwap", desc: "Governance token of the Shiba Inu ecosystem." },
-                { symbol: "TREAT", name: "Treat", desc: "Reward and metaverse token for the Shib ecosystem." },
-                { symbol: "OSCAR", name: "Oscar", desc: "Community meme token on Ethereum." },
+                { symbol: "SHIB", name: "Shiba Inu" },
+                { symbol: "BONE", name: "Bone ShibaSwap" },
+                { symbol: "TREAT", name: "Treat146b", },
+                { symbol: "OSCAR", name: "Oscar", },
               ].map((t) => <TokenRow key={t.symbol} {...t} />)}
             </div>
           </div>
