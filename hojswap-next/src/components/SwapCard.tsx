@@ -601,6 +601,13 @@ function SwapCardInner() {
                 )}
 
                 <div className="hoj-card space-y-3 rounded-3xl p-4 sm:p-6">
+                    {/* Heading */}
+                    <div className="text-center">
+                        <h1 className="text-2xl font-bold text-white">
+                            {activeTab === "swap" ? "Swap" : activeTab === "bridge" ? "Bridge" : "Transactions"}
+                        </h1>
+                    </div>
+
                     {/* Chain selector */}
                     <div className="flex flex-wrap justify-center gap-2">
                         {CHAINS.map(({ id, label }) => (
