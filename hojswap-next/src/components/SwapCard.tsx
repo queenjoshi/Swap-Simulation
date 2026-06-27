@@ -43,6 +43,12 @@ function SwapCardInner() {
 
     const [selectedChainId, setSelectedChainId] = useState<number>(base.id);
     const [activeTab, setActiveTab] = useState<ActiveTab>("swap");
+    const [apiKeyError, setApiKeyError] = useState<ApiKeyError>(null);
+
+    const availableTokens = useMemo(() => tokensForChain(selectedChainId), [selectedChainId]);
+
+    const SWAP_SUPPORTED_CHAINS = [base.id, mainnet.id];
+    const isSwapSupported = SWAP_SUPPORTED_CHAINS.includes(selectedChainId);
 
     // Auto-switch to bridge tab if swap is not supported on the selected chain
     useEffect(() => {
@@ -50,9 +56,6 @@ function SwapCardInner() {
             setActiveTab("bridge");
         }
     }, [selectedChainId, isSwapSupported, activeTab]);
-    const [apiKeyError, setApiKeyError] = useState<ApiKeyError>(null);
-
-    const availableTokens = useMemo(() => tokensForChain(selectedChainId), [selectedChainId]);
 
     const [sellToken, setSellToken] = useState<Token>(() => {
         const sellSymbol = searchParams.get("sell");
