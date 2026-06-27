@@ -130,13 +130,6 @@ export const TOKENS: Token[] = [
     chainId: mainnet.id,
     decimals: 18,
   },
-  {
-    symbol: "XRP",
-    name: "Ripple",
-    address: getAddress("0x1b84b021fb0f9d1c5b01225658ab26573b42c292"),
-    chainId: mainnet.id,
-    decimals: 18,
-  },
 
   // ─── Cronos ─────────────────────────────────────────────
   {

@@ -44,6 +44,16 @@ export function SwapCard() {
 
     const availableTokens = useMemo(() => tokensForChain(selectedChainId), [selectedChainId]);
 
+    const SWAP_SUPPORTED_CHAINS = [base.id, mainnet.id];
+    const isSwapSupported = SWAP_SUPPORTED_CHAINS.includes(selectedChainId);
+
+    // Auto-switch to bridge tab if swap is not supported on the selected chain
+    useEffect(() => {
+        if (!isSwapSupported && activeTab === "swap") {
+            setActiveTab("bridge");
+        }
+    }, [selectedChainId, isSwapSupported, activeTab]);
+
     // Parse URL params to set initial tokens
     const [sellToken, setSellToken] = useState<Token>(() => {
         const params = new URLSearchParams(window.location.search);
@@ -554,15 +564,15 @@ export function SwapCard() {
         <div className="w-full max-w-[480px]">
             <div className="mb-4 text-center">
                 <p className="text-[13px] text-white/50 leading-relaxed">
-                    Swap and bridge HOJ community tokens across Ethereum, Base, Cronos, and XRP EVM —
-                    best rates from <strong>0x</strong> + <strong>Stargate</strong>.
+                    Swap and bridge HOJ community tokens across Ethereum, Base, Cronos, and XRP EVM -
+                    best rates from <strong>0x</strong> and <strong>Stargate</strong>.
                 </p>
                 <div className="mt-3 flex justify-center gap-6 text-[11px]">
                     {[
                         { value: "4", label: "Chains" },
                         { value: "10+", label: "Tokens" },
                         { value: "1%", label: "House Fee" },
-                        { value: "0x / SG", label: "Powered By" },
+                        { value: "0x+SG", label: "Powered By" },
                     ].map(({ value, label }) => (
                         <div key={label} className="flex flex-col items-center gap-0.5">
                             <span className="text-base font-bold text-[rgba(212,175,55,0.9)]">{value}</span>
@@ -617,7 +627,7 @@ export function SwapCard() {
 
                     {/* Tab selector */}
                     <div className="flex gap-1 rounded-3xl border border-white/10 bg-black/20 p-1">
-                        {TABS.map(({ id, label }) => (
+                        {TABS.filter(tab => tab.id !== "swap" || isSwapSupported).map(({ id, label }) => (
                             <button
                                 key={id}
                                 type="button"
@@ -632,7 +642,7 @@ export function SwapCard() {
                         ))}
                     </div>
 
-                    {activeTab === "swap" ? (
+                    {isSwapSupported && activeTab === "swap" ? (
                         <>
                             {/* Sell panel */}
                             <div className="hoj-panel rounded-3xl p-4">
@@ -776,7 +786,7 @@ export function SwapCard() {
                 </div>
 
                 {/* Trending Tokens Section */}
-                {activeTab === "swap" && (
+                {isSwapSupported && activeTab === "swap" && (
                     <TrendingTokens 
                         chainId={selectedChainId} 
                         onSelectToken={onSelectTrendingToken}
@@ -803,7 +813,7 @@ export function SwapCard() {
                     <a href="https://0x.org" target="_blank" rel="noopener noreferrer" className="text-[rgba(212,175,55,0.6)] hover:text-[rgba(212,175,55,0.9)] transition">
                         0x Protocol
                     </a>
-                    {" "}· A 1% house fee applies to all swaps ·{" "}
+                    {" "} - A 1% house fee applies to all swaps - {" "}
                     <a href="https://thehouseofjoshi.com/contact" target="_blank" rel="noopener noreferrer" className="text-[rgba(212,175,55,0.6)] hover:text-[rgba(212,175,55,0.9)] transition">
                         Contact
                     </a>
