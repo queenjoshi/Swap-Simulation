@@ -31,6 +31,21 @@ export default function RootLayout({
       lang="en"
       className={`${displayFont.variable} ${sansFont.variable} antialiased`}
     >
+      <head>
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-2QDL68W4EG"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-2QDL68W4EG');
+          `}
+        </Script>
+      </head>
       <body className="flex min-h-dvh flex-col bg-[#0b0b0d] text-[#f5f1e6] font-sans">
         <Script
           async

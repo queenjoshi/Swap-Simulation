@@ -47,16 +47,6 @@ function SwapCardInner() {
 
     const availableTokens = useMemo(() => tokensForChain(selectedChainId), [selectedChainId]);
 
-    const SWAP_SUPPORTED_CHAINS = [base.id, mainnet.id];
-    const isSwapSupported = SWAP_SUPPORTED_CHAINS.includes(selectedChainId);
-
-    // Auto-switch to bridge tab if swap is not supported on the selected chain
-    useEffect(() => {
-        if (!isSwapSupported && activeTab === "swap") {
-            setActiveTab("bridge");
-        }
-    }, [selectedChainId, isSwapSupported, activeTab]);
-
     const [sellToken, setSellToken] = useState<Token>(() => {
         const sellSymbol = searchParams.get("sell");
         const initialTokens = tokensForChain(base.id);
@@ -106,6 +96,16 @@ function SwapCardInner() {
         setPrice(null);
         setQuoteError(null);
     }
+
+    const SWAP_SUPPORTED_CHAINS = [base.id, mainnet.id];
+    const isSwapSupported = SWAP_SUPPORTED_CHAINS.includes(selectedChainId);
+
+    // Auto-switch to bridge tab if swap is not supported on the selected chain
+    useEffect(() => {
+        if (!isSwapSupported && activeTab === "swap") {
+            setActiveTab("bridge");
+        }
+    }, [selectedChainId, isSwapSupported, activeTab]);
 
     const onSellTokenChange = useCallback(
         (next: Token) => {
@@ -561,9 +561,6 @@ function SwapCardInner() {
         { id: "bridge", label: "Bridge" },
         { id: "transactions", label: "Transactions" },
     ];
-
-    const SWAP_SUPPORTED_CHAINS = [base.id, mainnet.id];
-    const isSwapSupported = SWAP_SUPPORTED_CHAINS.includes(selectedChainId);
 
     return (
         <div className="w-full max-w-[480px]">
