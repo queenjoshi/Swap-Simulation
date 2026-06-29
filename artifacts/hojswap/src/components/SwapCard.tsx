@@ -809,14 +809,15 @@ export function SwapCard() {
                 </div>
 
                 <p className="mt-4 border-t border-white/8 pt-4 text-center text-[10px] leading-relaxed text-white/35 sm:text-[11px]">
-                    Powered by{" "}
+                    Want to add your coin? {" "}
+                    <a href="https://thehouseofjoshi.com/contact" target="_blank" rel="noopener noreferrer" className="text-[rgba(212,175,55,0.6)] hover:text-[rgba(212,175,55,0.9)] transition">
+                        Contact us
+                    </a>
+                    {" "} - Powered by{" "}
                     <a href="https://0x.org" target="_blank" rel="noopener noreferrer" className="text-[rgba(212,175,55,0.6)] hover:text-[rgba(212,175,55,0.9)] transition">
                         0x Protocol
                     </a>
-                    {" "} - A 1% house fee applies to all swaps - {" "}
-                    <a href="https://thehouseofjoshi.com/contact" target="_blank" rel="noopener noreferrer" className="text-[rgba(212,175,55,0.6)] hover:text-[rgba(212,175,55,0.9)] transition">
-                        Contact
-                    </a>
+                    {" "} - A 1% house fee applies to all swaps
                 </p>
             </div>
         </div>
