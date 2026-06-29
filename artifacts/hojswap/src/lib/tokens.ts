@@ -104,7 +104,7 @@ export const TOKENS: Token[] = [
   },
   {
     symbol: "BONE",
-    name: "Bone",
+    name: "BONE",
     address: getAddress("0x9813037ee2218799597d83D4a5B6F3b6778218d9"),
     chainId: mainnet.id,
     decimals: 18,
