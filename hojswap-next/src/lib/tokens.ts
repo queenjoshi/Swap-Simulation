@@ -130,6 +130,13 @@ export const TOKENS: Token[] = [
     chainId: mainnet.id,
     decimals: 18,
   },
+  {
+    symbol: "MAME",
+    name: "Mame Inu",
+    address: getAddress("0x38c8e615bb97cb1dcd7c19473d8bc9a65638bccb"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
 
   // ─── Cronos ─────────────────────────────────────────────
   {
