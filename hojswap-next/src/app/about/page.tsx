@@ -11,7 +11,7 @@ export default function About() {
         <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/65">
           The <strong className="text-white/85">House of Joshi</strong> is a decentralised
           token exchange and cross-chain bridge built for the HOJ community. Trade and bridge
-          ETH, USDC, USDT, SHIB, BONE, TREAT, OSCAR, BNB and HOJ tokens — directly from your
+          ETH, USDC, USDT, SHIB, BONE, TREAT, OSCAR, BNB, MAME and HOJ tokens — directly from your
           wallet, with no custodian and no sign-up required.
         </p>
       </div>
@@ -79,6 +79,7 @@ export default function About() {
                 { symbol: "TREAT", name: "Treat146b" },
                 { symbol: "OSCAR", name: "Oscar" },
                 { symbol: "BNB", name: "Binance Coin" },
+                { symbol: "MAME", name: "Mame Inu" },
               ].map((t) => <TokenRow key={t.symbol} {...t} />)}
             </div>
           </div>
