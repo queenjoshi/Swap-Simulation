@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { label: "About", href: "/about" },
   { label: "Community", href: "https://thehouseofjoshi.com", external: true },
   { label: "Contact", href: "https://thehouseofjoshi.com/contact", external: true },
+  { label: "Instagram", href: "https://www.instagram.com/thehouseofjoshi", external: true },
 ];
 
 const PAGE_TITLES: Record<string, string> = {
