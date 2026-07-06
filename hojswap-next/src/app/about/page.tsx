@@ -166,14 +166,12 @@ export default function About() {
           >
             Start Swapping
           </Link>
-          <a
-            href="https://thehouseofjoshi.com/contact"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/contact"
             className="rounded-2xl border border-[rgba(212,175,55,0.35)] px-6 py-2.5 text-sm font-medium text-[rgba(212,175,55,0.9)] hover:bg-[rgba(212,175,55,0.08)] transition"
           >
-            Contact Us ↗
-          </a>
+            Contact Us
+          </Link>
         </div>
       </section>
     </div>

@@ -19,7 +19,7 @@ const FOOTER_LINKS = [
     items: [
       { label: "About", href: "/about" },
       { label: "Website", href: "https://thehouseofjoshi.com", external: true },
-      { label: "Contact", href: "https://thehouseofjoshi.com/contact", external: true },
+      { label: "Contact", href: "/contact" },
     ],
   },
   {
@@ -146,12 +146,7 @@ export function Footer() {
             Not financial advice. Swap at your own risk. Always verify token addresses.
           </p>
           <div className="flex gap-4">
-            <a
-              href="https://thehouseofjoshi.com/contact"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[11px] text-white/40 hover:text-[rgba(212,175,55,0.8)] transition"
-            >
+            <a href="/contact" className="text-[11px] text-white/40 hover:text-[rgba(212,175,55,0.8)] transition">
               Contact
             </a>
             <a href="/about" className="text-[11px] text-white/40 hover:text-[rgba(212,175,55,0.8)] transition">
