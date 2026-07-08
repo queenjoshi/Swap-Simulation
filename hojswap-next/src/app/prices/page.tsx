@@ -27,6 +27,11 @@ export default function PricesPage() {
     { id: "ethereum", symbol: "ETH", name: "Ethereum" },
     { id: "ripple", symbol: "XRP", name: "Ripple" },
     { id: "binancecoin", symbol: "BNB", name: "Binance Coin" },
+    { id: "polygon-ecosystem-token", symbol: "POL", name: "Polygon Ecosystem Token" },
+    { id: "arbitrum", symbol: "ARB", name: "Arbitrum" },
+    { id: "optimism", symbol: "OP", name: "Optimism" },
+    { id: "pancakeswap-token", symbol: "CAKE", name: "PancakeSwap" },
+    { id: "aerodrome-finance", symbol: "AERO", name: "Aerodrome Finance" },
     { id: "cardano", symbol: "ADA", name: "Cardano" },
     { id: "solana", symbol: "SOL", name: "Solana" },
   ];
@@ -89,7 +94,7 @@ export default function PricesPage() {
             Cryptocurrency Prices
           </h1>
           <p className="mt-2 text-white/60">
-            Real-time prices powered by CoinGecko
+            Real-time prices for major swap and bridge assets, powered by CoinGecko
           </p>
         </div>
       </div>

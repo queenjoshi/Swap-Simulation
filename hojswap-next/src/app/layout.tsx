@@ -18,7 +18,8 @@ const sansFont = DM_Sans({
 
 export const metadata: Metadata = {
   title: "House of Joshi — Swap & Bridge",
-  description: "Swap and bridge BONE, TREAT, OSCAR, ETH, USDC, USDT across Ethereum, Base, Cronos, and XRP EVM.",
+  description:
+    "Swap and bridge HOJ community tokens across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Cronos, and XRP EVM.",
 };
 
 export default function RootLayout({

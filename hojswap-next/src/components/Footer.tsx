@@ -3,7 +3,11 @@ const SWAP_PAIRS = [
   { label: "SHIB / ETH", sell: "SHIB", buy: "ETH" },
   { label: "BONE / ETH", sell: "BONE", buy: "ETH" },
   { label: "USDC / ETH", sell: "USDC", buy: "ETH" },
-  { label: "BASE / ETH", sell: "BASE", buy: "ETH" },
+  { label: "AERO / USDC", sell: "AERO", buy: "USDC" },
+  { label: "POL / USDC", sell: "POL", buy: "USDC" },
+  { label: "BNB / USDT", sell: "BNB", buy: "USDT" },
+  { label: "ARB / USDC", sell: "ARB", buy: "USDC" },
+  { label: "OP / USDC", sell: "OP", buy: "USDC" },
 ];
 
 const FOOTER_LINKS = [
@@ -47,7 +51,8 @@ export function Footer() {
               </span>
             </div>
             <p className="max-w-xs text-xs leading-relaxed text-white/45">
-              Swap & bridge HOJ tokens across Ethereum, Base, Cronos, and XRP EVM,
+              Swap & bridge HOJ tokens across Ethereum, Base, Polygon, BNB Chain,
+              Arbitrum, Optimism, Cronos, and XRP EVM,
               powered by 0x, Stargate V2, and Li.Fi.
             </p>
             <div className="mt-4 flex flex-col gap-2">

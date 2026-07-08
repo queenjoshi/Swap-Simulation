@@ -11,7 +11,7 @@ export default function About() {
         <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/65">
           The <strong className="text-white/85">House of Joshi</strong> is a decentralised
           token exchange and cross-chain bridge built for the HOJ community. Trade and bridge
-          ETH, USDC, USDT, SHIB, BONE, TREAT, OSCAR, BNB, MAME and HOJ tokens — directly from your
+          ETH, USDC, USDT, SHIB, BONE, TREAT, OSCAR, BNB, MAME, WETH, DAI, LINK, UNI, AAVE, PEPE, FLOKI, and HOJ tokens across 8 supported networks — directly from your
           wallet, with no custodian and no sign-up required.
         </p>
       </div>
@@ -67,6 +67,10 @@ export default function About() {
               {[
                 { symbol: "QUEENJOSHI", name: "Queen Joshi" },
                 { symbol: "KINGJOSHI", name: "King Joshi" },
+                { symbol: "AERO", name: "Aerodrome Finance" },
+                { symbol: "BRETT", name: "Brett" },
+                { symbol: "MOG", name: "Mog Coin" },
+                { symbol: "TOSHI", name: "Toshi" },
               ].map((t) => <TokenRow key={t.symbol} {...t} />)}
             </div>
           </div>
@@ -80,6 +84,13 @@ export default function About() {
                 { symbol: "OSCAR", name: "Oscar" },
                 { symbol: "BNB", name: "Binance Coin" },
                 { symbol: "MAME", name: "Mame Inu" },
+                { symbol: "WETH", name: "Wrapped Ether" },
+                { symbol: "DAI", name: "Dai Stablecoin" },
+                { symbol: "LINK", name: "Chainlink" },
+                { symbol: "UNI", name: "Uniswap" },
+                { symbol: "AAVE", name: "Aave" },
+                { symbol: "PEPE", name: "Pepe" },
+                { symbol: "FLOKI", name: "FLOKI" },
               ].map((t) => <TokenRow key={t.symbol} {...t} />)}
             </div>
           </div>
@@ -101,6 +112,10 @@ export default function About() {
                 { symbol: "XRP", name: "XRP" },
                 { symbol: "KIND", name: "Kindred" },
                 { symbol: "NBAA", name: "NBAA" },
+                { symbol: "POL", name: "Polygon" },
+                { symbol: "BNB", name: "BNB Chain" },
+                { symbol: "ARB", name: "Arbitrum" },
+                { symbol: "OP", name: "Optimism" },
               ].map((t) => <TokenRow key={t.symbol} {...t} />)}
             </div>
           </div>
@@ -113,10 +128,14 @@ export default function About() {
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {[
-            { name: "Ethereum", badge: "Swap + Bridge", desc: "Home chain for SHIB, BONE, TREAT, OSCAR, BNB, USDC, USDT, and ETH. Bridge to Base (Stargate V2) or Cronos (Li.Fi) directly in-app." },
-            { name: "Base", badge: "Swap + Bridge", desc: "Coinbase's L2 — home of QUEENJOSHI and KINGJOSHI. Lower fees, faster confirmations. Bridge to Ethereum (Stargate V2) or Cronos (Li.Fi) directly in-app." },
-            { name: "Cronos", badge: "Swap + Bridge", desc: "High-throughput EVM chain. Swap CRO, ETH, USDC, USDT, KIND, and NBAA. Bridge USDC/USDT/ETH to Ethereum or Base via Li.Fi — fully in-app, no redirects." },
-            { name: "XRP Ledger EVM", badge: "Swap Only", desc: "XRP's EVM sidechain. Trade XRP alongside ETH, USDC, and USDT. In-app bridging to/from XRP EVM is coming soon." },
+            { name: "Ethereum", badge: "Swap + Bridge", desc: "Home chain for SHIB, BONE, TREAT, OSCAR, BNB, MAME, WETH, DAI, LINK, UNI, AAVE, PEPE, FLOKI, USDC, USDT, and ETH. Bridge to Base (Stargate V2) or Cronos (Li.Fi) directly in-app." },
+            { name: "Base", badge: "Swap + Bridge", desc: "Coinbase's L2 — home of QUEENJOSHI, KINGJOSHI, AERO, BRETT, MOG, and TOSHI. Lower fees, faster confirmations. Bridge to Ethereum (Stargate V2) or Cronos (Li.Fi) directly in-app." },
+            { name: "Polygon", badge: "Swap", desc: "High-throughput EVM chain. Swap POL, WETH, WBTC, USDC, and USDT through 0x liquidity." },
+            { name: "BNB Chain", badge: "Swap", desc: "Binance's EVM chain. Swap BNB, USDT, USDC, FDUSD, CAKE, and BabyDoge through 0x liquidity." },
+            { name: "Arbitrum", badge: "Swap", desc: "Ethereum L2 for scaling. Swap ARB, ETH, USDC, GMX, and MAGIC through 0x liquidity." },
+            { name: "Optimism", badge: "Swap", desc: "Ethereum L2 for scaling. Swap OP, ETH, USDC, and VELO through 0x liquidity." },
+            { name: "Cronos", badge: "Bridge", desc: "High-throughput EVM chain. Bridge USDC/USDT/ETH to Ethereum or Base via Li.Fi — fully in-app, no redirects." },
+            { name: "XRP Ledger EVM", badge: "Coming Soon", desc: "XRP's EVM sidechain is listed for network continuity. In-app swap and bridge routes will expand as reliable liquidity and bridge support become available." },
           ].map((c) => (
             <div key={c.name} className="hoj-panel rounded-2xl p-4">
               <div className="mb-1 flex items-center gap-2">
@@ -149,9 +168,9 @@ export default function About() {
           ))}
         </div>
         <div className="hoj-panel rounded-2xl p-4 text-xs text-white/55 space-y-1.5">
-          <p><strong className="text-white/75">Swapping</strong> — powered by 0x Protocol. Best price across all major DEXes on Ethereum, Base, Cronos, and XRP EVM. 1% house fee included in the quote.</p>
+          <p><strong className="text-white/75">Swapping</strong> — powered by 0x Protocol. Best price across all major DEXes on Ethereum, Base, Polygon, BNB Chain, Arbitrum, and Optimism. 1% house fee included in the quote.</p>
           <p><strong className="text-white/75">Bridging (Ethereum ↔ Base)</strong> — powered by Stargate V2 (LayerZero). Transfers USDC or ETH trustlessly. Requires a small LayerZero messaging fee paid in ETH, plus 1% house fee.</p>
-          <p><strong className="text-white/75">Bridging (Cronos routes)</strong> — powered by Li.Fi (cBridge / Connext). Routes USDC, USDT, or ETH between Ethereum, Base, and Cronos entirely in-app. Live quote fetched before each bridge, 1% house fee applies.</p>
+          <p><strong className="text-white/75">Bridging (Multi-chain)</strong> — powered by Li.Fi (cBridge / Connext). Routes USDC, USDT, or ETH between Ethereum, Base, and Cronos entirely in-app. Live quote fetched before each bridge, 1% house fee applies.</p>
           <p><strong className="text-white/75">Bridging (XRP EVM)</strong> — coming soon. No major bridge aggregator supports the XRP EVM sidechain yet. Swap on XRP EVM is fully available in the meantime.</p>
         </div>
       </section>
