@@ -26,7 +26,59 @@ export const xrp = {
   testnet: false,
 } as const;
 
-export const SUPPORTED_CHAIN_IDS = [base.id, mainnet.id, cronos.id, xrp.id] as const;
+export const polygon = {
+  id: 137,
+  name: "Polygon",
+  network: "polygon",
+  nativeCurrency: { name: "Polygon", symbol: "POL", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://polygon-rpc.com"] },
+    public: { http: ["https://polygon-rpc.com"] },
+  },
+  blockExplorers: { default: { name: "Polygonscan", url: "https://polygonscan.com" } },
+  testnet: false,
+} as const;
+
+export const bsc = {
+  id: 56,
+  name: "BNB Chain",
+  network: "bsc",
+  nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://bsc-dataseed.binance.org"] },
+    public: { http: ["https://bsc-dataseed.binance.org"] },
+  },
+  blockExplorers: { default: { name: "BscScan", url: "https://bscscan.com" } },
+  testnet: false,
+} as const;
+
+export const arbitrum = {
+  id: 42161,
+  name: "Arbitrum",
+  network: "arbitrum",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://arb1.arbitrum.io/rpc"] },
+    public: { http: ["https://arb1.arbitrum.io/rpc"] },
+  },
+  blockExplorers: { default: { name: "Arbiscan", url: "https://arbiscan.io" } },
+  testnet: false,
+} as const;
+
+export const optimism = {
+  id: 10,
+  name: "Optimism",
+  network: "optimism",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://mainnet.optimism.io"] },
+    public: { http: ["https://mainnet.optimism.io"] },
+  },
+  blockExplorers: { default: { name: "Optimism Explorer", url: "https://optimistic.etherscan.io" } },
+  testnet: false,
+} as const;
+
+export const SUPPORTED_CHAIN_IDS = [base.id, mainnet.id, cronos.id, xrp.id, polygon.id, bsc.id, arbitrum.id, optimism.id] as const;
 export type SupportedChainId = (typeof SUPPORTED_CHAIN_IDS)[number];
 
 export function getChainName(chainId: number) {
@@ -34,6 +86,10 @@ export function getChainName(chainId: number) {
   if (chainId === base.id) return "Base";
   if (chainId === cronos.id) return "Cronos";
   if (chainId === xrp.id) return "XRP Ledger";
+  if (chainId === polygon.id) return "Polygon";
+  if (chainId === bsc.id) return "BNB Chain";
+  if (chainId === arbitrum.id) return "Arbitrum";
+  if (chainId === optimism.id) return "Optimism";
   return "Unknown";
 }
 
@@ -42,6 +98,10 @@ export function explorerName(chainId: number) {
   if (chainId === base.id) return "Basescan";
   if (chainId === cronos.id) return "Cronoscan";
   if (chainId === xrp.id) return "XRPScan";
+  if (chainId === polygon.id) return "Polygonscan";
+  if (chainId === bsc.id) return "BscScan";
+  if (chainId === arbitrum.id) return "Arbiscan";
+  if (chainId === optimism.id) return "Optimism Explorer";
   return "Explorer";
 }
 
@@ -50,6 +110,10 @@ export function explorerTxUrl(chainId: number, hash: string) {
   if (chainId === base.id) return `https://basescan.org/tx/${hash}`;
   if (chainId === cronos.id) return `https://cronoscan.com/tx/${hash}`;
   if (chainId === xrp.id) return `https://xrpscan.com/tx/${hash}`;
+  if (chainId === polygon.id) return `https://polygonscan.com/tx/${hash}`;
+  if (chainId === bsc.id) return `https://bscscan.com/tx/${hash}`;
+  if (chainId === arbitrum.id) return `https://arbiscan.io/tx/${hash}`;
+  if (chainId === optimism.id) return `https://optimistic.etherscan.io/tx/${hash}`;
   return `https://basescan.org/tx/${hash}`;
 }
 
@@ -58,5 +122,9 @@ export function explorerAddressUrl(chainId: number, address: string) {
   if (chainId === base.id) return `https://basescan.org/address/${address}`;
   if (chainId === cronos.id) return `https://cronoscan.com/address/${address}`;
   if (chainId === xrp.id) return `https://xrpscan.com/account/${address}`;
+  if (chainId === polygon.id) return `https://polygonscan.com/address/${address}`;
+  if (chainId === bsc.id) return `https://bscscan.com/address/${address}`;
+  if (chainId === arbitrum.id) return `https://arbiscan.io/address/${address}`;
+  if (chainId === optimism.id) return `https://optimistic.etherscan.io/address/${address}`;
   return `https://basescan.org/address/${address}`;
 }
