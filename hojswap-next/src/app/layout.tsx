@@ -1,20 +1,9 @@
 import type { Metadata } from "next";
-import { Cinzel, DM_Sans } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-
-const displayFont = Cinzel({
-  variable: "--font-display",
-  subsets: ["latin"],
-});
-
-const sansFont = DM_Sans({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "House of Joshi — Swap & Bridge",
@@ -28,10 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${displayFont.variable} ${sansFont.variable} antialiased`}
-    >
+    <html lang="en" className="antialiased">
       <head>
         <Script
           async
