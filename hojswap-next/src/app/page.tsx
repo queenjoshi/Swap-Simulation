@@ -7,9 +7,6 @@ export default function Home() {
       <div className="w-full max-w-[480px]">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-white mb-2">Swap & Bridge</h1>
-          <p className="mx-auto max-w-sm text-sm leading-relaxed text-white/50">
-            Trade on Ethereum, Base, Polygon, BNB Chain, Arbitrum, and Optimism.
-          </p>
         </div>
         <Suspense fallback={<div className="text-center text-white/50">Loading...</div>}>
           <SwapCard />

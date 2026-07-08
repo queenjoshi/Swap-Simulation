@@ -1,6 +1,6 @@
 import { getAddress } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { cronos, xrp } from "@/lib/chains";
+import { arbitrum, bsc, cronos, optimism, polygon, xrp } from "@/lib/chains";
 
 export type Token = {
   symbol: string;
@@ -73,6 +73,34 @@ export const TOKENS: Token[] = [
     chainId: base.id,
     decimals: 9,
   },
+  {
+    symbol: "AERO",
+    name: "Aerodrome Finance",
+    address: getAddress("0x940181a94a35a4569e4529a3cdfb74e38fd98631"),
+    chainId: base.id,
+    decimals: 18,
+  },
+  {
+    symbol: "BRETT",
+    name: "Brett",
+    address: getAddress("0x532f2710296512e1b6cc49be25ebb142e4ec59b7"),
+    chainId: base.id,
+    decimals: 18,
+  },
+  {
+    symbol: "MOG",
+    name: "Mog Coin",
+    address: getAddress("0x2Da56AcB9Ea78330f947bD57C54119Debda7AF71"),
+    chainId: base.id,
+    decimals: 18,
+  },
+  {
+    symbol: "TOSHI",
+    name: "Toshi",
+    address: getAddress("0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2b4"),
+    chainId: base.id,
+    decimals: 18,
+  },
 
   // ─── Ethereum mainnet ────────────────────────────────────
   {
@@ -137,6 +165,55 @@ export const TOKENS: Token[] = [
     chainId: mainnet.id,
     decimals: 18,
   },
+  {
+    symbol: "WETH",
+    name: "Wrapped Ether",
+    address: getAddress("0xC02aaA39b223FE8D0A0e5C4F27ead9083C756Cc2"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "DAI",
+    name: "Dai Stablecoin",
+    address: getAddress("0x6B175474E89094C44Da98b954EedeAC495271d0F"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "LINK",
+    name: "Chainlink",
+    address: getAddress("0x514910771AF9Ca656af840dff83E8264EcF986CA"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "UNI",
+    name: "Uniswap",
+    address: getAddress("0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "AAVE",
+    name: "Aave",
+    address: getAddress("0x7Fc66500c84A76ad7e9c93437bfc5Ac33E2AEaE9"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "PEPE",
+    name: "Pepe",
+    address: getAddress("0x6982508145454Ce325dDbE47a25d4ec3d2311933"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "FLOKI",
+    name: "FLOKI",
+    address: getAddress("0x9813037ee22187284975a93366442274d1df36d9"),
+    chainId: mainnet.id,
+    decimals: 8,
+  },
 
   // ─── Cronos ─────────────────────────────────────────────
   {
@@ -181,6 +258,150 @@ export const TOKENS: Token[] = [
     decimals: 18,
   },
 
+  // ─── Polygon ─────────────────────────────────────────────
+  {
+    symbol: "POL",
+    name: "Polygon Ecosystem Token",
+    chainId: polygon.id,
+    decimals: 18,
+  },
+  {
+    symbol: "USDC",
+    name: "USD Coin",
+    address: getAddress("0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"),
+    chainId: polygon.id,
+    decimals: 6,
+  },
+  {
+    symbol: "USDT",
+    name: "Tether USD",
+    address: getAddress("0xc2132D05D31c914a87C6611C10748AEb04B58e8F"),
+    chainId: polygon.id,
+    decimals: 6,
+  },
+  {
+    symbol: "WETH",
+    name: "Wrapped Ether",
+    address: getAddress("0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"),
+    chainId: polygon.id,
+    decimals: 18,
+  },
+  {
+    symbol: "WBTC",
+    name: "Wrapped BTC",
+    address: getAddress("0x1BFD62B7D66453f26932296AB7c5409E839A7656"),
+    chainId: polygon.id,
+    decimals: 8,
+  },
+
+  // ─── BNB Chain ───────────────────────────────────────────
+  {
+    symbol: "BNB",
+    name: "Binance Coin",
+    chainId: bsc.id,
+    decimals: 18,
+  },
+  {
+    symbol: "USDT",
+    name: "Tether USD",
+    address: getAddress("0x55d398326f99059fF775485246999027B3197955"),
+    chainId: bsc.id,
+    decimals: 18,
+  },
+  {
+    symbol: "USDC",
+    name: "USD Coin",
+    address: getAddress("0x8AC76a51cc950d9822D68b83FE1Ad97B32Cd580d"),
+    chainId: bsc.id,
+    decimals: 18,
+  },
+  {
+    symbol: "FDUSD",
+    name: "First Digital USD",
+    address: getAddress("0xc5f0f7b66764F6ec8C8Dff7BA684102245B16472"),
+    chainId: bsc.id,
+    decimals: 18,
+  },
+  {
+    symbol: "CAKE",
+    name: "PancakeSwap Token",
+    address: getAddress("0x0E09FaBB73Bd3Ade0A17ECC321fD13a19E81cE82"),
+    chainId: bsc.id,
+    decimals: 18,
+  },
+  {
+    symbol: "BabyDoge",
+    name: "Baby Doge Coin",
+    address: getAddress("0xc748673057861a797275CD8A068AbB95A902e8de"),
+    chainId: bsc.id,
+    decimals: 9,
+  },
+
+  // ─── Arbitrum ────────────────────────────────────────────
+  {
+    symbol: "ARB",
+    name: "Arbitrum",
+    address: getAddress("0x912CE59144191C1204E64559FE8253a0e49E6548"),
+    chainId: arbitrum.id,
+    decimals: 18,
+  },
+  {
+    symbol: "ETH",
+    name: "Ether",
+    chainId: arbitrum.id,
+    decimals: 18,
+  },
+  {
+    symbol: "USDC",
+    name: "USD Coin",
+    address: getAddress("0xaf88d065e77c8cC2239327C5EDb3A432268e5831"),
+    chainId: arbitrum.id,
+    decimals: 6,
+  },
+  {
+    symbol: "GMX",
+    name: "GMX",
+    address: getAddress("0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a"),
+    chainId: arbitrum.id,
+    decimals: 18,
+  },
+  {
+    symbol: "MAGIC",
+    name: "MAGIC",
+    address: getAddress("0x539bdE0d7Dbd336b79148AA742883198BBF60342"),
+    chainId: arbitrum.id,
+    decimals: 18,
+  },
+
+  // ─── Optimism ────────────────────────────────────────────
+  {
+    symbol: "OP",
+    name: "Optimism",
+    address: getAddress("0x4200000000000000000000000000000000000042"),
+    chainId: optimism.id,
+    decimals: 18,
+  },
+  {
+    symbol: "ETH",
+    name: "Ether",
+    chainId: optimism.id,
+    decimals: 18,
+  },
+  {
+    symbol: "USDC",
+    name: "USD Coin",
+    address: getAddress("0x0b2C639c533813f4Aa9D7837CAe62653423a6504"),
+    chainId: optimism.id,
+    decimals: 6,
+  },
+  {
+    symbol: "VELO",
+    name: "Velodrome",
+    address: getAddress("0x9560e827aF36c94D2Ac33a39bCE1Fe78631088Db"),
+    chainId: optimism.id,
+    decimals: 18,
+  },
+
   // ─── XRP Ledger EVM Sidechain ────────────────────────────
   {
     symbol: "XRP",
@@ -218,16 +439,26 @@ export function tokensForChain(chainId: number) {
 export function defaultSellForChain(chainId: number) {
   const list = tokensForChain(chainId);
   if (chainId === mainnet.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
+  if (chainId === base.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
   if (chainId === cronos.id) return list.find((t) => t.symbol === "CRO") ?? list[0]!;
   if (chainId === xrp.id) return list.find((t) => t.symbol === "XRP") ?? list[0]!;
+  if (chainId === polygon.id) return list.find((t) => t.symbol === "POL") ?? list[0]!;
+  if (chainId === bsc.id) return list.find((t) => t.symbol === "BNB") ?? list[0]!;
+  if (chainId === arbitrum.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
+  if (chainId === optimism.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
   return list.find((t) => t.symbol === "ETH") ?? list[0]!;
 }
 
 export function defaultBuyForChain(chainId: number) {
   const list = tokensForChain(chainId);
   if (chainId === mainnet.id) return list.find((t) => t.symbol === "BONE") ?? list[1] ?? list[0]!;
+  if (chainId === base.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
   if (chainId === cronos.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
   if (chainId === xrp.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
+  if (chainId === polygon.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
+  if (chainId === bsc.id) return list.find((t) => t.symbol === "USDT") ?? list[1] ?? list[0]!;
+  if (chainId === arbitrum.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
+  if (chainId === optimism.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
   return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
 }
 

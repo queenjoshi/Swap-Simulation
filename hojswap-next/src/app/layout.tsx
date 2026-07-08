@@ -1,14 +1,24 @@
 import type { Metadata } from "next";
+import { Cinzel, DM_Sans } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
+const displayFont = Cinzel({
+  variable: "--font-display",
+  subsets: ["latin"],
+});
+
+const sansFont = DM_Sans({
+  variable: "--font-sans",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "House of Joshi — Swap & Bridge",
-  description:
-    "Swap and bridge HOJ community tokens across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Cronos, and XRP EVM.",
+  description: "Swap and bridge BONE, TREAT, OSCAR, ETH, USDC, USDT across Ethereum, Base, Cronos, and XRP EVM.",
 };
 
 export default function RootLayout({
@@ -17,7 +27,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="antialiased">
+    <html
+      lang="en"
+      className={`${displayFont.variable} ${sansFont.variable} antialiased`}
+    >
       <head>
         <Script
           async

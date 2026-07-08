@@ -1,6 +1,5 @@
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, bsc, cronos, optimism, polygon, xrp } from "@/lib/chains";
-import type { Chain } from "viem";
+import { cronos, xrp } from "@/lib/chains";
 import { fallback, http } from "viem";
 
 export const RPC_URLS: Record<number, readonly string[]> = {
@@ -22,26 +21,6 @@ export const RPC_URLS: Record<number, readonly string[]> = {
     "https://xrpl.ws",
     "https://xrplcluster.com",
   ],
-  [polygon.id]: [
-    "https://polygon-rpc.com",
-    "https://polygon-bor-rpc.publicnode.com",
-    "https://polygon.llamarpc.com",
-  ],
-  [bsc.id]: [
-    "https://bsc-dataseed.binance.org",
-    "https://bsc-rpc.publicnode.com",
-    "https://binance.llamarpc.com",
-  ],
-  [arbitrum.id]: [
-    "https://arb1.arbitrum.io/rpc",
-    "https://arbitrum-one-rpc.publicnode.com",
-    "https://arbitrum.llamarpc.com",
-  ],
-  [optimism.id]: [
-    "https://mainnet.optimism.io",
-    "https://optimism-rpc.publicnode.com",
-    "https://optimism.llamarpc.com",
-  ],
 };
 
 export function getRpcUrl(chainId: number) {
@@ -55,11 +34,7 @@ export function getRpcTransport(chainId: number) {
 
 export function getViemChain(chainId: number) {
   if (chainId === mainnet.id) return mainnet;
-  if (chainId === cronos.id) return cronos as Chain;
-  if (chainId === xrp.id) return xrp as Chain;
-  if (chainId === polygon.id) return polygon as Chain;
-  if (chainId === bsc.id) return bsc as Chain;
-  if (chainId === arbitrum.id) return arbitrum as Chain;
-  if (chainId === optimism.id) return optimism as Chain;
+  if (chainId === cronos.id) return cronos as any;
+  if (chainId === xrp.id) return xrp as any;
   return base;
 }

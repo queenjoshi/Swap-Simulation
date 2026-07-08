@@ -1,6 +1,17 @@
 import { NextResponse } from "next/server";
 import { createPublicClient, http, erc20Abi } from "viem";
-import { getRpcUrl, getViemChain } from "@/lib/rpc";
+import { mainnet, base } from "viem/chains";
+
+const chainMap: Record<number, typeof mainnet | typeof base> = {
+  1: mainnet,
+  8453: base,
+};
+
+const rpcMap: Record<number, string> = {
+  1: "https://ethereum-rpc.publicnode.com",
+  8453: "https://mainnet.base.org",
+  25: "https://mainnet.cronos.org",
+};
 
 export async function POST(request: Request) {
   try {
@@ -9,9 +20,10 @@ export async function POST(request: Request) {
       chainId: number;
     };
 
+    const chain = chainMap[chainId] ?? mainnet;
     const client = createPublicClient({
-      chain: getViemChain(chainId),
-      transport: http(getRpcUrl(chainId)),
+      chain,
+      transport: http(rpcMap[chainId] ?? rpcMap[1]!),
     });
 
     const decimals = await client.readContract({

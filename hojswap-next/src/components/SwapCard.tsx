@@ -13,7 +13,7 @@ import {
 } from "wagmi";
 import { parseUnits, maxUint256, formatUnits, concat, numberToHex, size } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, bsc, cronos, optimism, polygon, xrp, getChainName } from "@/lib/chains";
+import { cronos, xrp, getChainName } from "@/lib/chains";
 import { clampToDecimals, formatSwapAmountDisplay, isValidNumberInput } from "@/lib/format";
 import { tokenTo0xParam, type QuoteResponse, type PriceResponse, HOUSE_FEE_BPS } from "@/lib/quote";
 import { erc20Abi } from "@/lib/erc20";
@@ -97,15 +97,8 @@ function SwapCardInner() {
         setQuoteError(null);
     }
 
-    const SWAP_SUPPORTED_CHAINS: number[] = [
-        base.id,
-        mainnet.id,
-        polygon.id,
-        bsc.id,
-        arbitrum.id,
-        optimism.id,
-    ];
-    const isSwapSupported = SWAP_SUPPORTED_CHAINS.includes(selectedChainId);
+    const SWAP_SUPPORTED_CHAINS = [base.id, mainnet.id];
+    const isSwapSupported = SWAP_SUPPORTED_CHAINS.includes(selectedChainId as 1 | 8453);
 
     // Auto-switch to bridge tab if swap is not supported on the selected chain
     useEffect(() => {
@@ -561,10 +554,6 @@ function SwapCardInner() {
         { id: mainnet.id, label: "Ethereum" },
         { id: cronos.id, label: "Cronos" },
         { id: xrp.id, label: "XRP" },
-        { id: polygon.id, label: "Polygon" },
-        { id: bsc.id, label: "BNB" },
-        { id: arbitrum.id, label: "Arbitrum" },
-        { id: optimism.id, label: "Optimism" },
     ];
 
     const TABS: { id: ActiveTab; label: string }[] = [
@@ -577,12 +566,12 @@ function SwapCardInner() {
         <div className="w-full max-w-[480px]">
             <div className="mb-4 text-center">
                 <p className="text-[13px] text-white/50 leading-relaxed">
-                    Swap and bridge HOJ community tokens across Ethereum, Base, Cronos, XRP EVM, Polygon, BNB Chain, Arbitrum, and Optimism -
+                    Swap and bridge HOJ community tokens across Ethereum, Base, Cronos, and XRP EVM -
                     best rates from <strong>0x</strong> and <strong>Stargate</strong>.
                 </p>
                 <div className="mt-3 flex justify-center gap-6 text-[11px]">
                     {[
-                        { value: "8", label: "Chains" },
+                        { value: "4", label: "Chains" },
                         { value: "10+", label: "Tokens" },
                         { value: "1%", label: "House Fee" },
                         { value: "0x+SG", label: "Powered By" },
@@ -811,7 +800,7 @@ function SwapCardInner() {
                 {[
                     { icon: "⚡", label: "Best Price", desc: "0x aggregates DEX liquidity for the best rate every time" },
                     { icon: "🛡️", label: "Non-Custodial", desc: "Your wallet, your keys — we never hold your funds" },
-                    { icon: "🌐", label: "Multi-Chain", desc: "Swap on Base, Ethereum, Polygon, BNB, Arbitrum & Optimism in one place" },
+                    { icon: "🌐", label: "Multi-Chain", desc: "Swap on Base, Ethereum, Cronos & XRP in one place" },
                 ].map(({ icon, label, desc }) => (
                     <div key={label} className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-4 flex flex-col items-center gap-1.5">
                         <span className="text-xl">{icon}</span>
