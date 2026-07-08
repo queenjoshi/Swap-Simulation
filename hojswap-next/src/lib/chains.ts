@@ -82,14 +82,14 @@ export const SUPPORTED_CHAIN_IDS = [base.id, mainnet.id, cronos.id, xrp.id, poly
 export type SupportedChainId = (typeof SUPPORTED_CHAIN_IDS)[number];
 
 export const CHAIN_OPTIONS = [
+  { id: arbitrum.id, label: "Arbitrum", shortLabel: "Arbitrum", swap: true },
   { id: base.id, label: "Base", shortLabel: "Base", swap: true },
-  { id: xrp.id, label: "XRP EVM", shortLabel: "XRP", swap: false },
+  { id: bsc.id, label: "BNB Chain", shortLabel: "BNB", swap: true },
   { id: cronos.id, label: "Cronos", shortLabel: "Cronos", swap: false },
   { id: mainnet.id, label: "Ethereum", shortLabel: "ETH", swap: true },
-  { id: polygon.id, label: "Polygon", shortLabel: "Polygon", swap: true },
-  { id: bsc.id, label: "BNB Chain", shortLabel: "BNB", swap: true },
-  { id: arbitrum.id, label: "Arbitrum", shortLabel: "Arbitrum", swap: true },
   { id: optimism.id, label: "Optimism", shortLabel: "Optimism", swap: true },
+  { id: polygon.id, label: "Polygon", shortLabel: "Polygon", swap: true },
+  { id: xrp.id, label: "XRP EVM", shortLabel: "XRP", swap: false },
 ] as const;
 
 export const SWAP_SUPPORTED_CHAIN_IDS: readonly number[] = CHAIN_OPTIONS
