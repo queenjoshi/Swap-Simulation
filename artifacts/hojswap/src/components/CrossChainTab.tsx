@@ -11,7 +11,7 @@ import {
 } from "wagmi";
 import { formatUnits, parseUnits, maxUint256 } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { polygon, bsc, arbitrum, optimism, xrp } from "@/lib/chains";
+import { polygon, bsc, arbitrum, optimism, xrp, cronos } from "@/lib/chains";
 import { CHAIN_OPTIONS, getChainName } from "@/lib/chains";
 import { clampToDecimals, formatCompactNumber, isValidNumberInput } from "@/lib/format";
 import { useToast } from "@/components/Toast";
