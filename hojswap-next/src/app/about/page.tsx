@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TokenLogo } from "@/components/TokenLogo";
 
 export default function About() {
   return (
@@ -200,20 +201,7 @@ export default function About() {
 function TokenRow({ symbol, name, logo }: { symbol: string; name: string; logo?: string }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[rgba(212,175,55,0.3)] bg-[rgba(212,175,55,0.08)] text-[10px] font-bold text-[rgba(212,175,55,0.9)]">
-        <span>{symbol.slice(0, 4)}</span>
-        {logo ? (
-          <img
-            src={logo}
-            alt={`${symbol} logo`}
-            className="absolute inset-0 h-full w-full object-cover"
-            loading="lazy"
-            onError={(event) => {
-              event.currentTarget.style.display = "none";
-            }}
-          />
-        ) : null}
-      </div>
+      <TokenLogo symbol={symbol} logo={logo} />
       <div>
         <div className="text-sm font-semibold text-white/90">{symbol}</div>
         <div className="text-[11px] text-white/45">{name}</div>
