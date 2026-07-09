@@ -8,6 +8,10 @@ function getEtherscanApiUrl(chainId: number): string | null {
   if (chainId === 8453) return "https://api.basescan.org/api";
   if (chainId === 1) return "https://api.etherscan.io/api";
   if (chainId === 25) return "https://api.cronoscan.com/api";
+  if (chainId === 137) return "https://api.polygonscan.com/api";
+  if (chainId === 56) return "https://api.bscscan.com/api";
+  if (chainId === 42161) return "https://api.arbiscan.io/api";
+  if (chainId === 10) return "https://api-optimistic.etherscan.io/api";
   if (chainId === XRP_EVM_CHAIN_ID) return null; // No Etherscan-compatible API for XRP EVM
   return null;
 }

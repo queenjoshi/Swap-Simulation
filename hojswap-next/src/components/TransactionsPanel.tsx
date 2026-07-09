@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { base, mainnet } from "wagmi/chains";
-import { cronos, xrp, explorerTxUrl, explorerName, getChainName } from "@/lib/chains";
+import { CHAIN_OPTIONS, SUPPORTED_CHAIN_IDS, explorerTxUrl, explorerName, getChainName } from "@/lib/chains";
 import type { ExplorerHistoryItem } from "@/lib/explorer-api";
 import { loadTransactions, type SwapTransaction } from "@/lib/transactions";
 
@@ -49,10 +48,7 @@ function toDisplayFromOnChain(item: ExplorerHistoryItem): DisplayTx {
 
 const CHAIN_FILTERS = [
   { id: 0, label: "All" },
-  { id: base.id, label: "Base" },
-  { id: mainnet.id, label: "Ethereum" },
-  { id: cronos.id, label: "Cronos" },
-  { id: xrp.id, label: "XRP" },
+  ...CHAIN_OPTIONS.map(({ id, shortLabel }) => ({ id, label: shortLabel })),
 ] as const;
 
 const PAGE_SIZE = 50;
@@ -77,9 +73,8 @@ export function TransactionsPanel({
       setLoading(true);
       setLoadError(null);
       try {
-        const chains = [base.id, mainnet.id, cronos.id, xrp.id] as const;
         const requests: Promise<Response>[] = [];
-        for (const cid of chains) {
+        for (const cid of SUPPORTED_CHAIN_IDS) {
           requests.push(fetch(`/api/transactions?chainId=${cid}&source=house`));
           if (walletAddress) {
             requests.push(fetch(`/api/transactions?chainId=${cid}&source=wallet&address=${walletAddress}`));

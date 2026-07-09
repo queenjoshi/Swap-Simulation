@@ -10,6 +10,10 @@ export async function GET(request: Request) {
       '8453': ['base-ecosystem'],
       '1': ['ethereum-ecosystem', 'defi'], // Ethereum - with fallback to DeFi
       '25': ['cronos-ecosystem', 'defi'], // Cronos - with fallback to DeFi
+      '137': ['polygon-ecosystem', 'defi'],
+      '56': ['binance-smart-chain', 'defi'],
+      '42161': ['arbitrum-ecosystem', 'defi'],
+      '10': ['optimism-ecosystem', 'defi'],
     };
 
     const categories = categoryMap[chainId] || ['base-ecosystem'];

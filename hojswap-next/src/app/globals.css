@@ -1,4 +1,5 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+@source "../";
 
 :root {
   --hoj-black: #0b0b0d;
@@ -8,8 +9,8 @@
   --hoj-border: rgba(212, 175, 55, 0.22);
   --background: var(--hoj-black);
   --foreground: var(--hoj-ivory);
-  --font-display: 'Cinzel', ui-serif, Georgia, serif;
-  --font-sans: 'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: ui-serif, Georgia, serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 html {

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { getChainName } from "@/lib/chains";
 
 interface TrendingToken {
   id: string;
@@ -69,7 +70,7 @@ export function TrendingTokens({ chainId, onSelectToken, availableTokens = [] }:
       <div className="w-full">
       <div className="mb-2 flex items-center gap-2">
         <p className="text-[11px] uppercase tracking-[0.18em] text-white/55 font-semibold">
-          Trending on {chainId === 1 ? "Ethereum" : chainId === 25 ? "Cronos" : "Base"}
+          Trending on {getChainName(chainId)}
         </p>
         {loading && <span className="text-[10px] text-white/30">Updating...</span>}
       </div>
