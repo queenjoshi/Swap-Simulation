@@ -1,225 +1,296 @@
 import { Link } from "wouter";
 
+type Token = {
+  symbol: string;
+  name: string;
+  logo?: string;
+};
+
+const HOUSE_LOGO = "/logo.png";
+
+const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = [
+  {
+    title: "Base Community",
+    eyebrow: "Base",
+    tokens: [
+      { symbol: "QUEENJOSHI", name: "Queen Joshi", logo: HOUSE_LOGO },
+      { symbol: "KINGJOSHI", name: "King Joshi", logo: HOUSE_LOGO },
+      { symbol: "AERO", name: "Aerodrome Finance", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x940181a94A35A4569E4529A3CDfB74e38FD98631/logo.png" },
+      { symbol: "BRETT", name: "Brett", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x532f27101965dd16442E59d40670FaF5eBB142E4/logo.png" },
+      { symbol: "MOG", name: "Mog Coin", logo: "/tokens/mog.png" },
+      { symbol: "TOSHI", name: "Toshi", logo: "/tokens/toshi.png" },
+    ],
+  },
+  {
+    title: "Ethereum Tokens",
+    eyebrow: "Ethereum",
+    tokens: [
+      { symbol: "SHIB", name: "Shiba Inu", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE/logo.png" },
+      { symbol: "BONE", name: "Bone ShibaSwap", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x9813037ee2218799597d83D4a5B6F3b6778218d9/logo.png" },
+      { symbol: "TREAT", name: "Treat146b", logo: "/tokens/treat146b.png" },
+      { symbol: "OSCAR", name: "Oscar", logo: "/tokens/oscar.png" },
+      { symbol: "BNB", name: "Binance Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xB8c77482e45F1F44dE1745F52C74426C631bDD52/logo.png" },
+      { symbol: "MAME", name: "Mame Inu", logo: "/tokens/mame-inu.png" },
+      { symbol: "WETH", name: "Wrapped Ether", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png" },
+      { symbol: "DAI", name: "Dai Stablecoin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png" },
+      { symbol: "LINK", name: "Chainlink", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x514910771AF9Ca656af840dff83E8264EcF986CA/logo.png" },
+      { symbol: "UNI", name: "Uniswap", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984/logo.png" },
+      { symbol: "AAVE", name: "Aave", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9/logo.png" },
+      { symbol: "PEPE", name: "Pepe", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6982508145454Ce325dDbE47a25d4ec3d2311933/logo.png" },
+      { symbol: "FLOKI", name: "FLOKI", logo: "/tokens/floki.png" },
+    ],
+  },
+  {
+    title: "Bridgeable Assets",
+    eyebrow: "All chains",
+    tokens: [
+      { symbol: "USDC", name: "USD Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png" },
+      { symbol: "USDT", name: "Tether USD", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png" },
+      { symbol: "ETH", name: "Ether", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png" },
+    ],
+  },
+  {
+    title: "Polygon",
+    eyebrow: "Polygon",
+    tokens: [
+      { symbol: "POL", name: "Polygon Ecosystem Token", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png" },
+      { symbol: "USDC", name: "USD Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/assets/0x3c499c542cef5e3811e1192ce70d8cc03d5c3359/logo.png" },
+      { symbol: "USDT", name: "Tether USD", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/assets/0xc2132D05D31c914a87C6611C10748AEb04B58e8F/logo.png" },
+      { symbol: "WETH", name: "Wrapped Ether", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/assets/0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619/logo.png" },
+      { symbol: "WBTC", name: "Wrapped BTC", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/assets/0x1BFD62B7D66453f26932296AB7c5409E839A7656/logo.png" },
+    ],
+  },
+  {
+    title: "BNB Chain",
+    eyebrow: "BNB Chain",
+    tokens: [
+      { symbol: "BNB", name: "Binance Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/info/logo.png" },
+      { symbol: "USDT", name: "Tether USD", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x55d398326f99059fF775485246999027B3197955/logo.png" },
+      { symbol: "USDC", name: "USD Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x8AC76a51cc950d9822D68b83FE1Ad97B32Cd580d/logo.png" },
+      { symbol: "FDUSD", name: "First Digital USD", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xc5f0f7b66764F6ec8C8Dff7BA684102245B16472/logo.png" },
+      { symbol: "CAKE", name: "PancakeSwap Token", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x0E09FaBB73Bd3Ade0A17ECC321fD13a19E81cE82/logo.png" },
+      { symbol: "BabyDoge", name: "Baby Doge Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xc748673057861a797275CD8A068AbB95A902e8de/logo.png" },
+    ],
+  },
+  {
+    title: "Arbitrum",
+    eyebrow: "Arbitrum",
+    tokens: [
+      { symbol: "ARB", name: "Arbitrum", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0x912CE59144191C1204E64559FE8253a0e49E6548/logo.png" },
+      { symbol: "ETH", name: "Ether", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png" },
+      { symbol: "USDC", name: "USD Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0xaf88d065e77c8cC2239327C5EDb3A432268e5831/logo.png" },
+      { symbol: "GMX", name: "GMX", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a/logo.png" },
+      { symbol: "MAGIC", name: "MAGIC", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0x539bdE0d7Dbd336b79148AA742883198BBF60342/logo.png" },
+    ],
+  },
+  {
+    title: "Optimism",
+    eyebrow: "Optimism",
+    tokens: [
+      { symbol: "OP", name: "Optimism", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/assets/0x4200000000000000000000000000000000000042/logo.png" },
+      { symbol: "ETH", name: "Ether", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png" },
+      { symbol: "USDC", name: "USD Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/assets/0x0b2C639c533813f4Aa9D7837CAe62653423a6504/logo.png" },
+      { symbol: "VELO", name: "Velodrome", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/assets/0x9560e827aF36c94D2Ac33a39bCE1Fe78631088Db/logo.png" },
+    ],
+  },
+  {
+    title: "Chain-Native",
+    eyebrow: "Cronos & XRP",
+    tokens: [
+      { symbol: "CRO", name: "Cronos", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/cronos/info/logo.png" },
+      { symbol: "XRP", name: "XRP", logo: "/tokens/xrp.png" },
+      { symbol: "KIND", name: "Kindred", logo: HOUSE_LOGO },
+      { symbol: "NBAA", name: "NBAA", logo: HOUSE_LOGO },
+      { symbol: "POL", name: "Polygon", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png" },
+      { symbol: "BNB", name: "BNB Chain", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/info/logo.png" },
+      { symbol: "ARB", name: "Arbitrum", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0x912CE59144191C1204E64559FE8253a0e49E6548/logo.png" },
+      { symbol: "OP", name: "Optimism", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/assets/0x4200000000000000000000000000000000000042/logo.png" },
+    ],
+  },
+];
+
+const networks = [
+  { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity for SHIB, BONE, TREAT, OSCAR, BNB, MAME, WETH, DAI, LINK, UNI, AAVE, PEPE, FLOKI, USDC, USDT, and ETH." },
+  { name: "Base", badge: "Swap + Bridge", desc: "Home for QUEENJOSHI, KINGJOSHI, AERO, BRETT, MOG, and TOSHI with faster, lower-cost trading." },
+  { name: "Polygon", badge: "Swap", desc: "POL, WETH, WBTC, USDC, and USDT routed through 0x liquidity." },
+  { name: "BNB Chain", badge: "Swap", desc: "BNB, USDT, USDC, FDUSD, CAKE, and BabyDoge through 0x liquidity." },
+  { name: "Arbitrum", badge: "Swap", desc: "ARB, ETH, USDC, GMX, and MAGIC across Ethereum L2 liquidity." },
+  { name: "Optimism", badge: "Swap", desc: "OP, ETH, USDC, and VELO across Ethereum L2 liquidity." },
+  { name: "Cronos", badge: "Bridge", desc: "USDC, USDT, and ETH routes via Li.Fi between Ethereum, Base, and Cronos." },
+  { name: "XRP Ledger EVM", badge: "Coming Soon", desc: "Listed for network continuity while swap and bridge routes mature." },
+];
+
 export default function About() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <div className="mb-12 text-center">
-        <img src="/logo.png" alt="House of Joshi" className="mx-auto mb-6 h-24 w-24 object-contain" />
-        <h1 className="hoj-display text-2xl font-semibold text-[rgba(212,175,55,0.95)] sm:text-3xl">
-          House of Joshi — Swap &amp; Bridge
-        </h1>
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/65">
-          The <strong className="text-white/85">House of Joshi</strong> is a decentralised
-          token exchange and cross-chain bridge built for the HOJ community. Trade and bridge
-          ETH, USDC, USDT, SHIB, BONE, TREAT, OSCAR, BNB, MAME, WETH, DAI, LINK, UNI, AAVE, PEPE, FLOKI, BRETT, and Base community tokens across 8 supported networks — directly from your
-          wallet, with no custodian and no sign-up required.
-        </p>
-      </div>
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
+      <section className="mb-10 grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+        <div>
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.25)] bg-[rgba(212,175,55,0.07)] px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-[rgba(212,175,55,0.82)]">
+            Swap &amp; Bridge
+          </div>
+          <h1 className="hoj-display max-w-2xl text-3xl font-semibold leading-tight text-[rgba(212,175,55,0.96)] sm:text-4xl">
+            House of Joshi across every chain that matters.
+          </h1>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-white/66 sm:text-base">
+            Trade community tokens, blue-chip assets, stablecoins, and chain-native coins across 8 supported networks from one non-custodial interface.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href="/" className="rounded-2xl bg-[rgba(212,175,55,0.95)] px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-[rgba(212,175,55,0.85)]">
+              Start Swapping
+            </Link>
+            <Link href="/prices" className="rounded-2xl border border-[rgba(212,175,55,0.35)] px-5 py-2.5 text-sm font-medium text-[rgba(212,175,55,0.9)] transition hover:bg-[rgba(212,175,55,0.08)]">
+              View Prices
+            </Link>
+          </div>
+        </div>
+
+        <div className="hoj-panel rounded-2xl p-5">
+          <div className="mb-5 flex items-center gap-4">
+            <img src="/logo.png" alt="House of Joshi" className="h-16 w-16 rounded-2xl object-contain" />
+            <div>
+              <div className="text-sm font-semibold text-white/90">HOJ Swap &amp; Bridge</div>
+              <div className="text-xs text-white/50">Non-custodial trading with in-app route execution.</div>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { value: "8", label: "Supported chains" },
+              { value: "46", label: "Shown assets" },
+              { value: "1%", label: "House fee" },
+            ].map((item) => (
+              <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.035] p-3 text-center">
+                <div className="text-xl font-semibold text-[rgba(212,175,55,0.92)]">{item.value}</div>
+                <div className="mt-1 text-[10px] uppercase tracking-wider text-white/45">{item.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mb-10 grid gap-3 sm:grid-cols-3">
+        {[
+          { title: "Best route", desc: "0x aggregates swap liquidity across major DEX sources." },
+          { title: "Bridge inside the app", desc: "Stargate and Li.Fi routes keep transfers in one flow." },
+          { title: "Wallet-first", desc: "You sign every transaction directly from your own wallet." },
+        ].map((item) => (
+          <div key={item.title} className="hoj-panel rounded-2xl p-4">
+            <h2 className="text-sm font-semibold text-white/90">{item.title}</h2>
+            <p className="mt-2 text-xs leading-6 text-white/55">{item.desc}</p>
+          </div>
+        ))}
+      </section>
 
       <section className="mb-10">
-        <h2 className="hoj-display mb-4 text-base font-semibold uppercase tracking-widest text-[rgba(212,175,55,0.8)]">
-          What is HOJ Swap &amp; Bridge?
-        </h2>
-        <div className="hoj-panel rounded-2xl p-5 text-sm leading-relaxed text-white/70 space-y-3">
-          <p>
-            HOJ Swap &amp; Bridge is the official trading and bridging interface for the House of Joshi
-            ecosystem. The <strong className="text-white/85">Swap</strong> feature connects directly to the{" "}
-            <a href="https://0x.org" target="_blank" rel="noopener noreferrer" className="text-[rgba(212,175,55,0.85)] hover:underline">
-              0x Protocol
+        <SectionHeading
+          eyebrow="Supported tokens"
+          title="Logo-first token coverage"
+          desc="Token groups are organized by chain so users can quickly see every configured asset on Base, Ethereum, Polygon, BNB Chain, Arbitrum, Optimism, Cronos, and XRP."
+        />
+        <div className="grid gap-4 lg:grid-cols-2">
+          {tokenGroups.map((group) => (
+            <div key={group.title} className="hoj-panel rounded-2xl p-5">
+              <div className="mb-4 flex items-end justify-between gap-3">
+                <div>
+                  <div className="text-[10px] font-semibold uppercase tracking-widest text-[rgba(212,175,55,0.65)]">{group.eyebrow}</div>
+                  <h3 className="mt-1 text-base font-semibold text-white/90">{group.title}</h3>
+                </div>
+                <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] text-white/45">{group.tokens.length} assets</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {group.tokens.map((token) => (
+                  <TokenTile key={`${group.title}-${token.symbol}`} {...token} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-10">
+        <SectionHeading
+          eyebrow="Supported networks"
+          title="Clear routes by chain"
+          desc="Each network shows what users can do today, with bridge-only and coming-soon states separated from active swap routes."
+        />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {networks.map((network) => (
+            <div key={network.name} className="hoj-panel rounded-2xl p-4">
+              <div className="mb-3 flex items-start justify-between gap-2">
+                <h3 className="text-sm font-semibold text-white/90">{network.name}</h3>
+                <span className="shrink-0 rounded-full border border-[rgba(212,175,55,0.3)] px-2 py-0.5 text-[9px] uppercase tracking-wider text-[rgba(212,175,55,0.75)]">{network.badge}</span>
+              </div>
+              <p className="text-xs leading-6 text-white/54">{network.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-10 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+        <div className="hoj-panel rounded-2xl p-5">
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-[rgba(212,175,55,0.65)]">How it works</div>
+          <h2 className="mt-2 text-lg font-semibold text-white/90">Three actions, one route.</h2>
+          <p className="mt-3 text-sm leading-7 text-white/58">
+            Connect a wallet, choose tokens and chains, then confirm the quote. The app handles routing, fee display, and transaction history.
+          </p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {[
+            { step: "1", title: "Connect", desc: "Use MetaMask, Rabby, Coinbase Wallet, Trust Wallet, or WalletConnect." },
+            { step: "2", title: "Route", desc: "Pick a swap or bridge path and review slippage, fees, and outputs." },
+            { step: "3", title: "Confirm", desc: "Sign from your wallet and track the transaction in-app." },
+          ].map((item) => (
+            <div key={item.step} className="hoj-panel rounded-2xl p-4">
+              <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(212,175,55,0.15)] text-sm font-bold text-[rgba(212,175,55,0.9)]">
+                {item.step}
+              </div>
+              <h3 className="text-sm font-semibold text-white/90">{item.title}</h3>
+              <p className="mt-2 text-xs leading-6 text-white/52">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-[rgba(212,175,55,0.22)] bg-[rgba(212,175,55,0.055)] p-6">
+        <div className="grid gap-5 md:grid-cols-[1fr_auto] md:items-center">
+          <div>
+            <h2 className="hoj-display text-lg font-semibold text-[rgba(212,175,55,0.92)]">Ready to trade?</h2>
+            <p className="mt-2 text-sm leading-6 text-white/58">
+              A 1% house fee applies to swaps and bridges, supporting the House of Joshi treasury and ongoing development.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/" className="rounded-2xl bg-[rgba(212,175,55,0.95)] px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-[rgba(212,175,55,0.85)]">
+              Open Swap
+            </Link>
+            <a href="https://thehouseofjoshi.com/contact" target="_blank" rel="noopener noreferrer" className="rounded-2xl border border-[rgba(212,175,55,0.35)] px-5 py-2.5 text-sm font-medium text-[rgba(212,175,55,0.9)] transition hover:bg-[rgba(212,175,55,0.08)]">
+              Contact Us
             </a>
-            , routing trades through the best available on-chain liquidity — across Uniswap,
-            Curve, and dozens of other sources.
-          </p>
-          <p>
-            The <strong className="text-white/85">Bridge</strong> feature offers real in-app cross-chain bridging on all supported routes.
-            Between <strong className="text-white/85">Ethereum and Base</strong> it uses{" "}
-            <a href="https://stargate.finance" target="_blank" rel="noopener noreferrer" className="text-[rgba(212,175,55,0.85)] hover:underline">
-              Stargate V2 (LayerZero)
-            </a>{" "}
-            to move USDC and ETH trustlessly. Between <strong className="text-white/85">Ethereum / Base and Cronos</strong> it routes
-            through{" "}
-            <a href="https://li.fi" target="_blank" rel="noopener noreferrer" className="text-[rgba(212,175,55,0.85)] hover:underline">
-              Li.Fi
-            </a>{" "}
-            (cBridge / Connext) for the best available rate. XRP EVM bridging is not yet supported by any major
-            bridge aggregator and will be added when a reliable protocol becomes available.
-          </p>
-          <p>
-            A <strong className="text-white/85">1% House Fee</strong> is applied to every swap and bridge,
-            sent directly to the House of Joshi treasury to support the community and its ongoing development.
-          </p>
-          <p>
-            Fully non-custodial. Your wallet is never exposed to a third party — all transactions are
-            signed directly in your browser using MetaMask, Rabby, Coinbase Wallet, Trust Wallet, or
-            any WalletConnect-compatible mobile wallet.
-          </p>
-        </div>
-      </section>
-
-      <section className="mb-10">
-        <h2 className="hoj-display mb-4 text-base font-semibold uppercase tracking-widest text-[rgba(212,175,55,0.8)]">
-          Supported Tokens
-        </h2>
-        <div className="space-y-3">
-          <div className="hoj-panel rounded-2xl p-4">
-            <div className="mb-3 text-[11px] uppercase tracking-widest text-[rgba(212,175,55,0.7)]">Base</div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {[
-                { symbol: "QUEENJOSHI", name: "Queen Joshi", logo: "/logo.png" },
-                { symbol: "KINGJOSHI", name: "King Joshi", logo: "/logo.png" },
-                { symbol: "AERO", name: "Aerodrome Finance", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x940181a94A35A4569E4529A3CDfB74e38FD98631/logo.png" },
-                { symbol: "BRETT", name: "Brett", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x532f27101965dd16442E59d40670FaF5eBB142E4/logo.png" },
-                { symbol: "MOG", name: "Mog Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x2Da56AcB9Ea78330F947bD57C54119Debda7AF71/logo.png" },
-                { symbol: "TOSHI", name: "Toshi", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2b4/logo.png" },
-              ].map((t) => <TokenRow key={t.symbol} {...t} />)}
-            </div>
           </div>
-          <div className="hoj-panel rounded-2xl p-4">
-            <div className="mb-3 text-[11px] uppercase tracking-widest text-[rgba(212,175,55,0.7)]"> Ethereum</div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {[
-                { symbol: "SHIB", name: "Shiba Inu", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE/logo.png" },
-                { symbol: "BONE", name: "Bone ShibaSwap", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x9813037ee2218799597d83D4a5B6F3b6778218d9/logo.png" },
-                { symbol: "TREAT", name: "Treat146b" },
-                { symbol: "OSCAR", name: "Oscar" },
-                { symbol: "BNB", name: "Binance Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xB8c77482e45F1F44dE1745F52C74426C631bDD52/logo.png" },
-                { symbol: "MAME", name: "Mame Inu" },
-                { symbol: "WETH", name: "Wrapped Ether", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png" },
-                { symbol: "DAI", name: "Dai Stablecoin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png" },
-                { symbol: "LINK", name: "Chainlink", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x514910771AF9Ca656af840dff83E8264EcF986CA/logo.png" },
-                { symbol: "UNI", name: "Uniswap", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984/logo.png" },
-                { symbol: "AAVE", name: "Aave", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9/logo.png" },
-                { symbol: "PEPE", name: "Pepe", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6982508145454Ce325dDbE47a25d4ec3d2311933/logo.png" },
-                { symbol: "FLOKI", name: "FLOKI", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xcf0c122c6b73ff809c693db761e7baebe62b6a2e/logo.png" },
-              ].map((t) => <TokenRow key={t.symbol} {...t} />)}
-            </div>
-          </div>
-          <div className="hoj-panel rounded-2xl p-4">
-            <div className="mb-3 text-[11px] uppercase tracking-widest text-[rgba(212,175,55,0.7)]">Stablecoins &amp; Bridgeable — All Chains</div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {[
-                { symbol: "USDC", name: "USD Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png" },
-                { symbol: "USDT", name: "Tether USD", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png" },
-                { symbol: "ETH", name: "Ether", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png" },
-              ].map((t) => <TokenRow key={t.symbol} {...t} />)}
-            </div>
-          </div>
-          <div className="hoj-panel rounded-2xl p-4">
-            <div className="mb-3 text-[11px] uppercase tracking-widest text-[rgba(212,175,55,0.7)]">Chain-Native Tokens</div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {[
-                { symbol: "CRO", name: "Cronos", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/cronos/info/logo.png" },
-                { symbol: "XRP", name: "XRP", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/xrp/info/logo.png" },
-                { symbol: "KIND", name: "Kindred" },
-                { symbol: "NBAA", name: "NBAA" },
-                { symbol: "POL", name: "Polygon", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png" },
-                { symbol: "BNB", name: "BNB Chain", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/info/logo.png" },
-                { symbol: "ARB", name: "Arbitrum", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0x912CE59144191C1204E64559FE8253a0e49E6548/logo.png" },
-                { symbol: "OP", name: "Optimism", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/assets/0x4200000000000000000000000000000000000042/logo.png" },
-              ].map((t) => <TokenRow key={t.symbol} {...t} />)}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mb-10">
-        <h2 className="hoj-display mb-4 text-base font-semibold uppercase tracking-widest text-[rgba(212,175,55,0.8)]">
-          Supported Networks
-        </h2>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {[
-            { name: "Ethereum", badge: "Swap + Bridge", desc: "Home chain for SHIB, BONE, TREAT, OSCAR, BNB, MAME, WETH, DAI, LINK, UNI, AAVE, PEPE, FLOKI, USDC, USDT, and ETH. Bridge to Base (Stargate V2) or Cronos (Li.Fi) directly in-app." },
-            { name: "Base", badge: "Swap + Bridge", desc: "Coinbase's L2 — home of QUEENJOSHI, KINGJOSHI, AERO, BRETT, MOG, and TOSHI. Lower fees, faster confirmations. Bridge to Ethereum (Stargate V2) or Cronos (Li.Fi) directly in-app." },
-            { name: "Polygon", badge: "Swap", desc: "High-throughput EVM chain. Swap POL, WETH, WBTC, USDC, and USDT through 0x liquidity." },
-            { name: "BNB Chain", badge: "Swap", desc: "Binance's EVM chain. Swap BNB, USDT, USDC, FDUSD, CAKE, and BabyDoge through 0x liquidity." },
-            { name: "Arbitrum", badge: "Swap", desc: "Ethereum L2 for scaling. Swap ARB, ETH, USDC, GMX, and MAGIC through 0x liquidity." },
-            { name: "Optimism", badge: "Swap", desc: "Ethereum L2 for scaling. Swap OP, ETH, USDC, and VELO through 0x liquidity." },
-            { name: "Cronos", badge: "Bridge", desc: "High-throughput EVM chain. Bridge USDC/USDT/ETH to Ethereum or Base via Li.Fi — fully in-app, no redirects." },
-            { name: "XRP Ledger EVM", badge: "Coming Soon", desc: "XRP's EVM sidechain is listed for network continuity. In-app swap and bridge routes will expand as reliable liquidity and bridge support become available." },
-          ].map((c) => (
-            <div key={c.name} className="hoj-panel rounded-2xl p-4">
-              <div className="mb-1 flex items-center gap-2">
-                <h3 className="text-sm font-semibold text-white/90">{c.name}</h3>
-                <span className="rounded-full border border-[rgba(212,175,55,0.3)] px-2 py-0.5 text-[9px] uppercase tracking-wider text-[rgba(212,175,55,0.7)]">{c.badge}</span>
-              </div>
-              <p className="text-xs leading-relaxed text-white/55">{c.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="mb-10">
-        <h2 className="hoj-display mb-4 text-base font-semibold uppercase tracking-widest text-[rgba(212,175,55,0.8)]">
-          How it Works
-        </h2>
-        <div className="mb-4 grid gap-4 sm:grid-cols-3">
-          {[
-            { step: "1", title: "Connect Wallet", desc: "Connect MetaMask, Rabby, Coinbase Wallet, Trust Wallet, or any WalletConnect-compatible mobile wallet." },
-            { step: "2", title: "Choose Tokens &amp; Chains", desc: "Select which token to sell (or bridge) and the destination. Adjust slippage if needed." },
-            { step: "3", title: "Confirm &amp; Execute", desc: "Review the 0x or Stargate quote — including route, fees, and price impact — then confirm in your wallet." },
-          ].map((s) => (
-            <div key={s.step} className="hoj-panel rounded-2xl p-4">
-              <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(212,175,55,0.15)] text-sm font-bold text-[rgba(212,175,55,0.9)]">
-                {s.step}
-              </div>
-              <h3 className="mb-1 text-sm font-semibold text-white/90" dangerouslySetInnerHTML={{ __html: s.title }} />
-              <p className="text-xs leading-relaxed text-white/55">{s.desc}</p>
-            </div>
-          ))}
-        </div>
-        <div className="hoj-panel rounded-2xl p-4 text-xs text-white/55 space-y-1.5">
-          <p><strong className="text-white/75">Swapping</strong> — powered by 0x Protocol. Best price across all major DEXes on Ethereum, Base, Polygon, BNB Chain, Arbitrum, and Optimism. 1% house fee included in the quote.</p>
-          <p><strong className="text-white/75">Bridging (Ethereum ↔ Base)</strong> — powered by Stargate V2 (LayerZero). Transfers USDC or ETH trustlessly. Requires a small LayerZero messaging fee paid in ETH, plus 1% house fee.</p>
-          <p><strong className="text-white/75">Bridging (Multi-chain)</strong> — powered by Li.Fi (cBridge / Connext). Routes USDC, USDT, or ETH between Ethereum, Base, and Cronos entirely in-app. Live quote fetched before each bridge, 1% house fee applies.</p>
-          <p><strong className="text-white/75">Bridging (XRP EVM)</strong> — coming soon. No major bridge aggregator supports the XRP EVM sidechain yet. Swap on XRP EVM is fully available in the meantime.</p>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-[rgba(212,175,55,0.2)] bg-[rgba(212,175,55,0.05)] p-6 text-center">
-        <h2 className="hoj-display mb-2 text-base font-semibold text-[rgba(212,175,55,0.9)]">Ready to trade?</h2>
-        <p className="mb-4 text-sm text-white/60">Connect your wallet and swap or bridge in seconds.</p>
-        <div className="flex flex-wrap justify-center gap-3">
-          <Link
-            href="/"
-            className="rounded-2xl bg-[rgba(212,175,55,0.95)] px-6 py-2.5 text-sm font-semibold text-black hover:bg-[rgba(212,175,55,0.85)] transition"
-          >
-            Start Swapping
-          </Link>
-          <a
-            href="https://thehouseofjoshi.com/contact"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-2xl border border-[rgba(212,175,55,0.35)] px-6 py-2.5 text-sm font-medium text-[rgba(212,175,55,0.9)] hover:bg-[rgba(212,175,55,0.08)] transition"
-          >
-            Contact Us ↗
-          </a>
         </div>
       </section>
     </div>
   );
 }
 
-function TokenRow({ symbol, name, logo }: { symbol: string; name: string; logo?: string }) {
+function SectionHeading({ eyebrow, title, desc }: { eyebrow: string; title: string; desc: string }) {
   return (
-    <div className="flex items-start gap-3">
-      <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[rgba(212,175,55,0.3)] bg-[rgba(212,175,55,0.08)] text-[10px] font-bold text-[rgba(212,175,55,0.9)]">
+    <div className="mb-5 max-w-2xl">
+      <div className="text-[10px] font-semibold uppercase tracking-widest text-[rgba(212,175,55,0.65)]">{eyebrow}</div>
+      <h2 className="hoj-display mt-2 text-xl font-semibold text-[rgba(212,175,55,0.92)]">{title}</h2>
+      <p className="mt-2 text-sm leading-6 text-white/56">{desc}</p>
+    </div>
+  );
+}
+
+function TokenTile({ symbol, name, logo }: Token) {
+  return (
+    <div className="flex min-h-28 flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-center">
+      <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[rgba(212,175,55,0.3)] bg-[rgba(212,175,55,0.08)] text-[11px] font-bold text-[rgba(212,175,55,0.9)]">
         <span>{symbol.slice(0, 4)}</span>
-        {logo ? (
-          <img
-            src={logo}
-            alt={`${symbol} logo`}
-            className="absolute inset-0 h-full w-full object-cover"
-            loading="lazy"
-            onError={(event) => {
-              event.currentTarget.style.display = "none";
-            }}
-          />
-        ) : null}
+        {logo ? <img src={logo} alt={`${symbol} logo`} className="absolute inset-0 h-full w-full object-cover" loading="lazy" /> : null}
       </div>
-      <div>
-        <div className="text-sm font-semibold text-white/90">{symbol}</div>
-        <div className="text-[11px] text-white/45">{name}</div>
-      </div>
+      <div className="mt-3 w-full truncate text-sm font-semibold text-white/90" title={symbol}>{symbol}</div>
+      <div className="mt-1 w-full truncate text-[11px] text-white/45" title={name}>{name}</div>
     </div>
   );
 }
