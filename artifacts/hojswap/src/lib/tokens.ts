@@ -1,6 +1,6 @@
 import { getAddress } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { cronos, xrp } from "@/lib/chains";
+import { cronos, xrp, polygon, bsc, arbitrum, optimism } from "@/lib/chains";
 
 export type Token = {
   symbol: string;
@@ -73,6 +73,13 @@ export const TOKENS: Token[] = [
     chainId: base.id,
     decimals: 9,
   },
+  {
+    symbol: "BRETT",
+    name: "Brett",
+    address: getAddress("0x532f27101965dd16442e59d40670faf5ebb142e4"),
+    chainId: base.id,
+    decimals: 18,
+  },
 
   // ─── Ethereum mainnet ────────────────────────────────────
   {
@@ -127,6 +134,20 @@ export const TOKENS: Token[] = [
     symbol: "BNB",
     name: "Binance Coin",
     address: getAddress("0xb8c77482e45f1f44de1745f52c74426c631bdd52"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "FLOKI",
+    name: "FLOKI",
+    address: getAddress("0xcf0c122c6b73ff809c693db761e7baebe62b6a2e"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "AAVE",
+    name: "Aave",
+    address: getAddress("0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9"),
     chainId: mainnet.id,
     decimals: 18,
   },

@@ -83,7 +83,7 @@ export const TOKENS: Token[] = [
   {
     symbol: "BRETT",
     name: "Brett",
-    address: getAddress("0x532f2710296512e1b6cc49be25ebb142e4ec59b7"),
+    address: getAddress("0x532f27101965dd16442e59d40670faf5ebb142e4"),
     chainId: base.id,
     decimals: 18,
   },
@@ -196,7 +196,7 @@ export const TOKENS: Token[] = [
   {
     symbol: "AAVE",
     name: "Aave",
-    address: getAddress("0x7Fc66500c84A76ad7e9c93437bfc5Ac33E2AEaE9"),
+    address: getAddress("0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9"),
     chainId: mainnet.id,
     decimals: 18,
   },
@@ -210,9 +210,9 @@ export const TOKENS: Token[] = [
   {
     symbol: "FLOKI",
     name: "FLOKI",
-    address: getAddress("0x9813037ee22187284975a93366442274d1df36d9"),
+    address: getAddress("0xcf0c122c6b73ff809c693db761e7baebe62b6a2e"),
     chainId: mainnet.id,
-    decimals: 8,
+    decimals: 18,
   },
 
   // ─── Cronos ─────────────────────────────────────────────

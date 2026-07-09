@@ -11,7 +11,7 @@ import {
 } from "wagmi";
 import { parseUnits, maxUint256, formatUnits, concat, numberToHex, size } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { cronos, xrp, getChainName } from "@/lib/chains";
+import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, getChainName } from "@/lib/chains";
 import { clampToDecimals, formatSwapAmountDisplay, isValidNumberInput } from "@/lib/format";
 import { tokenTo0xParam, type QuoteResponse, type PriceResponse, HOUSE_FEE_BPS } from "@/lib/quote";
 import { erc20Abi } from "@/lib/erc20";
@@ -44,8 +44,7 @@ export function SwapCard() {
 
     const availableTokens = useMemo(() => tokensForChain(selectedChainId), [selectedChainId]);
 
-    const SWAP_SUPPORTED_CHAINS = [base.id, mainnet.id];
-    const isSwapSupported = SWAP_SUPPORTED_CHAINS.includes(selectedChainId);
+    const isSwapSupported = SWAP_SUPPORTED_CHAIN_IDS.includes(selectedChainId);
 
     // Auto-switch to bridge tab if swap is not supported on the selected chain
     useEffect(() => {
@@ -547,12 +546,7 @@ export function SwapCard() {
         nativeSymbol,
     ), [quote, price, nativeUsdPrice, nativeSymbol]);
 
-    const CHAINS = [
-        { id: base.id, label: "Base" },
-        { id: mainnet.id, label: "Ethereum" },
-        { id: cronos.id, label: "Cronos" },
-        { id: xrp.id, label: "XRP" },
-    ];
+    const CHAINS = CHAIN_OPTIONS.map(({ id, shortLabel }) => ({ id, label: shortLabel }));
 
     const TABS: { id: ActiveTab; label: string }[] = [
         { id: "swap", label: "Swap" },
@@ -564,12 +558,12 @@ export function SwapCard() {
         <div className="w-full max-w-[480px]">
             <div className="mb-4 text-center">
                 <p className="text-[13px] text-white/50 leading-relaxed">
-                    Swap and bridge HOJ community tokens across Ethereum, Base, Cronos, and XRP EVM -
+                    Swap and bridge HOJ community tokens across Ethereum, Base, Cronos, XRP EVM, Polygon, BNB Chain, Arbitrum, and Optimism -
                     best rates from <strong>0x</strong> and <strong>Stargate</strong>.
                 </p>
                 <div className="mt-3 flex justify-center gap-6 text-[11px]">
                     {[
-                        { value: "4", label: "Chains" },
+                        { value: "8", label: "Chains" },
                         { value: "10+", label: "Tokens" },
                         { value: "1%", label: "House Fee" },
                         { value: "0x+SG", label: "Powered By" },
@@ -583,33 +577,33 @@ export function SwapCard() {
             </div>
 
             {apiKeyError && (
-                    <div className="mb-4 flex items-start gap-3 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3">
-                        <span className="mt-0.5 shrink-0 text-amber-300">⚠</span>
-                        <div className="text-xs leading-relaxed text-amber-200/90">
-                            {apiKeyError === "api_key_missing" ? (
-                                <>
-                                    <strong className="block text-amber-200">0x API key not configured.</strong>
-                                    Set the <code className="rounded bg-black/30 px-1">ZEROX_API_KEY</code> environment variable.{" "}
-                                    <a href="https://dashboard.0x.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-100">
-                                        Get a free key →
-                                    </a>
-                                </>
-                            ) : (
-                                <>
-                                    <strong className="block text-amber-200">0x API key invalid or quota exceeded.</strong>
-                                    Check your key at{" "}
-                                    <a href="https://dashboard.0x.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-100">
-                                        dashboard.0x.org
-                                    </a>
-                                </>
-                            )}
-                        </div>
+                <div className="mb-4 flex items-start gap-3 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3">
+                    <span className="mt-0.5 shrink-0 text-amber-300">⚠</span>
+                    <div className="text-xs leading-relaxed text-amber-200/90">
+                        {apiKeyError === "api_key_missing" ? (
+                            <>
+                                <strong className="block text-amber-200">0x API key not configured.</strong>
+                                Set the <code className="rounded bg-black/30 px-1">ZEROX_API_KEY</code> environment variable.{" "}
+                                <a href="https://dashboard.0x.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-100">
+                                    Get a free key →
+                                </a>
+                            </>
+                        ) : (
+                            <>
+                                <strong className="block text-amber-200">0x API key invalid or quota exceeded.</strong>
+                                Check your key at{" "}
+                                <a href="https://dashboard.0x.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-100">
+                                    dashboard.0x.org
+                                </a>
+                            </>
+                        )}
                     </div>
-                )}
+                </div>
+            )}
 
-                <div className="hoj-card space-y-3 rounded-3xl p-4 sm:p-6">
-                    {/* Chain selector */}
-                    <div className="flex flex-wrap justify-center gap-2">
+            <div className="hoj-card space-y-3 rounded-3xl p-4 sm:p-6">
+                {/* Chain selector */}
+                <div className="flex flex-wrap justify-center gap-2">
                         {CHAINS.map(({ id, label }) => (
                             <button
                                 key={id}
@@ -798,7 +792,7 @@ export function SwapCard() {
                     {[
                         { icon: "⚡", label: "Best Price", desc: "0x aggregates DEX liquidity for the best rate every time" },
                         { icon: "🛡️", label: "Non-Custodial", desc: "Your wallet, your keys — we never hold your funds" },
-                        { icon: "🌐", label: "Multi-Chain", desc: "Swap on Base, Ethereum, Cronos & XRP in one place" },
+                        { icon: "🌐", label: "Multi-Chain", desc: "Swap on 8 chains including Base, Ethereum, Cronos, XRP, Polygon, BNB, Arbitrum & Optimism" },
                     ].map(({ icon, label, desc }) => (
                         <div key={label} className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-4 flex flex-col items-center gap-1.5">
                             <span className="text-xl">{icon}</span>
@@ -821,5 +815,4 @@ export function SwapCard() {
                 </p>
             </div>
         </div>
-    );
 }

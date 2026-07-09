@@ -12,7 +12,7 @@ import {
 } from "wagmi";
 import { formatUnits, parseUnits, maxUint256 } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { cronos, getChainName } from "@/lib/chains";
+import { CHAIN_OPTIONS, getChainName, polygon, bsc, arbitrum, optimism, xrp } from "@/lib/chains";
 import { clampToDecimals, formatCompactNumber, isValidNumberInput } from "@/lib/format";
 import { useToast } from "@/components/Toast";
 import { SIMPLE_TRANSFER_ABI } from "@/lib/stargate";
@@ -49,13 +49,42 @@ const TOKENS_BY_CHAIN: Record<number, XToken[]> = {
     { symbol: "USDT", address: "0x66e428c3f67a68767eb9ef128fda82a14f9061d3", decimals: 6 },
     { symbol: "WETH", address: "0xe44Fd7fCb2b1581822D0c862B68222998a0c299a", decimals: 18 },
   ],
+  [xrp.id]: [
+    { symbol: "XRP",  address: "0x0000000000000000000000000000000000000000", decimals: 18 },
+    { symbol: "USDC", address: "0x2058A9D763313Aae9296C864B03f7D404A72e4e1", decimals: 6 },
+    { symbol: "USDT", address: "0x34C2eCd3687c15Ec43639eFEB4467c2b8e5C0F74", decimals: 6 },
+  ],
+  [polygon.id]: [
+    { symbol: "POL",  address: "0x0000000000000000000000000000000000000000", decimals: 18 },
+    { symbol: "USDC", address: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359", decimals: 6 },
+    { symbol: "USDT", address: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F", decimals: 6 },
+    { symbol: "DAI",  address: "0x8f3Cf7ad23Cd3EDb978685aC72c0338C8B41ADED", decimals: 18 },
+    { symbol: "WBTC", address: "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6", decimals: 8 },
+  ],
+  [bsc.id]: [
+    { symbol: "BNB",  address: "0x0000000000000000000000000000000000000000", decimals: 18 },
+    { symbol: "USDC", address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d", decimals: 18 },
+    { symbol: "USDT", address: "0x55d398326f99059fF775485246999027B3197955", decimals: 18 },
+    { symbol: "DAI",  address: "0x1AF3F329e8BE154074D8769D1FFa4eE058B15DB0", decimals: 18 },
+    { symbol: "WBTC", address: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", decimals: 8 },
+  ],
+  [arbitrum.id]: [
+    { symbol: "ETH",  address: "0x0000000000000000000000000000000000000000", decimals: 18 },
+    { symbol: "USDC", address: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831", decimals: 6 },
+    { symbol: "USDT", address: "0xFd086bC7DD5a4816D4dF583C249c36f4C42190C0", decimals: 6 },
+    { symbol: "DAI",  address: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", decimals: 18 },
+    { symbol: "WBTC", address: "0x2f2a2543B5A17916B52D839E039eE702a2d4E0F1", decimals: 8 },
+  ],
+  [optimism.id]: [
+    { symbol: "ETH",  address: "0x0000000000000000000000000000000000000000", decimals: 18 },
+    { symbol: "USDC", address: "0x7F5c764cBc14f9669B88837ca1490cCa17c31607", decimals: 6 },
+    { symbol: "USDT", address: "0x94b008Aa00d79E0C0f9bc64dDf02Ed379797EcAd", decimals: 6 },
+    { symbol: "DAI",  address: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", decimals: 18 },
+    { symbol: "WBTC", address: "0x68505E8F81b86E4e9405f1D920Ce9404f8A25E3C", decimals: 8 },
+  ],
 };
 
-const ALL_CHAINS = [
-  { id: base.id,    name: "Base" },
-  { id: mainnet.id, name: "Ethereum" },
-  { id: cronos.id,  name: "Cronos" },
-];
+const ALL_CHAINS = CHAIN_OPTIONS.map(({ id, label }) => ({ id, name: label }));
 
 function isNativeToken(address: string) {
   return address === "0x0000000000000000000000000000000000000000";
