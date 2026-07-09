@@ -50,8 +50,9 @@ export async function POST(request: Request) {
       buyToken,
       sellAmount,
       slippageBps: String(slippageBps ?? 100),
-      integratorFee: HOUSE_FEE_BPS,
-      integratorFeeRecipient: HOUSE_WALLET,
+      swapFeeRecipient: HOUSE_WALLET,
+      swapFeeBps: HOUSE_FEE_BPS,
+      swapFeeToken: sellToken,
     });
     if (taker) params.set("taker", taker);
 
