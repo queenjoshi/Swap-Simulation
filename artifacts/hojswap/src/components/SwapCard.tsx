@@ -602,217 +602,209 @@ export function SwapCard() {
             )}
 
             <div className="hoj-card space-y-3 rounded-3xl p-4 sm:p-6">
-                {/* Chain selector */}
                 <div className="flex flex-wrap justify-center gap-2">
-                        {CHAINS.map(({ id, label }) => (
-                            <button
-                                key={id}
-                                type="button"
-                                onClick={() => pickChain(id)}
-                                className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${selectedChainId === id
-                                    ? "bg-[rgba(212,175,55,0.95)] text-black"
-                                    : "bg-white/5 text-white/70 hover:bg-white/10"
-                                    }`}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Tab selector */}
-                    <div className="flex gap-1 rounded-3xl border border-white/10 bg-black/20 p-1">
-                        {TABS.filter(tab => tab.id !== "swap" || isSwapSupported).map(({ id, label }) => (
-                            <button
-                                key={id}
-                                type="button"
-                                onClick={() => setActiveTab(id)}
-                                className={`flex-1 rounded-2xl px-3 py-3 text-sm font-semibold capitalize transition ${activeTab === id
-                                    ? "bg-[rgba(212,175,55,0.95)] text-black"
-                                    : "bg-transparent text-white/70 hover:bg-white/5"
-                                    }`}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {isSwapSupported && activeTab === "swap" ? (
-                        <>
-                            {/* Sell panel */}
-                            <div className="hoj-panel rounded-3xl p-4">
-                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_11.875rem] sm:items-start">
-                                    <div className="min-w-0 overflow-hidden">
-                                        <div className="text-[11px] uppercase tracking-[0.18em] text-white/55">You pay</div>
-                                        <input
-                                            inputMode="decimal"
-                                            placeholder="0.0"
-                                            value={sellAmountInput}
-                                            onChange={(e) => {
-                                                const nextRaw = e.target.value.replaceAll(",", ".");
-                                                if (!isValidNumberInput(nextRaw)) return;
-                                                const next = sellDecimals != null ? clampToDecimals(nextRaw, sellDecimals) : nextRaw;
-                                                setSellAmountInput(next);
-                                            }}
-                                            className="hoj-input mt-2 w-full min-w-0 bg-transparent text-2xl text-white outline-none placeholder:text-white/25"
-                                        />
-                                    </div>
-                                    <div className="min-w-0 sm:w-[11.875rem]">
-                                        <div className="text-left text-[11px] uppercase tracking-[0.18em] text-white/55">Token</div>
-                                        <div className="mt-2">
-                                            <TokenSelect tokens={availableTokens} value={sellToken} onChange={onSellTokenChange} />
-                                        </div>
-                                        <TokenBalance token={sellToken} chainId={selectedChainId} isConnected={isConnected} walletChainId={chainId} onMax={walletOnSelectedChain ? setMaxAmount : undefined} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Flip */}
-                            <div className="flex justify-center py-1">
-                                <button
-                                    type="button"
-                                    onClick={flipTokens}
-                                    className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(212,175,55,0.3)] bg-black/40 text-[rgba(212,175,55,0.9)] hover:border-[rgba(212,175,55,0.6)] hover:bg-black/60 transition shadow-sm text-lg"
-                                    aria-label="Flip tokens"
-                                >
-                                    ⇅
-                                </button>
-                            </div>
-
-                            {/* Buy panel */}
-                            <div className="hoj-panel rounded-3xl p-4">
-                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_11.875rem] sm:items-start">
-                                    <div className="min-w-0 overflow-hidden">
-                                        <div className="text-[11px] uppercase tracking-[0.18em] text-white/55">You receive</div>
-                                        <div className="mt-2 truncate text-xl font-medium tabular-nums text-white/90 sm:text-2xl" title={buyAmountRaw ?? undefined}>
-                                            {(() => {
-                                                if (isQuoting) return "…";
-                                                if (!sellAmountInput) return "—";
-                                                if (Number(sellAmountInput) === 0) return "0";
-                                                if ((quote as any)?.liquidityAvailable === false) return "No liquidity";
-                                                return buyAmountFormatted ?? "—";
-                                            })()}
-                                        </div>
-                                        {minBuyFormatted && (
-                                            <div className="mt-1 truncate text-xs text-white/45" title={minBuyFormatted}>
-                                                Min: {minBuyFormatted}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="min-w-0 sm:w-[11.875rem]">
-                                        <div className="text-left text-[11px] uppercase tracking-[0.18em] text-white/55">Token</div>
-                                        <div className="mt-2">
-                                            <TokenSelect tokens={availableTokens} value={buyToken} onChange={onBuyTokenChange} />
-                                        </div>
-                                        <TokenBalance token={buyToken} chainId={selectedChainId} isConnected={isConnected} walletChainId={chainId} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Gas estimate row — visible before confirming */}
-                            {gasDisplay && (
-                                <div className="flex items-center justify-between px-1 text-[11px] text-white/45">
-                                    <span>Est. network fee</span>
-                                    <span className="font-mono tabular-nums">
-                                        {gasDisplay.usd
-                                            ? <>{gasDisplay.usd} <span className="text-white/25">({gasDisplay.eth})</span></>
-                                            : gasDisplay.eth}
-                                    </span>
-                                </div>
-                            )}
-
-                            {/* House fee row */}
-                            {houseFeeFormatted && (
-                                <div className="flex items-center justify-between px-1 text-[11px] text-white/45">
-                                    <span>House fee <span className="text-white/30">(1%)</span></span>
-                                    <span className="font-mono tabular-nums">{houseFeeFormatted}</span>
-                                </div>
-                            )}
-
-                            <SwapShowMore
-                                slippageBps={slippageBps} onSlippageChange={setSlippageBps}
-                                quote={quote} price={price}
-                                sellToken={sellToken} buyToken={buyToken}
-                                sellDecimals={sellDecimals} buyDecimals={buyDecimals}
-                                isQuoting={isQuoting}
-                                nativeUsdPrice={nativeUsdPrice}
-                                nativeSymbol={nativeSymbol}
-                            />
-
-                            {!isConnected ? (
-                                <div className="hoj-panel rounded-2xl px-4 py-3 text-sm text-white/70">
-                                    Connect your wallet to begin.
-                                </div>
-                            ) : needsCorrectChain ? (
-                                <button
-                                    type="button"
-                                    onClick={() => switchChainAsync({ chainId: selectedChainId })}
-                                    disabled={isSwitching}
-                                    className="w-full rounded-2xl bg-[rgba(212,175,55,0.95)] px-4 py-3 text-sm font-semibold text-black hover:bg-[rgba(212,175,55,0.85)] disabled:opacity-60 transition"
-                                >
-                                    {isSwitching ? "Switching…" : `Switch to ${selectedChainName}`}
-                                </button>
-                            ) : quoteError ? (
-                                <div className="rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                                    {quoteError}
-                                </div>
-                            ) : (
-                                <button
-                                    type="button"
-                                    onClick={needsApproval ? approve : swap}
-                                    disabled={primaryDisabled}
-                                    className="w-full rounded-2xl bg-[rgba(255,222,85,0.98)] px-4 py-3 text-sm font-semibold text-black shadow-[0_12px_25px_-12px_rgba(255,222,85,0.9)] hover:bg-[rgba(255,210,65,0.98)] disabled:opacity-60 transition"
-                                >
-                                    {primaryLabel}
-                                </button>
-                            )}
-
-                            {insufficientBalance && walletOnSelectedChain && (
-                                <div className="text-center text-xs text-red-300/90">
-                                    Amount exceeds your {sellToken.symbol} balance.
-                                </div>
-                            )}
-                        </>
-                    ) : activeTab === "bridge" ? (
-                        <BridgeTab selectedChainId={selectedChainId} onChainChange={pickChain} />
-                    ) : (
-                        <TransactionsPanel key={txHistoryVersion} walletAddress={address} selectedChainId={selectedChainId} />
-                    )}
-                </div>
-
-                {/* Trending Tokens Section */}
-                {isSwapSupported && activeTab === "swap" && (
-                    <TrendingTokens 
-                        chainId={selectedChainId} 
-                        onSelectToken={onSelectTrendingToken}
-                        availableTokens={availableTokens.map(t => t.symbol)}
-                    />
-                )}
-
-                <div className="mt-5 grid grid-cols-3 gap-3 text-center">
-                    {[
-                        { icon: "⚡", label: "Best Price", desc: "0x aggregates DEX liquidity for the best rate every time" },
-                        { icon: "🛡️", label: "Non-Custodial", desc: "Your wallet, your keys — we never hold your funds" },
-                        { icon: "🌐", label: "Multi-Chain", desc: "Swap on 8 chains including Base, Ethereum, Cronos, XRP, Polygon, BNB, Arbitrum & Optimism" },
-                    ].map(({ icon, label, desc }) => (
-                        <div key={label} className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-4 flex flex-col items-center gap-1.5">
-                            <span className="text-xl">{icon}</span>
-                            <span className="text-[11px] font-semibold text-[rgba(212,175,55,0.9)]">{label}</span>
-                            <span className="text-[10px] leading-relaxed text-white/40">{desc}</span>
-                        </div>
+                    {CHAINS.map(({ id, label }) => (
+                        <button
+                            key={id}
+                            type="button"
+                            onClick={() => pickChain(id)}
+                            className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${selectedChainId === id
+                                ? "bg-[rgba(212,175,55,0.95)] text-black"
+                                : "bg-white/5 text-white/70 hover:bg-white/10"
+                                }`}
+                        >
+                            {label}
+                        </button>
                     ))}
                 </div>
 
-                <p className="mt-4 border-t border-white/8 pt-4 text-center text-[10px] leading-relaxed text-white/35 sm:text-[11px]">
-                    Want to add your coin? {" "}
-                    <a href="https://thehouseofjoshi.com/contact" target="_blank" rel="noopener noreferrer" className="text-[rgba(212,175,55,0.6)] hover:text-[rgba(212,175,55,0.9)] transition">
-                        Contact us
-                    </a>
-                    {" "} - Powered by{" "}
-                    <a href="https://0x.org" target="_blank" rel="noopener noreferrer" className="text-[rgba(212,175,55,0.6)] hover:text-[rgba(212,175,55,0.9)] transition">
-                        0x Protocol
-                    </a>
-                    {" "} - A 1% house fee applies to all swaps
-                </p>
+                <div className="flex gap-1 rounded-3xl border border-white/10 bg-black/20 p-1">
+                    {TABS.filter(tab => tab.id !== "swap" || isSwapSupported).map(({ id, label }) => (
+                        <button
+                            key={id}
+                            type="button"
+                            onClick={() => setActiveTab(id)}
+                            className={`flex-1 rounded-2xl px-3 py-3 text-sm font-semibold capitalize transition ${activeTab === id
+                                ? "bg-[rgba(212,175,55,0.95)] text-black"
+                                : "bg-transparent text-white/70 hover:bg-white/5"
+                                }`}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+
+                {isSwapSupported && activeTab === "swap" ? (
+                    <>
+                        <div className="hoj-panel rounded-3xl p-4">
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_11.875rem] sm:items-start">
+                                <div className="min-w-0 overflow-hidden">
+                                    <div className="text-[11px] uppercase tracking-[0.18em] text-white/55">You pay</div>
+                                    <input
+                                        inputMode="decimal"
+                                        placeholder="0.0"
+                                        value={sellAmountInput}
+                                        onChange={(e) => {
+                                            const nextRaw = e.target.value.replaceAll(",", ".");
+                                            if (!isValidNumberInput(nextRaw)) return;
+                                            const next = sellDecimals != null ? clampToDecimals(nextRaw, sellDecimals) : nextRaw;
+                                            setSellAmountInput(next);
+                                        }}
+                                        className="hoj-input mt-2 w-full min-w-0 bg-transparent text-2xl text-white outline-none placeholder:text-white/25"
+                                    />
+                                </div>
+                                <div className="min-w-0 sm:w-[11.875rem]">
+                                    <div className="text-left text-[11px] uppercase tracking-[0.18em] text-white/55">Token</div>
+                                    <div className="mt-2">
+                                        <TokenSelect tokens={availableTokens} value={sellToken} onChange={onSellTokenChange} />
+                                    </div>
+                                    <TokenBalance token={sellToken} chainId={selectedChainId} isConnected={isConnected} walletChainId={chainId} onMax={walletOnSelectedChain ? setMaxAmount : undefined} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-center py-1">
+                            <button
+                                type="button"
+                                onClick={flipTokens}
+                                className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(212,175,55,0.3)] bg-black/40 text-[rgba(212,175,55,0.9)] hover:border-[rgba(212,175,55,0.6)] hover:bg-black/60 transition shadow-sm text-lg"
+                                aria-label="Flip tokens"
+                            >
+                                ⇅
+                            </button>
+                        </div>
+
+                        <div className="hoj-panel rounded-3xl p-4">
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_11.875rem] sm:items-start">
+                                <div className="min-w-0 overflow-hidden">
+                                    <div className="text-[11px] uppercase tracking-[0.18em] text-white/55">You receive</div>
+                                    <div className="mt-2 truncate text-xl font-medium tabular-nums text-white/90 sm:text-2xl" title={buyAmountRaw ?? undefined}>
+                                        {(() => {
+                                            if (isQuoting) return "…";
+                                            if (!sellAmountInput) return "—";
+                                            if (Number(sellAmountInput) === 0) return "0";
+                                            if ((quote as any)?.liquidityAvailable === false) return "No liquidity";
+                                            return buyAmountFormatted ?? "—";
+                                        })()}
+                                    </div>
+                                    {minBuyFormatted && (
+                                        <div className="mt-1 truncate text-xs text-white/45" title={minBuyFormatted}>
+                                            Min: {minBuyFormatted}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="min-w-0 sm:w-[11.875rem]">
+                                    <div className="text-left text-[11px] uppercase tracking-[0.18em] text-white/55">Token</div>
+                                    <div className="mt-2">
+                                        <TokenSelect tokens={availableTokens} value={buyToken} onChange={onBuyTokenChange} />
+                                    </div>
+                                    <TokenBalance token={buyToken} chainId={selectedChainId} isConnected={isConnected} walletChainId={chainId} />
+                                </div>
+                            </div>
+                        </div>
+
+                        {gasDisplay && (
+                            <div className="flex items-center justify-between px-1 text-[11px] text-white/45">
+                                <span>Est. network fee</span>
+                                <span className="font-mono tabular-nums">
+                                    {gasDisplay.usd
+                                        ? <>{gasDisplay.usd} <span className="text-white/25">({gasDisplay.eth})</span></>
+                                        : gasDisplay.eth}
+                                </span>
+                            </div>
+                        )}
+
+                        {houseFeeFormatted && (
+                            <div className="flex items-center justify-between px-1 text-[11px] text-white/45">
+                                <span>House fee <span className="text-white/30">(1%)</span></span>
+                                <span className="font-mono tabular-nums">{houseFeeFormatted}</span>
+                            </div>
+                        )}
+
+                        <SwapShowMore
+                            slippageBps={slippageBps} onSlippageChange={setSlippageBps}
+                            quote={quote} price={price}
+                            sellToken={sellToken} buyToken={buyToken}
+                            sellDecimals={sellDecimals} buyDecimals={buyDecimals}
+                            isQuoting={isQuoting}
+                            nativeUsdPrice={nativeUsdPrice}
+                            nativeSymbol={nativeSymbol}
+                        />
+
+                        {!isConnected ? (
+                            <div className="hoj-panel rounded-2xl px-4 py-3 text-sm text-white/70">
+                                Connect your wallet to begin.
+                            </div>
+                        ) : needsCorrectChain ? (
+                            <button
+                                type="button"
+                                onClick={() => switchChainAsync({ chainId: selectedChainId })}
+                                disabled={isSwitching}
+                                className="w-full rounded-2xl bg-[rgba(212,175,55,0.95)] px-4 py-3 text-sm font-semibold text-black hover:bg-[rgba(212,175,55,0.85)] disabled:opacity-60 transition"
+                            >
+                                {isSwitching ? "Switching…" : `Switch to ${selectedChainName}`}
+                            </button>
+                        ) : quoteError ? (
+                            <div className="rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                                {quoteError}
+                            </div>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={needsApproval ? approve : swap}
+                                disabled={primaryDisabled}
+                                className="w-full rounded-2xl bg-[rgba(255,222,85,0.98)] px-4 py-3 text-sm font-semibold text-black shadow-[0_12px_25px_-12px_rgba(255,222,85,0.9)] hover:bg-[rgba(255,210,65,0.98)] disabled:opacity-60 transition"
+                            >
+                                {primaryLabel}
+                            </button>
+                        )}
+
+                        {insufficientBalance && walletOnSelectedChain && (
+                            <div className="text-center text-xs text-red-300/90">
+                                Amount exceeds your {sellToken.symbol} balance.
+                            </div>
+                        )}
+                    </>
+                ) : activeTab === "bridge" ? (
+                    <BridgeTab selectedChainId={selectedChainId} onChainChange={pickChain} />
+                ) : (
+                    <TransactionsPanel key={txHistoryVersion} walletAddress={address} selectedChainId={selectedChainId} />
+                )}
             </div>
+
+            {isSwapSupported && activeTab === "swap" && (
+                <TrendingTokens
+                    chainId={selectedChainId}
+                    onSelectToken={onSelectTrendingToken}
+                    availableTokens={availableTokens.map(t => t.symbol)}
+                />
+            )}
+
+            <div className="mt-5 grid grid-cols-3 gap-3 text-center">
+                {[
+                    { icon: "⚡", label: "Best Price", desc: "0x aggregates DEX liquidity for the best rate every time" },
+                    { icon: "🛡️", label: "Non-Custodial", desc: "Your wallet, your keys — we never hold your funds" },
+                    { icon: "🌐", label: "Multi-Chain", desc: "Swap on 8 chains including Base, Ethereum, Cronos, XRP, Polygon, BNB, Arbitrum & Optimism" },
+                ].map(({ icon, label, desc }) => (
+                    <div key={label} className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-4 flex flex-col items-center gap-1.5">
+                        <span className="text-xl">{icon}</span>
+                        <span className="text-[11px] font-semibold text-[rgba(212,175,55,0.9)]">{label}</span>
+                        <span className="text-[10px] leading-relaxed text-white/40">{desc}</span>
+                    </div>
+                ))}
+            </div>
+
+            <p className="mt-4 border-t border-white/8 pt-4 text-center text-[10px] leading-relaxed text-white/35 sm:text-[11px]">
+                Want to add your coin?{" "}
+                <a href="https://thehouseofjoshi.com/contact" target="_blank" rel="noopener noreferrer" className="text-[rgba(212,175,55,0.6)] hover:text-[rgba(212,175,55,0.9)] transition">
+                    Contact us
+                </a>
+                {" "} - Powered by{" "}
+                <a href="https://0x.org" target="_blank" rel="noopener noreferrer" className="text-[rgba(212,175,55,0.6)] hover:text-[rgba(212,175,55,0.9)] transition">
+                    0x Protocol
+                </a>
+                {" "} - A 1% house fee applies to all swaps
+            </p>
         </div>
+    );
 }
