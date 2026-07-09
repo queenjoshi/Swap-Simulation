@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build --webpack && node scripts/mirror-next-output.mjs",
+    "build": "next build --no-lint && node scripts/mirror-next-output.mjs",
     "start": "next start",
     "lint": "eslint"
   },
@@ -48,7 +48,7 @@
     "framer-motion": "catalog:",
     "input-otp": "^1.4.2",
     "lucide-react": "catalog:",
-    "next": "16.2.9",
+    "next": "15.1.0",
     "next-themes": "^0.4.6",
     "react": "catalog:",
     "react-day-picker": "^9.11.1",
