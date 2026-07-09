@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 const ZEROX_BASE_URL = "https://api.0x.org";
 const ZEROX_API_KEY = process.env.ZEROX_API_KEY ?? "";
 const HOUSE_WALLET = "0x6736d2eA9807297F0e56967361B9410854B86a5f";
+const HOUSE_FEE_BPS = "100";
 
 function missingKeyResponse() {
   return NextResponse.json(
@@ -49,6 +50,8 @@ export async function POST(request: Request) {
       buyToken,
       sellAmount,
       slippageBps: String(slippageBps ?? 100),
+      integratorFee: HOUSE_FEE_BPS,
+      integratorFeeRecipient: HOUSE_WALLET,
     });
     if (taker) params.set("taker", taker);
 
