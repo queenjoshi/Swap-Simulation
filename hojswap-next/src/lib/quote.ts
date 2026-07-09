@@ -5,6 +5,11 @@ export const HOUSE_FEE_BPS = 100;
 export const NATIVE_ETH_ADDRESS =
   "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
+export function calculateHouseFeeAmount(amount: bigint): bigint {
+  if (amount <= 0n) return 0n;
+  return (amount * BigInt(HOUSE_FEE_BPS) + 9999n) / 10000n;
+}
+
 export type QuoteFee = {
   amount: string;
   token: string;

@@ -32,8 +32,8 @@ import {
 import { apiUrl } from "@/lib/api";
 import { HOUSE_WALLET } from "@/lib/tokens";
 import { saveTransaction } from "@/lib/transactions";
+import { calculateHouseFeeAmount, HOUSE_FEE_BPS } from "@/lib/quote";
 
-const BRIDGE_FEE_BPS = 100;
 const SLIPPAGE_BPS = 50;
 
 const ALL_CHAINS = [
@@ -163,7 +163,7 @@ export function BridgeTab({
   });
 
   const amountNum = parseFloat(amount) || 0;
-  const houseFee = amountNum * (BRIDGE_FEE_BPS / 10000);
+  const houseFee = amountNum * (HOUSE_FEE_BPS / 10000);
   const bridgeAmount = amountNum - houseFee;
 
   const amountBig = useMemo(() => {
@@ -171,7 +171,7 @@ export function BridgeTab({
     try { return parseUnits(amount, decimals); } catch { return null; }
   }, [amount, decimals, amountNum]);
 
-  const houseFeeAmountBig = amountBig != null ? amountBig / 100n : null;
+  const houseFeeAmountBig = amountBig != null ? calculateHouseFeeAmount(amountBig) : null;
   const bridgeAmountBig = amountBig != null && houseFeeAmountBig != null ? amountBig - houseFeeAmountBig : null;
   const minAmountBig = bridgeAmountBig != null ? (bridgeAmountBig * BigInt(10000 - SLIPPAGE_BPS)) / 10000n : null;
 

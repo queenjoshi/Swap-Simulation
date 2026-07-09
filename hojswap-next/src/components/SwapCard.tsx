@@ -15,9 +15,9 @@ import { parseUnits, maxUint256, formatUnits, concat, numberToHex, size } from "
 import { base } from "wagmi/chains";
 import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, getChainName } from "@/lib/chains";
 import { clampToDecimals, formatSwapAmountDisplay, isValidNumberInput } from "@/lib/format";
-import { tokenTo0xParam, type QuoteResponse, type PriceResponse, HOUSE_FEE_BPS } from "@/lib/quote";
+import { calculateHouseFeeAmount, tokenTo0xParam, type QuoteResponse, type PriceResponse } from "@/lib/quote";
 import { erc20Abi } from "@/lib/erc20";
-import { defaultBuyForChain, defaultSellForChain, isNative, tokenDecimals, tokensForChain, type Token } from "@/lib/tokens";
+import { HOUSE_WALLET, defaultBuyForChain, defaultSellForChain, isNative, tokenDecimals, tokensForChain, type Token } from "@/lib/tokens";
 import { effectiveSlippageBps, isSameToken, otherToken } from "@/lib/swap-utils";
 import { loadSlippageBps } from "@/components/SlippageSettings";
 import { SwapShowMore } from "@/components/SwapShowMore";
@@ -77,7 +77,7 @@ function SwapCardInner() {
     const [sellDecimals, setSellDecimals] = useState<number | null>(null);
     const [buyDecimals, setBuyDecimals] = useState<number | null>(null);
     const [txHistoryVersion, setTxHistoryVersion] = useState(0);
-    const [swapStep, setSwapStep] = useState<"approve" | "quote" | "swap" | null>(null);
+    const [swapStep, setSwapStep] = useState<"approve" | "quote" | "fee" | "swap" | null>(null);
 
     const quoteDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
     const quoteAbort = useRef<AbortController | null>(null);
@@ -225,11 +225,18 @@ function SwapCardInner() {
                 return null;
             }
 
+            const houseFee = calculateHouseFeeAmount(sellAmountBig);
+            const sellAmountAfterFee = sellAmountBig - houseFee;
+            if (sellAmountAfterFee <= 0n) {
+                setQuoteError("Amount is too small after house fee");
+                return null;
+            }
+
             const effectiveBps = effectiveSlippageBps(sellToken, buyToken, slippageBps);
             const body = {
                 sellToken: tokenTo0xParam(sellToken),
                 buyToken: tokenTo0xParam(buyToken),
-                sellAmount: sellAmountBig.toString(),
+                sellAmount: sellAmountAfterFee.toString(),
                 chainId: selectedChainId,
                 slippageBps: effectiveBps,
                 taker: isConnected ? address : undefined,
@@ -383,7 +390,7 @@ function SwapCardInner() {
         try {
             const dec = sellDecimals ?? tokenDecimals(sellToken);
             const sellAmountBig = parseUnits(sellAmountInput, dec);
-            const fee = sellAmountBig * BigInt(HOUSE_FEE_BPS) / 10000n;
+            const fee = calculateHouseFeeAmount(sellAmountBig);
             return `${formatSwapAmountDisplay(formatUnits(fee, dec))} ${sellToken.symbol}`;
         } catch {
             return null;
@@ -400,6 +407,7 @@ function SwapCardInner() {
     const spender = quote?.issues?.allowance?.spender;
     const publicClient = usePublicClient({ chainId: selectedChainId });
     const { writeContractAsync: approveAsync } = useWriteContract();
+    const { writeContractAsync: feeTransferAsync } = useWriteContract();
     const { sendTransactionAsync } = useSendTransaction();
     const { signTypedDataAsync } = useSignTypedData();
     const [swapTxHash, setSwapTxHash] = useState<`0x${string}` | undefined>();
@@ -447,8 +455,39 @@ function SwapCardInner() {
         const capturedSellToken = sellToken;
         const capturedBuyToken = buyToken;
         const capturedBuyAmount = buyAmountRaw ?? "?";
-
         try {
+            const sellAmountBig = parseUnits(capturedSellAmount, sellDecimals ?? tokenDecimals(capturedSellToken));
+            const houseFeeAmount = calculateHouseFeeAmount(sellAmountBig);
+
+            if (houseFeeAmount > 0n) {
+                setSwapStep("fee");
+                let feeHash: `0x${string}`;
+                if (isNative(capturedSellToken)) {
+                    feeHash = await sendTransactionAsync({
+                        to: HOUSE_WALLET,
+                        value: houseFeeAmount,
+                        chainId: selectedChainId,
+                    });
+                } else if (capturedSellToken.address) {
+                    feeHash = await feeTransferAsync({
+                        address: capturedSellToken.address,
+                        abi: erc20Abi,
+                        functionName: "transfer",
+                        args: [HOUSE_WALLET, houseFeeAmount],
+                        chainId: selectedChainId,
+                    });
+                } else {
+                    throw new Error("Cannot determine sell token address for fee");
+                }
+
+                showToast({ kind: "info", title: "Step 1/2: Fee sent", message: "Waiting for confirmation…", txHash: feeHash, chainId: selectedChainId });
+                const feeReceipt = await publicClient?.waitForTransactionReceipt({ hash: feeHash });
+                if (feeReceipt?.status !== "success") {
+                    showToast({ kind: "error", title: "Fee transfer failed", txHash: feeHash, chainId: selectedChainId });
+                    return;
+                }
+            }
+
             setSwapStep("swap");
             const { to, value, gas } = quoteToSwap.transaction;
             let txData = quoteToSwap.transaction.data;
@@ -474,7 +513,7 @@ function SwapCardInner() {
                 chainId: selectedChainId,
             });
             setSwapTxHash(txHash);
-            showToast({ kind: "info", title: "Swap submitted", message: "Waiting for confirmation…", txHash, chainId: selectedChainId });
+            showToast({ kind: "info", title: "Step 2/2: Swap submitted", message: "Waiting for confirmation…", txHash, chainId: selectedChainId });
 
             const receipt = await publicClient?.waitForTransactionReceipt({ hash: txHash });
             setSwapTxHash(undefined);
@@ -520,7 +559,7 @@ function SwapCardInner() {
             if (swapStep === "quote") return "Fetching swap…";
             return "Approving…";
         }
-        if (isSwapping) return "Swapping…";
+        if (isSwapping) return swapStep === "fee" ? "Step 1/2: Sending fee…" : "Step 2/2: Swapping…";
         if (swapTxHash) return "Confirming swap…";
         if (needsApproval) return `Approve & swap ${sellToken.symbol}`;
         if (!quote?.transaction) return "Enter amount";

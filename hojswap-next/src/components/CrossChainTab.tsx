@@ -20,8 +20,8 @@ import { type LiFiQuote } from "@/lib/lifi";
 import { apiUrl } from "@/lib/api";
 import { HOUSE_WALLET } from "@/lib/tokens";
 import { saveTransaction } from "@/lib/transactions";
+import { calculateHouseFeeAmount } from "@/lib/quote";
 
-const BRIDGE_FEE_BPS = 100;
 const DUMMY_ADDRESS = "0x0000000000000000000000000000000000000001" as const;
 
 type XToken = { symbol: string; address: string; decimals: number };
@@ -144,7 +144,7 @@ export function CrossChainTab() {
     try { return parseUnits(amount, fromToken.decimals); } catch { return null; }
   }, [amount, fromToken.decimals]);
 
-  const houseFeeAmountBig = amountBig != null ? amountBig / 100n : null;
+  const houseFeeAmountBig = amountBig != null ? calculateHouseFeeAmount(amountBig) : null;
   const bridgeAmountBig   = amountBig != null && houseFeeAmountBig != null ? amountBig - houseFeeAmountBig : null;
   const houseFeeDisplay   = amountBig ? formatCompactNumber(parseFloat(formatUnits(houseFeeAmountBig!, fromToken.decimals)), 6) : null;
 
