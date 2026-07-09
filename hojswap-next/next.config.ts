@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const appDir = dirname(fileURLToPath(import.meta.url));
+const workspaceRoot = resolve(appDir, "..");
 
 const nextConfig: NextConfig = {
-  outputFileTracingRoot: process.cwd(),
+  outputFileTracingRoot: workspaceRoot,
   webpack: (config, { webpack }) => {
     config.plugins.push(
       new webpack.IgnorePlugin({
