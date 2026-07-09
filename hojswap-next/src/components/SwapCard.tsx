@@ -17,7 +17,7 @@ import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, getChainName } from "@/lib/cha
 import { clampToDecimals, formatSwapAmountDisplay, isValidNumberInput } from "@/lib/format";
 import { tokenTo0xParam, type QuoteResponse, type PriceResponse, HOUSE_FEE_BPS } from "@/lib/quote";
 import { erc20Abi } from "@/lib/erc20";
-import { defaultBuyForChain, defaultSellForChain, isNative, tokenDecimals, tokensForChain, type Token, HOUSE_WALLET } from "@/lib/tokens";
+import { defaultBuyForChain, defaultSellForChain, isNative, tokenDecimals, tokensForChain, type Token } from "@/lib/tokens";
 import { effectiveSlippageBps, isSameToken, otherToken } from "@/lib/swap-utils";
 import { loadSlippageBps } from "@/components/SlippageSettings";
 import { SwapShowMore } from "@/components/SwapShowMore";
@@ -77,8 +77,7 @@ function SwapCardInner() {
     const [sellDecimals, setSellDecimals] = useState<number | null>(null);
     const [buyDecimals, setBuyDecimals] = useState<number | null>(null);
     const [txHistoryVersion, setTxHistoryVersion] = useState(0);
-    const [quoteVersion, setQuoteVersion] = useState(0);
-    const [swapStep, setSwapStep] = useState<"fee" | "swap" | null>(null);
+    const [swapStep, setSwapStep] = useState<"approve" | "quote" | "swap" | null>(null);
 
     const quoteDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
     const quoteAbort = useRef<AbortController | null>(null);
@@ -213,6 +212,103 @@ function SwapCardInner() {
         return () => { cancelled = true; };
     }, [sellToken, buyToken]);
 
+    const fetchQuoteForTrade = useCallback(
+        async (signal?: AbortSignal): Promise<QuoteResponse | null> => {
+            if (!sellAmountInput || Number(sellAmountInput) === 0) return null;
+
+            const dec = sellDecimals ?? tokenDecimals(sellToken);
+            let sellAmountBig: bigint;
+            try {
+                sellAmountBig = parseUnits(sellAmountInput, dec);
+            } catch {
+                setQuoteError("Invalid amount");
+                return null;
+            }
+
+            const effectiveBps = effectiveSlippageBps(sellToken, buyToken, slippageBps);
+            const body = {
+                sellToken: tokenTo0xParam(sellToken),
+                buyToken: tokenTo0xParam(buyToken),
+                sellAmount: sellAmountBig.toString(),
+                chainId: selectedChainId,
+                slippageBps: effectiveBps,
+                taker: isConnected ? address : undefined,
+            };
+
+            const fetchOpts = (b: object) => ({
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(b),
+                signal,
+            });
+
+            if (!isConnected) {
+                const priceRes = await fetch("/api/price", fetchOpts(body));
+                const priceData = await priceRes.json().catch(() => null) as PriceResponse | null;
+                setApiKeyError(null);
+                setQuote(null);
+                if (priceRes.status === 503) {
+                    const err = (priceData as any)?.error as string;
+                    if (err === "api_key_missing") setApiKeyError("api_key_missing");
+                    else if (err === "api_key_invalid") setApiKeyError("api_key_invalid");
+                    setPrice(null);
+                } else if (!priceRes.ok || !priceData) {
+                    setQuoteError((priceData as any)?.reason ?? (priceData as any)?.error ?? "Failed to fetch price");
+                    setPrice(null);
+                } else {
+                    setQuoteError(null);
+                    setPrice(priceData);
+                }
+                return null;
+            }
+
+            const [quoteRes, priceRes] = await Promise.all([
+                fetch("/api/quote", fetchOpts(body)),
+                fetch("/api/price", fetchOpts(body)),
+            ]);
+
+            const [quoteData, priceData] = (await Promise.all([
+                quoteRes.json().catch(() => null),
+                priceRes.json().catch(() => null),
+            ])) as [QuoteResponse & { error?: string; reason?: string } | null, PriceResponse | null];
+
+            if (quoteRes.status === 503) {
+                const err = (quoteData as any)?.error as string;
+                if (err === "api_key_missing") setApiKeyError("api_key_missing");
+                else if (err === "api_key_invalid") setApiKeyError("api_key_invalid");
+                setQuoteError(null);
+                setQuote(null);
+                setPrice(null);
+                return null;
+            }
+
+            if (!quoteRes.ok) {
+                setApiKeyError(null);
+                setQuoteError(
+                    (quoteData as any)?.reason ?? (quoteData as any)?.error ?? quoteRes.statusText ?? "Failed to fetch quote",
+                );
+                setQuote(null);
+                setPrice(null);
+                return null;
+            }
+
+            if (!quoteData) {
+                setApiKeyError(null);
+                setQuoteError("Failed to parse quote response");
+                setQuote(null);
+                setPrice(null);
+                return null;
+            }
+
+            setApiKeyError(null);
+            setQuote(quoteData);
+            setQuoteError(null);
+            setPrice(priceRes.ok ? priceData : null);
+            return quoteData;
+        },
+        [sellAmountInput, sellDecimals, sellToken, buyToken, slippageBps, selectedChainId, isConnected, address],
+    );
+
     useEffect(() => {
         if (quoteDebounce.current) clearTimeout(quoteDebounce.current);
         if (!sellAmountInput || Number(sellAmountInput) === 0) {
@@ -229,89 +325,8 @@ function SwapCardInner() {
             const signal = quoteAbort.current.signal;
             setQuoteError(null);
             setApiKeyError(null);
-            const dec = sellDecimals ?? tokenDecimals(sellToken);
-            let sellAmountBig: bigint;
             try {
-                sellAmountBig = parseUnits(sellAmountInput, dec);
-            } catch {
-                setIsQuoting(false);
-                setQuoteError("Invalid amount");
-                return;
-            }
-            const effectiveBps = effectiveSlippageBps(sellToken, buyToken, slippageBps);
-            // Quote for 99% — 1% is sent separately as house fee
-            const houseFee = sellAmountBig * BigInt(HOUSE_FEE_BPS) / 10000n;
-            const sellAmountAfterFee = sellAmountBig - houseFee;
-            const body = {
-                sellToken: tokenTo0xParam(sellToken),
-                buyToken: tokenTo0xParam(buyToken),
-                sellAmount: sellAmountAfterFee.toString(),
-                chainId: selectedChainId,
-                slippageBps: effectiveBps,
-                taker: isConnected ? address : undefined,
-            };
-            try {
-                const fetchOpts = (b: object) => ({
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(b),
-                    signal,
-                });
-
-                if (!isConnected) {
-                    const priceRes = await fetch("/api/price", fetchOpts(body));
-                    const priceData = await priceRes.json().catch(() => null) as PriceResponse | null;
-                    setApiKeyError(null);
-                    setQuote(null);
-                    if (priceRes.status === 503) {
-                        const err = (priceData as any)?.error as string;
-                        if (err === "api_key_missing") setApiKeyError("api_key_missing");
-                        else if (err === "api_key_invalid") setApiKeyError("api_key_invalid");
-                        setPrice(null);
-                    } else if (!priceRes.ok || !priceData) {
-                        setQuoteError((priceData as any)?.reason ?? (priceData as any)?.error ?? "Failed to fetch price");
-                        setPrice(null);
-                    } else {
-                        setQuoteError(null);
-                        setPrice(priceData);
-                    }
-                } else {
-                    const [quoteRes, priceRes] = await Promise.all([
-                        fetch("/api/quote", fetchOpts(body)),
-                        fetch("/api/price", fetchOpts(body)),
-                    ]);
-
-                    const [quoteData, priceData] = (await Promise.all([
-                        quoteRes.json().catch(() => null),
-                        priceRes.json().catch(() => null),
-                    ])) as [QuoteResponse & { error?: string; reason?: string } | null, PriceResponse | null];
-
-                    if (quoteRes.status === 503) {
-                        const err = (quoteData as any)?.error as string;
-                        if (err === "api_key_missing") setApiKeyError("api_key_missing");
-                        else if (err === "api_key_invalid") setApiKeyError("api_key_invalid");
-                        setQuoteError(null);
-                        setQuote(null);
-                        setPrice(null);
-                    } else if (!quoteRes.ok) {
-                        setApiKeyError(null);
-                        setQuoteError(
-                            (quoteData as any)?.reason ?? (quoteData as any)?.error ?? quoteRes.statusText ?? "Failed to fetch quote",
-                        );
-                        setQuote(null);
-                        setPrice(null);
-                    } else if (!quoteData) {
-                        setApiKeyError(null);
-                        setQuoteError("Failed to parse quote response");
-                        setQuote(null);
-                        setPrice(null);
-                    } else {
-                        setApiKeyError(null);
-                        setQuote(quoteData);
-                        setQuoteError(null);
-                        setPrice(priceRes.ok ? priceData : null);
-                    }
-                }
+                await fetchQuoteForTrade(signal);
             } catch (err: unknown) {
                 if (err instanceof Error && err.name === "AbortError") return;
                 console.error("Quote fetch error:", err);
@@ -323,7 +338,7 @@ function SwapCardInner() {
             }
         }, DEBOUNCE_MS);
         return () => { if (quoteDebounce.current) clearTimeout(quoteDebounce.current); };
-    }, [sellAmountInput, sellToken, buyToken, selectedChainId, slippageBps, sellDecimals, isConnected, address, quoteVersion]);
+    }, [sellAmountInput, fetchQuoteForTrade]);
 
     const buyAmountRaw = useMemo(() => {
         const raw = quote?.buyAmount ?? price?.buyAmount;
@@ -385,16 +400,16 @@ function SwapCardInner() {
     const spender = quote?.issues?.allowance?.spender;
     const publicClient = usePublicClient({ chainId: selectedChainId });
     const { writeContractAsync: approveAsync } = useWriteContract();
-    const { writeContractAsync: feeTransferAsync } = useWriteContract();
     const { sendTransactionAsync } = useSendTransaction();
     const { signTypedDataAsync } = useSignTypedData();
     const [swapTxHash, setSwapTxHash] = useState<`0x${string}` | undefined>();
     const [isSwapping, setIsSwapping] = useState(false);
     const [isApproving, setIsApproving] = useState(false);
 
-    async function approve() {
+    async function approveAndSwap() {
         if (!sellToken.address || !spender) return;
         setIsApproving(true);
+        setSwapStep("approve");
         try {
             const hash = await approveAsync({
                 address: sellToken.address,
@@ -405,18 +420,26 @@ function SwapCardInner() {
             });
             showToast({ kind: "info", title: "Approval submitted", message: "Waiting for confirmation…" });
             await publicClient?.waitForTransactionReceipt({ hash });
-            showToast({ kind: "success", title: "Approval confirmed", message: "Fetching updated quote…" });
-            setQuoteVersion((v) => v + 1);
+            showToast({ kind: "success", title: "Approval confirmed", message: "Continuing to swap…" });
+            setSwapStep("quote");
+            const freshQuote = await fetchQuoteForTrade();
+            if (freshQuote?.transaction) {
+                setIsApproving(false);
+                await swap(freshQuote);
+            } else {
+                showToast({ kind: "error", title: "Swap unavailable", message: "Approval succeeded, but the updated quote is not ready. Try swap again." });
+            }
         } catch (e: any) {
             if (!e?.message?.includes("User rejected"))
                 showToast({ kind: "error", title: "Approval failed", message: e?.shortMessage ?? e?.message ?? String(e) });
         } finally {
             setIsApproving(false);
+            setSwapStep(null);
         }
     }
 
-    async function swap() {
-        if (!quote?.transaction) return;
+    async function swap(quoteToSwap: QuoteResponse = quote as QuoteResponse) {
+        if (!quoteToSwap?.transaction) return;
         setIsSwapping(true);
 
         // Capture before any state changes
@@ -424,16 +447,14 @@ function SwapCardInner() {
         const capturedSellToken = sellToken;
         const capturedBuyToken = buyToken;
         const capturedBuyAmount = buyAmountRaw ?? "?";
-        const dec = sellDecimals ?? tokenDecimals(sellToken);
 
         try {
-            // Step 1 — execute the swap (quoted for 99% of sell amount)
             setSwapStep("swap");
-            const { to, value, gas } = quote.transaction;
-            let txData = quote.transaction.data;
+            const { to, value, gas } = quoteToSwap.transaction;
+            let txData = quoteToSwap.transaction.data;
 
-            if (quote.permit2?.eip712) {
-                const { types, domain, message, primaryType } = quote.permit2.eip712;
+            if (quoteToSwap.permit2?.eip712) {
+                const { types, domain, message, primaryType } = quoteToSwap.permit2.eip712;
                 const { EIP712Domain: _domain, ...typesWithoutDomain } = types as any;
                 const signature = await signTypedDataAsync({
                     types: typesWithoutDomain,
@@ -453,9 +474,8 @@ function SwapCardInner() {
                 chainId: selectedChainId,
             });
             setSwapTxHash(txHash);
-            showToast({ kind: "info", title: "Step 1/2: Swap submitted", message: "Waiting for confirmation…", txHash, chainId: selectedChainId });
+            showToast({ kind: "info", title: "Swap submitted", message: "Waiting for confirmation…", txHash, chainId: selectedChainId });
 
-            // Wait for swap receipt inline
             const receipt = await publicClient?.waitForTransactionReceipt({ hash: txHash });
             setSwapTxHash(undefined);
 
@@ -483,35 +503,6 @@ function SwapCardInner() {
                 setSellAmountInput("");
                 setQuote(null);
                 setPrice(null);
-
-                // Step 2 — collect 1% fee only after confirmed swap success
-                setSwapStep("fee");
-                const sellAmountBig = parseUnits(capturedSellAmount, dec);
-                const houseFeeAmount = sellAmountBig * BigInt(HOUSE_FEE_BPS) / 10000n;
-
-                try {
-                    let feeHash: `0x${string}`;
-                    if (isNative(capturedSellToken)) {
-                        feeHash = await sendTransactionAsync({ to: HOUSE_WALLET, value: houseFeeAmount, chainId: selectedChainId });
-                    } else if (capturedSellToken.address) {
-                        feeHash = await feeTransferAsync({
-                            address: capturedSellToken.address,
-                            abi: erc20Abi,
-                            functionName: "transfer",
-                            args: [HOUSE_WALLET, houseFeeAmount],
-                            chainId: selectedChainId,
-                        });
-                    } else {
-                        throw new Error("Cannot determine sell token address for fee");
-                    }
-                    showToast({ kind: "info", title: "Step 2/2: Fee transfer submitted", message: "Waiting for confirmation…", txHash: feeHash, chainId: selectedChainId });
-                    await publicClient?.waitForTransactionReceipt({ hash: feeHash });
-                    showToast({ kind: "success", title: "Fee collected ✓", txHash: feeHash, chainId: selectedChainId });
-                } catch (feeErr: any) {
-                    // Fee failure is non-fatal — swap already succeeded
-                    if (!feeErr?.message?.includes("User rejected"))
-                        showToast({ kind: "error", title: "Fee collection failed", message: feeErr?.shortMessage ?? feeErr?.message ?? String(feeErr) });
-                }
             }
         } catch (e: any) {
             if (!e?.message?.includes("User rejected"))
@@ -525,13 +516,16 @@ function SwapCardInner() {
     const primaryLabel = useMemo(() => {
         if (!sellAmountInput || Number(sellAmountInput) === 0) return "Enter amount";
         if (isQuoting) return "Getting quote…";
-        if (isApproving) return "Approving…";
-        if (isSwapping) return swapStep === "fee" ? "Step 2/2: Sending fee…" : "Step 1/2: Swapping…";
+        if (isApproving) {
+            if (swapStep === "quote") return "Fetching swap…";
+            return "Approving…";
+        }
+        if (isSwapping) return "Swapping…";
         if (swapTxHash) return "Confirming swap…";
-        if (needsApproval) return `Approve ${sellToken.symbol}`;
+        if (needsApproval) return `Approve & swap ${sellToken.symbol}`;
         if (!quote?.transaction) return "Enter amount";
         return `Swap ${sellToken.symbol} → ${buyToken.symbol}`;
-    }, [sellAmountInput, isQuoting, isApproving, isSwapping, swapTxHash, needsApproval, sellToken.symbol, buyToken.symbol, quote?.transaction]);
+    }, [sellAmountInput, isQuoting, isApproving, swapStep, isSwapping, swapTxHash, needsApproval, sellToken.symbol, buyToken.symbol, quote?.transaction]);
 
     const primaryDisabled =
         !sellAmountInput || Number(sellAmountInput) === 0 ||
@@ -760,7 +754,7 @@ function SwapCardInner() {
                         ) : (
                             <button
                                 type="button"
-                                onClick={needsApproval ? approve : swap}
+                                onClick={needsApproval ? approveAndSwap : () => swap()}
                                 disabled={primaryDisabled}
                                 className="w-full rounded-2xl bg-[rgba(255,222,85,0.98)] px-4 py-3 text-sm font-semibold text-black shadow-[0_12px_25px_-12px_rgba(255,222,85,0.9)] hover:bg-[rgba(255,210,65,0.98)] disabled:opacity-60 transition"
                             >
