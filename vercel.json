@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "pnpm --filter hojswap-next run build && rm -rf .next && cp -R hojswap-next/.next .next",
+  "buildCommand": "pnpm --filter hojswap-next run build",
   "installCommand": "pnpm install --frozen-lockfile",
-  "outputDirectory": ".next"
+  "outputDirectory": "hojswap-next/.next"
 }
