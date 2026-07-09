@@ -1,4 +1,4 @@
-import { cpSync, existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -19,19 +19,38 @@ if (!existsSync(join(source, "package.json"))) {
 rmSync(target, { force: true, recursive: true });
 cpSync(source, target, { recursive: true });
 
-for (const file of ["next-server.js.nft.json", "next-minimal-server.js.nft.json"]) {
-  const traceFile = join(target, file);
-  if (!existsSync(traceFile)) continue;
-
+function normalizeTraceFile(traceFile) {
   const trace = JSON.parse(readFileSync(traceFile, "utf8"));
-  if (Array.isArray(trace.files)) {
-    trace.files = trace.files.map((entry) =>
-      typeof entry === "string" && entry.startsWith("../../node_modules/")
-        ? entry.replace("../../node_modules/", "../node_modules/")
-        : entry,
-    );
+  if (!Array.isArray(trace.files)) return;
+
+  let changed = false;
+  trace.files = trace.files.map((entry) => {
+    if (typeof entry !== "string") return entry;
+    const nodeModulesIndex = entry.indexOf("node_modules/");
+    if (nodeModulesIndex === -1) return entry;
+
+    const normalized = `../${entry.slice(nodeModulesIndex)}`;
+    if (normalized !== entry) changed = true;
+    return normalized;
+  });
+
+  if (changed) {
     writeFileSync(traceFile, `${JSON.stringify(trace)}\n`);
   }
 }
+
+function normalizeTraceFiles(dir) {
+  for (const entry of readdirSync(dir)) {
+    const path = join(dir, entry);
+    const stat = statSync(path);
+    if (stat.isDirectory()) {
+      normalizeTraceFiles(path);
+    } else if (path.endsWith(".nft.json")) {
+      normalizeTraceFile(path);
+    }
+  }
+}
+
+normalizeTraceFiles(target);
 
 process.stdout.write(`Mirrored Next output to ${target}\n`);
