@@ -212,7 +212,7 @@ export const TOKENS: Token[] = [
     name: "FLOKI",
     address: getAddress("0xcf0c122c6b73ff809c693db761e7baebe62b6a2e"),
     chainId: mainnet.id,
-    decimals: 18,
+    decimals: 9,
   },
 
   // ─── Cronos ─────────────────────────────────────────────
@@ -318,7 +318,7 @@ export const TOKENS: Token[] = [
   {
     symbol: "FDUSD",
     name: "First Digital USD",
-    address: getAddress("0xc5f0f7b66764F6ec8C8Dff7BA684102245B16472"),
+    address: getAddress("0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409"),
     chainId: bsc.id,
     decimals: 18,
   },

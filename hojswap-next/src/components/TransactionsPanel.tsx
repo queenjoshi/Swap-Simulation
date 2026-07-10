@@ -56,16 +56,21 @@ const PAGE_SIZE = 50;
 export function TransactionsPanel({
   walletAddress,
   selectedChainId,
+  variant = "embedded",
+  scope = "mixed",
 }: {
   walletAddress?: string;
   selectedChainId?: number;
+  variant?: "embedded" | "page";
+  scope?: "mixed" | "swap";
 }) {
   const [localTxs] = useState<SwapTransaction[]>(() => loadTransactions());
   const [onChain, setOnChain] = useState<ExplorerHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [chainFilter, setChainFilter] = useState<number>(0);
+  const [chainFilter, setChainFilter] = useState<number>(selectedChainId ?? 0);
   const [page, setPage] = useState(1);
+  const isPage = variant === "page";
 
   useEffect(() => {
     let cancelled = false;
@@ -76,7 +81,7 @@ export function TransactionsPanel({
         const requests: Promise<Response>[] = [];
         for (const cid of SUPPORTED_CHAIN_IDS) {
           requests.push(fetch(`/api/transactions?chainId=${cid}&source=house`));
-          if (walletAddress) {
+          if (scope === "mixed" && walletAddress) {
             requests.push(fetch(`/api/transactions?chainId=${cid}&source=wallet&address=${walletAddress}`));
           }
         }
@@ -87,31 +92,31 @@ export function TransactionsPanel({
           const data = (await res.json()) as { items?: ExplorerHistoryItem[] };
           if (Array.isArray(data.items)) items.push(...data.items);
         }
-        if (!cancelled) setOnChain(items);
+        if (!cancelled) setOnChain(scope === "swap" ? items.filter((item) => item.kind === "fee") : items);
       } catch {
         if (!cancelled)
-          setLoadError("Could not load on-chain history. Your saved swaps are still shown below.");
+          setLoadError("Could not load on-chain swap history. Your saved swaps are still shown below.");
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
     void load();
     return () => { cancelled = true; };
-  }, [walletAddress]);
+  }, [scope, walletAddress]);
 
   const allDisplayTxs = useMemo(() => {
     const byHash = new Map<string, DisplayTx>();
     for (const item of onChain) {
-      const key = `${item.chainId}:${item.hash}:${item.kind}`;
+      const key = scope === "swap" ? `${item.chainId}:${item.hash}` : `${item.chainId}:${item.hash}:${item.kind}`;
       if (!byHash.has(key)) byHash.set(key, toDisplayFromOnChain(item));
     }
     for (const tx of localTxs) {
       if (tx.hash === "N/A") continue;
-      const key = `${tx.chainId}:${tx.hash}:local`;
+      const key = scope === "swap" ? `${tx.chainId}:${tx.hash}` : `${tx.chainId}:${tx.hash}:local`;
       byHash.set(key, toDisplayFromLocal(tx));
     }
     return [...byHash.values()].sort((a, b) => b.timestamp - a.timestamp);
-  }, [localTxs, onChain]);
+  }, [localTxs, onChain, scope]);
 
   const filtered = useMemo(
     () => (chainFilter === 0 ? allDisplayTxs : allDisplayTxs.filter((t) => t.chainId === chainFilter)),
@@ -133,12 +138,12 @@ export function TransactionsPanel({
   const shortHash = (h: string) => `${h.slice(0, 6)}…${h.slice(-4)}`;
 
   return (
-    <div className="hoj-panel rounded-3xl p-4">
+    <div className={`hoj-panel rounded-3xl p-4 ${isPage ? "sm:p-5" : ""}`}>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-white/55">
           {loading
             ? "Loading…"
-            : `${filtered.length.toLocaleString()} transaction${filtered.length !== 1 ? "s" : ""}`}
+            : `${filtered.length.toLocaleString()} transaction${filtered.length !== 1 ? "s" : ""} found`}
         </p>
         <div className="flex flex-wrap gap-1">
           {CHAIN_FILTERS.map(({ id, label }) => (
@@ -173,12 +178,12 @@ export function TransactionsPanel({
       ) : filtered.length === 0 ? (
         <p className="py-4 text-center text-sm text-white/50">
           {chainFilter === 0
-            ? "No transactions found. Complete a swap to see history here."
+            ? "No swap transactions found yet."
             : `No transactions on ${CHAIN_FILTERS.find((c) => c.id === chainFilter)?.label ?? "this chain"}.`}
         </p>
       ) : (
         <>
-          <div className="max-h-[min(520px,65vh)] space-y-2 overflow-y-auto pr-1">
+          <div className={`${isPage ? "space-y-2" : "max-h-[min(520px,65vh)] space-y-2 overflow-y-auto pr-1"}`}>
             {paginated.map((tx) => (
               <div key={tx.id} className="hoj-surface rounded-2xl p-3">
                 <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
@@ -216,7 +221,7 @@ export function TransactionsPanel({
                     title={tx.hash}
                     className="flex items-center gap-1 text-[11px] text-[rgba(212,175,55,0.8)] hover:text-[rgba(212,175,55,1)] hover:underline transition"
                   >
-                    {shortHash(tx.hash)} ↗
+                    {isPage ? `View on ${explorerName(tx.chainId)}` : shortHash(tx.hash)} ↗
                   </a>
                 </div>
               </div>

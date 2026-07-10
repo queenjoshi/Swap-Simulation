@@ -29,6 +29,8 @@ import { TrendingTokens } from "@/components/TrendingTokens";
 import { useToast } from "@/components/Toast";
 import { saveTransaction } from "@/lib/transactions";
 import { useNativeTokenPrice, getNativeSymbol, formatNetworkFee } from "@/lib/gas";
+import { hojswapRouterAbi, tokenToRouterAddress } from "@/lib/hojswap-router";
+import { HOUSE_WALLET } from "@/lib/swap-fee";
 
 const DEBOUNCE_MS = 750;
 type ActiveTab = "swap" | "bridge" | "transactions";
@@ -42,6 +44,7 @@ function SwapCardInner() {
     const { switchChainAsync, isPending: isSwitching } = useSwitchChain();
 
     const [selectedChainId, setSelectedChainId] = useState<number>(base.id);
+    const publicClient = usePublicClient({ chainId: selectedChainId });
     const [activeTab, setActiveTab] = useState<ActiveTab>("swap");
     const [apiKeyError, setApiKeyError] = useState<ApiKeyError>(null);
 
@@ -77,7 +80,7 @@ function SwapCardInner() {
     const [sellDecimals, setSellDecimals] = useState<number | null>(null);
     const [buyDecimals, setBuyDecimals] = useState<number | null>(null);
     const [txHistoryVersion, setTxHistoryVersion] = useState(0);
-    const [swapStep, setSwapStep] = useState<"approve" | "quote" | "swap" | null>(null);
+    const [swapStep, setSwapStep] = useState<"approve" | "quote" | "fee" | "swap" | null>(null);
 
     const quoteDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
     const quoteAbort = useRef<AbortController | null>(null);
@@ -187,6 +190,16 @@ function SwapCardInner() {
             return false;
         }
     }, [sellAmountInput, sellBalanceData, walletOnSelectedChain]);
+
+    const inputSellAmountBig = useMemo(() => {
+        if (!sellAmountInput || Number(sellAmountInput) === 0) return null;
+        try {
+            const dec = sellDecimals ?? tokenDecimals(sellToken);
+            return parseUnits(sellAmountInput, dec);
+        } catch {
+            return null;
+        }
+    }, [sellAmountInput, sellDecimals, sellToken]);
 
     async function fetchDecimals(token: Token): Promise<number | null> {
         if (isNative(token)) return 18;
@@ -390,16 +403,56 @@ function SwapCardInner() {
         }
     }, [sellAmountInput, sellDecimals, sellToken]);
 
-    // 0x v2 returns issues.allowance = { actual, spender } (no 'expected' field).
-    // Its presence (non-null) means the Permit2 contract needs ERC20 approval.
-    const needsApproval = useMemo(() => {
-        if (!quote?.issues?.allowance || isNative(sellToken)) return false;
-        return true;
-    }, [quote?.issues?.allowance, sellToken]);
+    const routerSwap = quote?.hojswapRouter?.enabled ? quote.hojswapRouter : null;
+    const routerAddress = routerSwap?.address;
+    const [routerAllowance, setRouterAllowance] = useState<bigint | null>(null);
 
-    const spender = quote?.issues?.allowance?.spender;
-    const publicClient = usePublicClient({ chainId: selectedChainId });
+    useEffect(() => {
+        setRouterAllowance(null);
+        if (
+            !routerAddress ||
+            !address ||
+            !sellToken.address ||
+            isNative(sellToken) ||
+            !publicClient ||
+            !walletOnSelectedChain
+        ) return;
+
+        let cancelled = false;
+        publicClient
+            .readContract({
+                address: sellToken.address,
+                abi: erc20Abi,
+                functionName: "allowance",
+                args: [address, routerAddress],
+            })
+            .then((allowance) => {
+                if (!cancelled) setRouterAllowance(allowance as bigint);
+            })
+            .catch(() => {
+                if (!cancelled) setRouterAllowance(null);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [routerAddress, address, sellToken, publicClient, walletOnSelectedChain]);
+
+    const permit2Spender = quote?.issues?.allowance?.spender;
+    const approvalSpender = routerAddress ?? permit2Spender;
+
+    const needsApproval = useMemo(() => {
+        if (isNative(sellToken)) return false;
+        if (routerAddress) {
+            if (!inputSellAmountBig || inputSellAmountBig <= 0n) return false;
+            return routerAllowance == null || routerAllowance < inputSellAmountBig;
+        }
+        return !!quote?.issues?.allowance;
+    }, [inputSellAmountBig, quote?.issues?.allowance, routerAddress, routerAllowance, sellToken]);
+
     const { writeContractAsync: approveAsync } = useWriteContract();
+    const { writeContractAsync: writeRouterAsync } = useWriteContract();
+    const { writeContractAsync: writeTokenAsync } = useWriteContract();
     const { sendTransactionAsync } = useSendTransaction();
     const { signTypedDataAsync } = useSignTypedData();
     const [swapTxHash, setSwapTxHash] = useState<`0x${string}` | undefined>();
@@ -407,7 +460,7 @@ function SwapCardInner() {
     const [isApproving, setIsApproving] = useState(false);
 
     async function approveAndSwap() {
-        if (!sellToken.address || !spender) return;
+        if (!sellToken.address || !approvalSpender) return;
         setIsApproving(true);
         setSwapStep("approve");
         try {
@@ -415,11 +468,12 @@ function SwapCardInner() {
                 address: sellToken.address,
                 abi: erc20Abi,
                 functionName: "approve",
-                args: [spender, maxUint256],
+                args: [approvalSpender, maxUint256],
                 chainId: selectedChainId,
             });
             showToast({ kind: "info", title: "Approval submitted", message: "Waiting for confirmation…" });
             await publicClient?.waitForTransactionReceipt({ hash });
+            if (routerAddress) setRouterAllowance(maxUint256);
             showToast({ kind: "success", title: "Approval confirmed", message: "Continuing to swap…" });
             setSwapStep("quote");
             const freshQuote = await fetchQuoteForTrade();
@@ -438,6 +492,53 @@ function SwapCardInner() {
         }
     }
 
+    async function payManualHouseFee(manualHouseFee: NonNullable<QuoteResponse["manualHouseFee"]>, token: Token) {
+        const feeAmount = BigInt(manualHouseFee.amount);
+        if (feeAmount <= 0n) return;
+        const feeTokenAddress = token.address;
+        if (!isNative(token) && !feeTokenAddress) throw new Error("Missing fee token address");
+
+        setSwapStep("fee");
+        showToast({
+            kind: "info",
+            title: "House fee submitted",
+            message: "Step 1/2: waiting for fee confirmation…",
+        });
+
+        const feeHash = isNative(token)
+            ? await sendTransactionAsync({
+                to: manualHouseFee.recipient ?? HOUSE_WALLET,
+                value: feeAmount,
+                chainId: selectedChainId,
+            })
+            : await writeTokenAsync({
+                address: feeTokenAddress as `0x${string}`,
+                abi: erc20Abi,
+                functionName: "transfer",
+                args: [manualHouseFee.recipient ?? HOUSE_WALLET, feeAmount],
+                chainId: selectedChainId,
+            });
+
+        showToast({
+            kind: "info",
+            title: "House fee sent",
+            message: "Waiting for confirmation before swapping…",
+            txHash: feeHash,
+            chainId: selectedChainId,
+        });
+
+        const feeReceipt = await publicClient?.waitForTransactionReceipt({ hash: feeHash });
+        if (feeReceipt?.status !== "success") throw new Error("House fee transaction reverted");
+
+        showToast({
+            kind: "success",
+            title: "House fee confirmed",
+            message: "Step 2/2: continuing to swap…",
+            txHash: feeHash,
+            chainId: selectedChainId,
+        });
+    }
+
     async function swap(quoteToSwap: QuoteResponse = quote as QuoteResponse) {
         if (!quoteToSwap?.transaction) return;
         setIsSwapping(true);
@@ -451,27 +552,80 @@ function SwapCardInner() {
             setSwapStep("swap");
             const { to, value, gas } = quoteToSwap.transaction;
             let txData = quoteToSwap.transaction.data;
+            const router = quoteToSwap.hojswapRouter?.enabled ? quoteToSwap.hojswapRouter : null;
+            const manualHouseFee = !router && quoteToSwap.manualHouseFee?.enabled ? quoteToSwap.manualHouseFee : null;
+            let txHash: `0x${string}`;
 
-            if (quoteToSwap.permit2?.eip712) {
-                const { types, domain, message, primaryType } = quoteToSwap.permit2.eip712;
-                const { EIP712Domain: _domain, ...typesWithoutDomain } = types as any;
-                const signature = await signTypedDataAsync({
-                    types: typesWithoutDomain,
-                    domain: domain as any,
-                    message: message as any,
-                    primaryType,
+            if (router) {
+                if (!address) throw new Error("Connect your wallet before swapping");
+                const sellAmountForRouter = BigInt(router.sellAmount);
+                const minBuyAmount = BigInt(quoteToSwap.minBuyAmount ?? quoteToSwap.buyAmount ?? "0");
+                const buyTokenForRouter = tokenToRouterAddress(capturedBuyToken);
+
+                if (isNative(capturedSellToken)) {
+                    txHash = await writeRouterAsync({
+                        address: router.address,
+                        abi: hojswapRouterAbi,
+                        functionName: "swapExactNative",
+                        args: [{
+                            swapTarget: to,
+                            swapCallData: txData,
+                            buyToken: buyTokenForRouter,
+                            minBuyAmount,
+                            recipient: address,
+                        }],
+                        value: sellAmountForRouter,
+                        chainId: selectedChainId,
+                    });
+                } else {
+                    if (!capturedSellToken.address) throw new Error("Missing sell token address");
+                    if (!router.spender || router.spender === "0x0000000000000000000000000000000000000000") {
+                        throw new Error("Missing allowance spender in router quote");
+                    }
+                    txHash = await writeRouterAsync({
+                        address: router.address,
+                        abi: hojswapRouterAbi,
+                        functionName: "swapExactToken",
+                        args: [{
+                            sellToken: capturedSellToken.address,
+                            sellAmount: sellAmountForRouter,
+                            spender: router.spender,
+                            swapTarget: to,
+                            swapCallData: txData,
+                            buyToken: buyTokenForRouter,
+                            minBuyAmount,
+                            recipient: address,
+                        }],
+                        chainId: selectedChainId,
+                    });
+                }
+            } else {
+                if (quoteToSwap.permit2?.eip712) {
+                    const { types, domain, message, primaryType } = quoteToSwap.permit2.eip712;
+                    const { EIP712Domain: _domain, ...typesWithoutDomain } = types as any;
+                    const signature = await signTypedDataAsync({
+                        types: typesWithoutDomain,
+                        domain: domain as any,
+                        message: message as any,
+                        primaryType,
+                    });
+                    const signatureLengthInHex = numberToHex(size(signature), { signed: false, size: 32 });
+                    txData = concat([txData, signatureLengthInHex, signature]) as `0x${string}`;
+                }
+
+                if (manualHouseFee) {
+                    await payManualHouseFee(manualHouseFee, capturedSellToken);
+                    setSwapStep("swap");
+                }
+
+                txHash = await sendTransactionAsync({
+                    to,
+                    data: txData,
+                    value: value ? BigInt(value) : 0n,
+                    gas: gas ? BigInt(gas) : undefined,
+                    chainId: selectedChainId,
                 });
-                const signatureLengthInHex = numberToHex(size(signature), { signed: false, size: 32 });
-                txData = concat([txData, signatureLengthInHex, signature]) as `0x${string}`;
             }
-
-            const txHash = await sendTransactionAsync({
-                to,
-                data: txData,
-                value: value ? BigInt(value) : 0n,
-                gas: gas ? BigInt(gas) : undefined,
-                chainId: selectedChainId,
-            });
             setSwapTxHash(txHash);
             showToast({ kind: "info", title: "Swap submitted", message: "Waiting for confirmation…", txHash, chainId: selectedChainId });
 
@@ -517,9 +671,13 @@ function SwapCardInner() {
         if (isQuoting) return "Getting quote…";
         if (isApproving) {
             if (swapStep === "quote") return "Fetching swap…";
+            if (swapStep === "fee") return "Paying House fee…";
             return "Approving…";
         }
-        if (isSwapping) return "Swapping…";
+        if (isSwapping) {
+            if (swapStep === "fee") return "Paying House fee…";
+            return "Swapping…";
+        }
         if (swapTxHash) return "Confirming swap…";
         if (needsApproval) return `Approve & swap ${sellToken.symbol}`;
         if (!quote?.transaction) return "Enter amount";
@@ -551,26 +709,6 @@ function SwapCardInner() {
 
     return (
         <div className="w-full max-w-[480px]">
-            <div className="mb-4 text-center">
-                <p className="text-[13px] text-white/50 leading-relaxed">
-                    Swap and bridge HOJ community tokens across Ethereum, Base, Cronos, XRP EVM, Polygon, BNB Chain, Arbitrum, and Optimism -
-                    best rates from <strong>0x</strong> and <strong>Stargate</strong>.
-                </p>
-                <div className="mt-3 flex justify-center gap-6 text-[11px]">
-                    {[
-                        { value: "8", label: "Chains" },
-                        { value: "10+", label: "Tokens" },
-                        { value: "1%", label: "House Fee" },
-                        { value: "0x+SG", label: "Powered By" },
-                    ].map(({ value, label }) => (
-                        <div key={label} className="flex flex-col items-center gap-0.5">
-                            <span className="text-base font-bold text-[rgba(212,175,55,0.9)]">{value}</span>
-                            <span className="text-white/35">{label}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
             {apiKeyError && (
                 <div className="mb-4 flex items-start gap-3 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3">
                     <span className="mt-0.5 shrink-0 text-amber-300">⚠</span>
@@ -596,15 +734,15 @@ function SwapCardInner() {
                 </div>
             )}
 
-            <div className="hoj-card space-y-3 rounded-3xl p-4 sm:p-6">
+            <div className="hoj-card space-y-3 rounded-3xl p-3 sm:p-6">
                 {/* Chain selector */}
-                <div className="flex flex-wrap justify-center gap-2">
+                <div className="-mx-1 flex snap-x flex-nowrap justify-start gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0 sm:pb-0">
                     {CHAINS.map(({ id, label }) => (
                         <button
                             key={id}
                             type="button"
                             onClick={() => pickChain(id)}
-                            className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${selectedChainId === id
+                            className={`shrink-0 snap-start rounded-2xl px-3 py-2 text-[13px] font-semibold transition sm:px-4 sm:text-sm ${selectedChainId === id
                                 ? "bg-[rgba(212,175,55,0.95)] text-black"
                                 : "bg-white/5 text-white/70 hover:bg-white/10"
                                 }`}
@@ -615,13 +753,13 @@ function SwapCardInner() {
                 </div>
 
                 {/* Tab selector */}
-                <div className="flex gap-1 rounded-3xl border border-white/10 bg-black/20 p-1">
+                <div className="flex gap-1 rounded-2xl border border-white/10 bg-black/20 p-1 sm:rounded-3xl">
                     {TABS.filter(tab => tab.id !== "swap" || isSwapSupported).map(({ id, label }) => (
                         <button
                             key={id}
                             type="button"
                             onClick={() => setActiveTab(id)}
-                            className={`flex-1 rounded-2xl px-3 py-3 text-sm font-semibold capitalize transition ${activeTab === id
+                            className={`min-w-0 flex-1 rounded-xl px-2 py-2.5 text-[13px] font-semibold capitalize transition sm:rounded-2xl sm:px-3 sm:py-3 sm:text-sm ${activeTab === id
                                 ? "bg-[rgba(212,175,55,0.95)] text-black"
                                 : "bg-transparent text-white/70 hover:bg-white/5"
                                 }`}
@@ -634,7 +772,7 @@ function SwapCardInner() {
                 {isSwapSupported && activeTab === "swap" ? (
                     <>
                         {/* Sell panel */}
-                        <div className="hoj-panel rounded-3xl p-4">
+                        <div className="hoj-panel rounded-3xl p-3 sm:p-4">
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_11.875rem] sm:items-start">
                                 <div className="min-w-0 overflow-hidden">
                                     <div className="text-[11px] uppercase tracking-[0.18em] text-white/55">You pay</div>
@@ -674,7 +812,7 @@ function SwapCardInner() {
                         </div>
 
                         {/* Buy panel */}
-                        <div className="hoj-panel rounded-3xl p-4">
+                        <div className="hoj-panel rounded-3xl p-3 sm:p-4">
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_11.875rem] sm:items-start">
                                 <div className="min-w-0 overflow-hidden">
                                     <div className="text-[11px] uppercase tracking-[0.18em] text-white/55">You receive</div>
@@ -782,32 +920,6 @@ function SwapCardInner() {
                     availableTokens={availableTokens.map(t => t.symbol)}
                 />
             )}
-
-            <div className="mt-5 grid grid-cols-3 gap-3 text-center">
-                {[
-                    { icon: "⚡", label: "Best Price", desc: "0x aggregates DEX liquidity for the best rate every time" },
-                    { icon: "🛡️", label: "Non-Custodial", desc: "Your wallet, your keys — we never hold your funds" },
-                    { icon: "🌐", label: "Multi-Chain", desc: "Swap on Base, Ethereum, Polygon, BNB, Arbitrum & Optimism in one place" },
-                ].map(({ icon, label, desc }) => (
-                    <div key={label} className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-4 flex flex-col items-center gap-1.5">
-                        <span className="text-xl">{icon}</span>
-                        <span className="text-[11px] font-semibold text-[rgba(212,175,55,0.9)]">{label}</span>
-                        <span className="text-[10px] leading-relaxed text-white/40">{desc}</span>
-                    </div>
-                ))}
-            </div>
-
-            <p className="mt-4 border-t border-white/8 pt-4 text-center text-[10px] leading-relaxed text-white/35 sm:text-[11px]">
-                Want to add your coin? {" "}
-            <a href="https://thehouseofjoshi.com/contact" target="_blank" rel="noopener noreferrer" className="text-[rgba(212,175,55,0.6)] hover:text-[rgba(212,175,55,0.9)] transition">
-                Contact us
-            </a>
-            {" "} - Powered by{" "}
-            <a href="https://0x.org" target="_blank" rel="noopener noreferrer" className="text-[rgba(212,175,55,0.6)] hover:text-[rgba(212,175,55,0.9)] transition">
-                0x Protocol
-            </a>
-            {" "} - A 1% house fee applies to all swaps
-        </p>
     </div>
     );
 }

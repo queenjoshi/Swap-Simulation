@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
+import { getHojswapRouterAddress, ZERO_ADDRESS } from "@/lib/hojswap-router";
+import { HOUSE_WALLET, calculateHouseFeeAmount, calculateRouterSellAmount } from "@/lib/swap-fee";
 
 const ZEROX_BASE_URL = "https://api.0x.org";
 const ZEROX_API_KEY = process.env.ZEROX_API_KEY ?? "";
-const HOUSE_WALLET = "0x6736d2eA9807297F0e56967361B9410854B86a5f";
-const HOUSE_FEE_BPS = "100";
 
 function missingKeyResponse() {
   return NextResponse.json(
@@ -24,6 +24,34 @@ function createMockPriceResponse(sellAmount: string) {
   };
 }
 
+function attachRouterMetadata(data: any, routerAddress: `0x${string}`, sellAmount: string, routerSellAmount: string) {
+  const spender = data?.issues?.allowance?.spender;
+  return {
+    ...data,
+    hojswapRouter: {
+      enabled: true,
+      address: routerAddress,
+      spender: spender ?? ZERO_ADDRESS,
+      sellAmount,
+      routerSellAmount,
+    },
+  };
+}
+
+function attachManualFeeMetadata(data: any, sellToken: string, sellAmount: string, swapSellAmount: string) {
+  return {
+    ...data,
+    manualHouseFee: {
+      enabled: true,
+      recipient: HOUSE_WALLET,
+      token: sellToken,
+      amount: calculateHouseFeeAmount(BigInt(sellAmount)).toString(),
+      sellAmount,
+      swapSellAmount,
+    },
+  };
+}
+
 export async function POST(request: Request) {
   if (!ZEROX_API_KEY) {
     if (process.env.NODE_ENV === "production") {
@@ -40,20 +68,27 @@ export async function POST(request: Request) {
 
   try {
     const { sellToken, buyToken, sellAmount, chainId, slippageBps, taker } = await request.json();
+    const routerAddress = getHojswapRouterAddress(Number(chainId));
+    const swapSellAmount = calculateRouterSellAmount(String(sellAmount));
 
     const params = new URLSearchParams({
       chainId: String(chainId),
       sellToken,
       buyToken,
-      sellAmount,
+      sellAmount: swapSellAmount,
       slippageBps: String(slippageBps ?? 100),
-      swapFeeRecipient: HOUSE_WALLET,
-      swapFeeBps: HOUSE_FEE_BPS,
-      swapFeeToken: sellToken,
     });
-    if (taker) params.set("taker", taker);
+    if (routerAddress) {
+      params.set("taker", routerAddress);
+      params.set("recipient", routerAddress);
+      params.set("skipValidation", "true");
+      if (taker) params.set("txOrigin", taker);
+    } else {
+      if (taker) params.set("taker", taker);
+    }
 
-    const url = `${ZEROX_BASE_URL}/swap/permit2/price?${params.toString()}`;
+    const endpoint = routerAddress ? "allowance-holder" : "permit2";
+    const url = `${ZEROX_BASE_URL}/swap/${endpoint}/price?${params.toString()}`;
     const upstream = await fetch(url, {
       headers: {
         "Content-Type": "application/json",
@@ -74,7 +109,14 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json(data, { status: upstream.status });
+    return NextResponse.json(
+      upstream.ok
+        ? routerAddress
+          ? attachRouterMetadata(data, routerAddress, String(sellAmount), swapSellAmount)
+          : attachManualFeeMetadata(data, sellToken, String(sellAmount), swapSellAmount)
+        : data,
+      { status: upstream.status },
+    );
   } catch (err) {
     console.error("Error fetching 0x price:", err);
     return NextResponse.json({ error: "Failed to fetch price" }, { status: 500 });

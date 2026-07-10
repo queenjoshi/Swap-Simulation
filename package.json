@@ -1,9 +1,13 @@
 {
   "name": "workspace",
   "version": "0.0.0",
+  "packageManager": "pnpm@11.7.0",
   "license": "MIT",
   "scripts": {
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
+    "compile:contracts": "node scripts/compile-contracts.mjs",
+    "deploy:router": "node scripts/deploy-hojswap-router-v2.mjs",
+    "router:approve-pair": "node scripts/set-router-spender-approval.mjs",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },
@@ -11,6 +15,7 @@
   "devDependencies": {
     "next": "16.2.9",
     "prettier": "^3.8.3",
+    "solc": "0.8.26",
     "typescript": "~5.9.3"
   }
 }

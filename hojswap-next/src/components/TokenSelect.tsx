@@ -24,7 +24,7 @@ export function TokenSelect({
   return (
     <div className="relative w-full">
       <select
-        className="w-full appearance-none rounded-2xl border border-white/10 bg-black/35 px-4 py-3 pr-10 text-sm text-white outline-none ring-0 hover:border-[rgba(212,175,55,0.25)] focus:border-[rgba(212,175,55,0.45)]"
+        className="w-full appearance-none rounded-2xl border border-white/10 bg-black/35 px-4 py-3 pr-10 text-base text-white outline-none ring-0 hover:border-[rgba(212,175,55,0.25)] focus:border-[rgba(212,175,55,0.45)] sm:text-sm"
         value={tokenId(value)}
         onChange={(e) => {
           const id = e.target.value;

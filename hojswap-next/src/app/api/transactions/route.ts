@@ -4,6 +4,36 @@ const ETHERSCAN_KEY = process.env.ETHERSCAN_API_KEY ?? "";
 const HOUSE_WALLET = "0x6736d2eA9807297F0e56967361B9410854B86a5f";
 const XRP_EVM_CHAIN_ID = 1440002;
 
+type EtherscanTx = {
+  hash: string;
+  timeStamp: string;
+  value: string;
+  from: string;
+  to?: string;
+  isError?: string;
+  input?: string;
+  tokenSymbol?: string;
+  tokenDecimal?: string;
+};
+
+type ExplorerTransaction = {
+  hash: string;
+  chainId: number;
+  timestamp: number;
+  status: "success" | "failed";
+  kind: "fee" | "wallet";
+  type: "token" | "eth";
+  summary: string;
+  from: string;
+  to?: string;
+  tokenSymbol: string;
+  amount: string;
+};
+
+function isExplorerTransaction(tx: ExplorerTransaction | null): tx is ExplorerTransaction {
+  return tx !== null;
+}
+
 function getEtherscanApiUrl(chainId: number): string | null {
   if (chainId === 8453) return "https://api.basescan.org/api";
   if (chainId === 1) return "https://api.etherscan.io/api";
@@ -22,7 +52,7 @@ async function fetchEtherscanTxns(
   apiKey: string,
   action: "tokentx" | "txlist",
   offset = 1000
-): Promise<any[]> {
+): Promise<EtherscanTx[]> {
   const url = new URL(baseUrl);
   url.searchParams.set("module", "account");
   url.searchParams.set("action", action);
@@ -34,11 +64,19 @@ async function fetchEtherscanTxns(
   url.searchParams.set("sort", "desc");
   url.searchParams.set("apikey", apiKey || "YourApiKeyToken");
 
-  const response = await fetch(url.toString(), { headers: { Accept: "application/json" } });
-  if (!response.ok) return [];
-  const data = (await response.json()) as { status: string; result: any[] };
-  if (data.status !== "1" || !Array.isArray(data.result)) return [];
-  return data.result;
+  try {
+    const response = await fetch(url.toString(), { headers: { Accept: "application/json" } });
+    if (!response.ok) return [];
+    const data = (await response.json().catch(() => null)) as { status?: string; result?: unknown } | null;
+    if (data?.status !== "1" || !Array.isArray(data.result)) return [];
+    return data.result.filter((tx): tx is EtherscanTx => {
+      if (!tx || typeof tx !== "object") return false;
+      const item = tx as Partial<EtherscanTx>;
+      return typeof item.hash === "string" && typeof item.timeStamp === "string";
+    });
+  } catch {
+    return [];
+  }
 }
 
 export async function GET(request: Request) {
@@ -65,7 +103,7 @@ export async function GET(request: Request) {
 
     const seen = new Set<string>();
 
-    const mapToken = (tx: any) => {
+    const mapToken = (tx: EtherscanTx): ExplorerTransaction | null => {
       const key = `${tx.hash}-token-${tx.tokenSymbol}`;
       if (seen.has(key)) return null;
       seen.add(key);
@@ -77,7 +115,7 @@ export async function GET(request: Request) {
           : amount < 0.000001
           ? "<0.000001"
           : amount.toLocaleString(undefined, { maximumFractionDigits: 6 });
-      const kind = tx.to.toLowerCase() === HOUSE_WALLET.toLowerCase() ? "fee" : "wallet";
+      const kind = tx.to?.toLowerCase() === HOUSE_WALLET.toLowerCase() ? "fee" : "wallet";
       return {
         hash: tx.hash,
         chainId,
@@ -85,15 +123,15 @@ export async function GET(request: Request) {
         status: tx.isError === "1" ? "failed" : "success",
         kind,
         type: "token",
-        summary: `${amtStr} ${tx.tokenSymbol}`,
+        summary: `${amtStr} ${tx.tokenSymbol ?? "TOKEN"}`,
         from: tx.from,
         to: tx.to,
-        tokenSymbol: tx.tokenSymbol,
+        tokenSymbol: tx.tokenSymbol ?? "TOKEN",
         amount: amtStr,
       };
     };
 
-    const mapEth = (tx: any) => {
+    const mapEth = (tx: EtherscanTx): ExplorerTransaction | null => {
       if (tx.input === "0x") return null;
       const key = `${tx.hash}-eth`;
       if (seen.has(key)) return null;
@@ -122,9 +160,9 @@ export async function GET(request: Request) {
     };
 
     const items = [
-      ...tokenTxns.map(mapToken).filter(Boolean),
-      ...ethTxns.map(mapEth).filter(Boolean),
-    ].sort((a: any, b: any) => b.timestamp - a.timestamp);
+      ...tokenTxns.map(mapToken).filter(isExplorerTransaction),
+      ...ethTxns.map(mapEth).filter(isExplorerTransaction),
+    ].sort((a, b) => b.timestamp - a.timestamp);
 
     return NextResponse.json({ items, total: items.length });
   } catch (err) {

@@ -193,7 +193,6 @@ export default function About() {
         <SectionHeading
           eyebrow="Supported tokens"
           title="Logo-first token coverage"
-          desc="Token groups are organized by chain so users can quickly see every configured asset on Base, Ethereum, Polygon, BNB Chain, Arbitrum, Optimism, Cronos, and XRP."
         />
         <div className="grid gap-4 lg:grid-cols-2">
           {tokenGroups.map((group) => (
@@ -219,7 +218,6 @@ export default function About() {
         <SectionHeading
           eyebrow="Supported networks"
           title="Clear routes by chain"
-          desc="Each network shows what users can do today, with bridge-only and coming-soon states separated from active swap routes."
         />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {networks.map((network) => (
@@ -287,12 +285,12 @@ export default function About() {
   );
 }
 
-function SectionHeading({ eyebrow, title, desc }: { eyebrow: string; title: string; desc: string }) {
+function SectionHeading({ eyebrow, title, desc }: { eyebrow: string; title: string; desc?: string }) {
   return (
     <div className="mb-5 max-w-2xl">
       <div className="text-[10px] font-semibold uppercase tracking-widest text-[rgba(212,175,55,0.65)]">{eyebrow}</div>
       <h2 className="hoj-display mt-2 text-xl font-semibold text-[rgba(212,175,55,0.92)]">{title}</h2>
-      <p className="mt-2 text-sm leading-6 text-white/56">{desc}</p>
+      {desc && <p className="mt-2 text-sm leading-6 text-white/56">{desc}</p>}
     </div>
   );
 }

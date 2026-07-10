@@ -7,6 +7,8 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 const NAV_LINKS = [
   { label: "Swap & Bridge", href: "/" },
   { label: "Prices", href: "/prices" },
+  { label: "Transactions", href: "/transactions" },
+  { label: "FAQ", href: "/faq" },
   { label: "About", href: "/about" },
   { label: "Community", href: "https://thehouseofjoshi.com", external: true },
   { label: "Contact", href: "/contact" },
@@ -15,7 +17,9 @@ const NAV_LINKS = [
 const PAGE_TITLES: Record<string, string> = {
   "/": "Swap & Bridge",
   "/about": "About",
+  "/faq": "FAQ",
   "/prices": "Prices",
+  "/transactions": "Transactions",
 };
 
 function getPageTitle(location: string): string {
@@ -31,18 +35,90 @@ function isActive(linkHref: string, location: string) {
   return location === linkHref || location.startsWith(linkHref + "/");
 }
 
+function shortAddress(address?: string) {
+  if (!address) return "";
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+function WalletButton() {
+  return (
+    <ConnectButton.Custom>
+      {({
+        account,
+        chain,
+        mounted,
+        openAccountModal,
+        openChainModal,
+        openConnectModal,
+      }) => {
+        const ready = mounted;
+        const connected = ready && account && chain;
+
+        if (!ready) {
+          return <div className="h-9 w-20 rounded-xl bg-white/5 sm:w-32" aria-hidden="true" />;
+        }
+
+        if (!connected) {
+          return (
+            <button
+              type="button"
+              onClick={openConnectModal}
+              className="h-9 rounded-xl bg-[rgba(212,175,55,0.95)] px-3 text-sm font-semibold leading-none text-black transition hover:bg-[rgba(212,175,55,0.85)] sm:px-4"
+            >
+              <span className="sm:hidden">Connect</span>
+              <span className="hidden sm:inline">Connect Wallet</span>
+            </button>
+          );
+        }
+
+        if (chain.unsupported) {
+          return (
+            <button
+              type="button"
+              onClick={openChainModal}
+              className="h-9 rounded-xl bg-red-400/90 px-3 text-xs font-semibold text-black transition hover:bg-red-300 sm:px-4"
+            >
+              Wrong network
+            </button>
+          );
+        }
+
+        return (
+          <div className="flex min-w-0 items-center gap-1.5">
+            <button
+              type="button"
+              onClick={openChainModal}
+              className="hidden h-9 items-center rounded-xl border border-white/10 bg-white/5 px-3 text-xs font-semibold text-white/75 transition hover:border-[rgba(212,175,55,0.3)] hover:text-white sm:inline-flex"
+            >
+              {chain.name}
+            </button>
+            <button
+              type="button"
+              onClick={openAccountModal}
+              className="h-9 max-w-[7.25rem] truncate rounded-xl bg-[rgba(212,175,55,0.95)] px-3 text-sm font-semibold leading-none text-black transition hover:bg-[rgba(212,175,55,0.85)] sm:max-w-[10rem]"
+              title={account.address}
+            >
+              {account.displayName || shortAddress(account.address)}
+            </button>
+          </div>
+        );
+      }}
+    </ConnectButton.Custom>
+  );
+}
+
 export function Header() {
   const location = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 border-b border-[rgba(212,175,55,0.15)] bg-[rgba(11,11,13,0.92)] backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2 sm:px-6">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 py-2 sm:gap-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2.5 group shrink-0">
           <img
             src="/logo.png"
             alt="House of Joshi"
-            className="h-10 w-10 object-contain transition group-hover:scale-105"
+            className="h-9 w-9 object-contain transition group-hover:scale-105 sm:h-10 sm:w-10"
           />
           <div className="hidden sm:block">
             <span className="hoj-display block text-sm font-semibold leading-tight text-[rgba(212,175,55,0.95)]">
@@ -86,11 +162,11 @@ export function Header() {
         </nav>
 
         <div className="ml-auto flex items-center gap-3 md:hidden">
-          <span className="text-[13px] text-white/40">{getPageTitle(location)}</span>
+          <span className="hidden text-[13px] text-white/40 min-[380px]:inline">{getPageTitle(location)}</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <ConnectButton accountStatus="avatar" chainStatus="icon" showBalance={false} />
+          <WalletButton />
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}

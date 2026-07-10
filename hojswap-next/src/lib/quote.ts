@@ -1,13 +1,13 @@
 import { Token, isNative } from "@/lib/tokens";
 import { formatCompactNumber } from "@/lib/format";
+import { calculateHouseFeeAmount as calculateHouseFeeAmountShared } from "@/lib/swap-fee";
 
 export const HOUSE_FEE_BPS = 100;
 export const NATIVE_ETH_ADDRESS =
   "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
 export function calculateHouseFeeAmount(amount: bigint): bigint {
-  if (amount <= 0n) return 0n;
-  return (amount * BigInt(HOUSE_FEE_BPS) + 9999n) / 10000n;
+  return calculateHouseFeeAmountShared(amount);
 }
 
 export type QuoteFee = {
@@ -66,6 +66,21 @@ export type QuoteResponse = {
     gas?: string | null;
     gasPrice?: string;
   };
+  hojswapRouter?: {
+    enabled: boolean;
+    address: `0x${string}`;
+    spender: `0x${string}`;
+    sellAmount: string;
+    routerSellAmount: string;
+  } | null;
+  manualHouseFee?: {
+    enabled: boolean;
+    recipient: `0x${string}`;
+    token: string;
+    amount: string;
+    sellAmount: string;
+    swapSellAmount: string;
+  } | null;
 };
 
 export type PriceResponse = {
@@ -78,6 +93,7 @@ export type PriceResponse = {
     integratorFee?: QuoteFee | null;
     zeroExFee?: QuoteFee | null;
   };
+  manualHouseFee?: QuoteResponse["manualHouseFee"];
 };
 
 export function tokenTo0xParam(t: Token) {
