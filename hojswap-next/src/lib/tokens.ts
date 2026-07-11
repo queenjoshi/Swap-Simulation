@@ -316,6 +316,13 @@ export const TOKENS: Token[] = [
     decimals: 18,
   },
   {
+    symbol: "DOGE",
+    name: "Binance-Peg Dogecoin",
+    address: getAddress("0xbA2aE424d960c26247Dd6c32edC70B295c744C43"),
+    chainId: bsc.id,
+    decimals: 8,
+  },
+  {
     symbol: "FDUSD",
     name: "First Digital USD",
     address: getAddress("0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409"),

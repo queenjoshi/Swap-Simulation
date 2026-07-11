@@ -22,15 +22,12 @@ interface TrendingTokensProps {
 export function TrendingTokens({ chainId, onSelectToken, availableTokens = [] }: TrendingTokensProps) {
   const [tokens, setTokens] = useState<TrendingToken[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const fetchTrendingTokens = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
       const res = await fetch(`/api/trending?chainId=${chainId}`);
       if (!res.ok) {
-        setError(null); // Silently fail
         setTokens([]);
         return;
       }
@@ -47,7 +44,6 @@ export function TrendingTokens({ chainId, onSelectToken, availableTokens = [] }:
     } catch (err) {
       console.error("Error fetching trending tokens:", err);
       setTokens([]); // Clear tokens on error
-      setError(null); // Don't show error to user
     } finally {
       setLoading(false);
     }
@@ -55,9 +51,12 @@ export function TrendingTokens({ chainId, onSelectToken, availableTokens = [] }:
 
   // Fetch on mount and set up auto-refresh every 60 seconds
   useEffect(() => {
-    fetchTrendingTokens();
+    const initialFetch = window.setTimeout(() => void fetchTrendingTokens(), 0);
     const interval = setInterval(fetchTrendingTokens, 60000);
-    return () => clearInterval(interval);
+    return () => {
+      window.clearTimeout(initialFetch);
+      clearInterval(interval);
+    };
   }, [fetchTrendingTokens]);
 
   // If no tokens, don't render anything
@@ -66,17 +65,17 @@ export function TrendingTokens({ chainId, onSelectToken, availableTokens = [] }:
   }
 
   return (
-    <div className="mt-4 hoj-card rounded-3xl p-4 sm:p-6">
+    <div className="mt-3 rounded-[24px] border border-white/8 bg-white/[0.025] px-3 py-3">
       <div className="w-full">
-      <div className="mb-2 flex items-center gap-2">
-        <p className="text-[11px] uppercase tracking-[0.18em] text-white/55 font-semibold">
-          Trending on {getChainName(chainId)}
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">
+          Quick picks on {getChainName(chainId)}
         </p>
-        {loading && <span className="text-[10px] text-white/30">Updating...</span>}
+        {loading && <span className="text-[10px] text-white/25">Updating...</span>}
       </div>
 
       <div className="overflow-x-auto scrollbar-hide">
-        <div className="flex gap-2 pb-2">
+        <div className="flex gap-2 pb-1">
           {tokens.map((token) => (
             <button
               key={token.id}
@@ -87,7 +86,7 @@ export function TrendingTokens({ chainId, onSelectToken, availableTokens = [] }:
                   console.error("Error selecting token:", e);
                 }
               }}
-              className="flex-shrink-0 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 hover:bg-white/[0.08] hover:border-[rgba(212,175,55,0.3)] transition cursor-pointer"
+              className="flex-shrink-0 cursor-pointer rounded-full border border-white/10 bg-black/20 px-3 py-2 transition hover:border-[rgba(212,175,55,0.3)] hover:bg-white/[0.06]"
             >
               <div className="flex items-center gap-2">
                 <img
@@ -99,18 +98,8 @@ export function TrendingTokens({ chainId, onSelectToken, availableTokens = [] }:
                   }}
                 />
                 <div className="text-left">
-                  <p className="text-xs font-semibold text-white">
+                  <p className="text-xs font-semibold leading-none text-white">
                     {token.symbol}
-                  </p>
-                  <p
-                    className={`text-[10px] ${
-                      token.price_change_percentage_24h >= 0
-                        ? "text-green-400/70"
-                        : "text-red-400/70"
-                    }`}
-                  >
-                    {token.price_change_percentage_24h >= 0 ? "+" : ""}
-                    {token.price_change_percentage_24h.toFixed(1)}%
                   </p>
                 </div>
               </div>

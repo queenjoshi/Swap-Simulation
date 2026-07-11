@@ -28,9 +28,19 @@ export function FastOnRampButton({ walletAddress, selectedChainId, onSuccess }: 
   };
 
   const launchOnRamp = () => {
+    const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY;
+    if (!apiKey) {
+      showToast({
+        kind: "error",
+        title: "On-ramp unavailable",
+        message: "Set NEXT_PUBLIC_TRANSAK_API_KEY before enabling card purchases.",
+      });
+      return;
+    }
+
     try {
       const transak = new Transak({
-        apiKey: process.env.NEXT_PUBLIC_TRANSAK_API_KEY || "ba03584f-2416-4717-b18f-6bc76c25eb52",
+        apiKey,
         environment: process.env.NODE_ENV === "production" ? "PRODUCTION" : "STAGING",
         widgetWidth: "450px",
         widgetHeight: "700px",

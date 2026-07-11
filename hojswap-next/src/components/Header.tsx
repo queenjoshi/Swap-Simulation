@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
   { label: "Swap & Bridge", href: "/" },
@@ -55,7 +56,7 @@ function WalletButton() {
         const connected = ready && account && chain;
 
         if (!ready) {
-          return <div className="h-9 w-20 rounded-xl bg-white/5 sm:w-32" aria-hidden="true" />;
+          return <div className="h-10 w-20 rounded-full bg-white/5 sm:w-32" aria-hidden="true" />;
         }
 
         if (!connected) {
@@ -63,7 +64,7 @@ function WalletButton() {
             <button
               type="button"
               onClick={openConnectModal}
-              className="h-9 rounded-xl bg-[rgba(212,175,55,0.95)] px-3 text-sm font-semibold leading-none text-black transition hover:bg-[rgba(212,175,55,0.85)] sm:px-4"
+              className="h-10 rounded-full bg-[rgba(212,175,55,0.95)] px-4 text-sm font-semibold leading-none text-black transition hover:bg-[rgba(212,175,55,0.85)]"
             >
               <span className="sm:hidden">Connect</span>
               <span className="hidden sm:inline">Connect Wallet</span>
@@ -76,7 +77,7 @@ function WalletButton() {
             <button
               type="button"
               onClick={openChainModal}
-              className="h-9 rounded-xl bg-red-400/90 px-3 text-xs font-semibold text-black transition hover:bg-red-300 sm:px-4"
+              className="h-10 rounded-full bg-red-400/90 px-3 text-xs font-semibold text-black transition hover:bg-red-300 sm:px-4"
             >
               Wrong network
             </button>
@@ -88,14 +89,14 @@ function WalletButton() {
             <button
               type="button"
               onClick={openChainModal}
-              className="hidden h-9 items-center rounded-xl border border-white/10 bg-white/5 px-3 text-xs font-semibold text-white/75 transition hover:border-[rgba(212,175,55,0.3)] hover:text-white sm:inline-flex"
+              className="hidden h-10 items-center rounded-full border border-white/10 bg-white/5 px-3 text-xs font-semibold text-white/75 transition hover:border-[rgba(212,175,55,0.3)] hover:text-white sm:inline-flex"
             >
               {chain.name}
             </button>
             <button
               type="button"
               onClick={openAccountModal}
-              className="h-9 max-w-[7.25rem] truncate rounded-xl bg-[rgba(212,175,55,0.95)] px-3 text-sm font-semibold leading-none text-black transition hover:bg-[rgba(212,175,55,0.85)] sm:max-w-[10rem]"
+              className="h-10 max-w-[7.25rem] truncate rounded-full bg-[rgba(212,175,55,0.95)] px-3 text-sm font-semibold leading-none text-black transition hover:bg-[rgba(212,175,55,0.85)] sm:max-w-[10rem]"
               title={account.address}
             >
               {account.displayName || shortAddress(account.address)}
@@ -112,13 +113,13 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[rgba(212,175,55,0.15)] bg-[rgba(11,11,13,0.92)] backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 py-2 sm:gap-4 sm:px-6">
+    <header className="sticky top-0 z-50 border-b border-white/8 bg-[rgba(11,11,13,0.84)] backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 py-2.5 sm:gap-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2.5 group shrink-0">
           <img
             src="/logo.png"
             alt="House of Joshi"
-            className="h-9 w-9 object-contain transition group-hover:scale-105 sm:h-10 sm:w-10"
+            className="h-8 w-8 object-contain transition group-hover:scale-105 sm:h-9 sm:w-9"
           />
           <div className="hidden sm:block">
             <span className="hoj-display block text-sm font-semibold leading-tight text-[rgba(212,175,55,0.95)]">
@@ -170,10 +171,10 @@ export function Header() {
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 text-white/60 hover:border-[rgba(212,175,55,0.3)] hover:text-white md:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/60 hover:border-[rgba(212,175,55,0.3)] hover:text-white md:hidden"
             aria-label="Toggle menu"
           >
-            {menuOpen ? "✕" : "☰"}
+            {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         </div>
       </div>

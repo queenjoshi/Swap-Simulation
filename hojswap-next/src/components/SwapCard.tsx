@@ -11,7 +11,7 @@ import {
     useSwitchChain,
     useWriteContract,
 } from "wagmi";
-import { parseUnits, maxUint256, formatUnits, concat, numberToHex, size } from "viem";
+import { parseUnits, formatUnits, concat, numberToHex, size } from "viem";
 import { base } from "wagmi/chains";
 import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, getChainName } from "@/lib/chains";
 import { clampToDecimals, formatSwapAmountDisplay, isValidNumberInput } from "@/lib/format";
@@ -23,9 +23,11 @@ import { loadSlippageBps } from "@/components/SlippageSettings";
 import { SwapShowMore } from "@/components/SwapShowMore";
 import { TokenBalance } from "@/components/TokenBalance";
 import { TokenSelect } from "@/components/TokenSelect";
+import { TokenLogo } from "@/components/TokenLogo";
 import { TransactionsPanel } from "@/components/TransactionsPanel";
 import { BridgeTab } from "@/components/BridgeTab";
 import { TrendingTokens } from "@/components/TrendingTokens";
+import { SwapCoach } from "@/components/SwapCoach";
 import { useToast } from "@/components/Toast";
 import { saveTransaction } from "@/lib/transactions";
 import { useNativeTokenPrice, getNativeSymbol, formatNetworkFee } from "@/lib/gas";
@@ -33,6 +35,17 @@ import { hojswapRouterAbi, tokenToRouterAddress } from "@/lib/hojswap-router";
 import { HOUSE_WALLET } from "@/lib/swap-fee";
 
 const DEBOUNCE_MS = 750;
+const CHAIN_LOGOS: Record<number, string> = {
+    1: "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
+    10: "https://assets.coingecko.com/coins/images/25244/standard/Optimism.png",
+    25: "https://assets.coingecko.com/coins/images/7310/standard/cro_token_logo.png",
+    56: "https://assets.coingecko.com/coins/images/825/standard/bnb-icon2_2x.png",
+    137: "https://assets.coingecko.com/coins/images/32440/standard/polygon.png",
+    8453: "https://assets.coingecko.com/asset_platforms/images/131/small/base.jpeg",
+    42161: "https://assets.coingecko.com/coins/images/16547/standard/arb.jpg",
+    1440002: "/tokens/xrp.png",
+};
+
 type ActiveTab = "swap" | "bridge" | "transactions";
 type ApiKeyError = "api_key_missing" | "api_key_invalid" | null;
 
@@ -47,6 +60,7 @@ function SwapCardInner() {
     const publicClient = usePublicClient({ chainId: selectedChainId });
     const [activeTab, setActiveTab] = useState<ActiveTab>("swap");
     const [apiKeyError, setApiKeyError] = useState<ApiKeyError>(null);
+    const [chainMenuOpen, setChainMenuOpen] = useState(false);
 
     const availableTokens = useMemo(() => tokensForChain(selectedChainId), [selectedChainId]);
 
@@ -84,12 +98,14 @@ function SwapCardInner() {
 
     const quoteDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
     const quoteAbort = useRef<AbortController | null>(null);
+    const chainMenuRef = useRef<HTMLDivElement>(null);
 
     const walletOnSelectedChain = chainId === selectedChainId;
     const needsCorrectChain = isConnected && !walletOnSelectedChain;
     const selectedChainName = getChainName(selectedChainId);
 
     function pickChain(newChainId: number) {
+        setChainMenuOpen(false);
         setSelectedChainId(newChainId);
         setSellToken(defaultSellForChain(newChainId));
         setBuyToken(defaultBuyForChain(newChainId));
@@ -107,6 +123,25 @@ function SwapCardInner() {
             setActiveTab("bridge");
         }
     }, [selectedChainId, isSwapSupported, activeTab]);
+
+    useEffect(() => {
+        if (!chainMenuOpen) return;
+
+        function onPointerDown(event: PointerEvent) {
+            if (!chainMenuRef.current?.contains(event.target as Node)) setChainMenuOpen(false);
+        }
+
+        function onKeyDown(event: KeyboardEvent) {
+            if (event.key === "Escape") setChainMenuOpen(false);
+        }
+
+        window.addEventListener("pointerdown", onPointerDown);
+        window.addEventListener("keydown", onKeyDown);
+        return () => {
+            window.removeEventListener("pointerdown", onPointerDown);
+            window.removeEventListener("keydown", onKeyDown);
+        };
+    }, [chainMenuOpen]);
 
     const onSellTokenChange = useCallback(
         (next: Token) => {
@@ -167,6 +202,12 @@ function SwapCardInner() {
     const { data: sellBalanceData } = useBalance({
         address,
         token: isNative(sellToken) ? undefined : sellToken.address,
+        chainId: selectedChainId,
+        query: { enabled: isConnected && !!address && walletOnSelectedChain, refetchInterval: 12_000 },
+    });
+
+    const { data: nativeBalanceData } = useBalance({
+        address,
         chainId: selectedChainId,
         query: { enabled: isConnected && !!address && walletOnSelectedChain, refetchInterval: 12_000 },
     });
@@ -461,6 +502,13 @@ function SwapCardInner() {
 
     async function approveAndSwap() {
         if (!sellToken.address || !approvalSpender) return;
+        const approvalAmount =
+            routerAddress && quote?.hojswapRouter?.enabled
+                ? BigInt(quote.hojswapRouter.sellAmount)
+                : quote?.issues?.allowance?.expected
+                  ? BigInt(quote.issues.allowance.expected)
+                  : inputSellAmountBig;
+        if (!approvalAmount || approvalAmount <= 0n) return;
         setIsApproving(true);
         setSwapStep("approve");
         try {
@@ -468,12 +516,12 @@ function SwapCardInner() {
                 address: sellToken.address,
                 abi: erc20Abi,
                 functionName: "approve",
-                args: [approvalSpender, maxUint256],
+                args: [approvalSpender, approvalAmount],
                 chainId: selectedChainId,
             });
             showToast({ kind: "info", title: "Approval submitted", message: "Waiting for confirmation…" });
             await publicClient?.waitForTransactionReceipt({ hash });
-            if (routerAddress) setRouterAllowance(maxUint256);
+            if (routerAddress) setRouterAllowance(approvalAmount);
             showToast({ kind: "success", title: "Approval confirmed", message: "Continuing to swap…" });
             setSwapStep("quote");
             const freshQuote = await fetchQuoteForTrade();
@@ -698,8 +746,15 @@ function SwapCardInner() {
         nativeUsdPrice,
         nativeSymbol,
     ), [quote, price, nativeUsdPrice, nativeSymbol]);
+    const hasNativeGas = !isConnected ? null : nativeBalanceData ? nativeBalanceData.value > 0n : null;
 
-    const CHAINS = CHAIN_OPTIONS.map(({ id, shortLabel }) => ({ id, label: shortLabel }));
+    const CHAINS = CHAIN_OPTIONS.map(({ id, label, shortLabel }) => ({
+        id,
+        label: shortLabel,
+        name: label,
+        logo: CHAIN_LOGOS[id],
+    }));
+    const selectedChainOption = CHAINS.find((chain) => chain.id === selectedChainId) ?? CHAINS[0];
 
     const TABS: { id: ActiveTab; label: string }[] = [
         { id: "swap", label: "Swap" },
@@ -734,32 +789,73 @@ function SwapCardInner() {
                 </div>
             )}
 
-            <div className="hoj-card space-y-3 rounded-3xl p-3 sm:p-6">
-                {/* Chain selector */}
-                <div className="-mx-1 flex snap-x flex-nowrap justify-start gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0 sm:pb-0">
-                    {CHAINS.map(({ id, label }) => (
+            <div className="hoj-card space-y-2.5 rounded-[28px] p-2.5 sm:p-3">
+                <div className="flex items-center justify-between gap-2 px-1 pb-1">
+                    <div className="min-w-0">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Trade</p>
+                        <p className="truncate text-sm font-semibold text-white/80">{selectedChainName}</p>
+                    </div>
+                    <div ref={chainMenuRef} className="relative">
                         <button
-                            key={id}
                             type="button"
-                            onClick={() => pickChain(id)}
-                            className={`shrink-0 snap-start rounded-2xl px-3 py-2 text-[13px] font-semibold transition sm:px-4 sm:text-sm ${selectedChainId === id
-                                ? "bg-[rgba(212,175,55,0.95)] text-black"
-                                : "bg-white/5 text-white/70 hover:bg-white/10"
-                                }`}
+                            onClick={() => setChainMenuOpen((next) => !next)}
+                            className="flex min-w-[8.75rem] items-center justify-between gap-2 rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-2 text-left outline-none transition hover:border-[rgba(212,175,55,0.3)] focus:border-[rgba(212,175,55,0.55)]"
+                            aria-haspopup="listbox"
+                            aria-expanded={chainMenuOpen}
+                            aria-label="Select network"
                         >
-                            {label}
+                            <span className="flex min-w-0 items-center gap-2">
+                                <TokenLogo
+                                    symbol={selectedChainOption.label}
+                                    logo={selectedChainOption.logo}
+                                    size="xs"
+                                />
+                                <span className="truncate text-xs font-semibold text-white/80">
+                                    {selectedChainOption.label}
+                                </span>
+                            </span>
+                            <span className={`text-xs text-[rgba(212,175,55,0.9)] transition ${chainMenuOpen ? "rotate-180" : ""}`}>▾</span>
                         </button>
-                    ))}
+
+                        {chainMenuOpen && (
+                            <div
+                                role="listbox"
+                                className="absolute right-0 top-full z-50 mt-2 max-h-72 min-w-[14rem] overflow-y-auto rounded-2xl border border-white/10 bg-[#151517] p-1.5 shadow-[0_22px_55px_rgba(0,0,0,0.55)]"
+                            >
+                                {CHAINS.map((chain) => {
+                                    const selected = chain.id === selectedChainId;
+                                    return (
+                                        <button
+                                            key={chain.id}
+                                            type="button"
+                                            role="option"
+                                            aria-selected={selected}
+                                            onClick={() => pickChain(chain.id)}
+                                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${selected
+                                                ? "bg-[rgba(212,175,55,0.14)] text-white"
+                                                : "text-white/78 hover:bg-white/[0.06] hover:text-white"
+                                                }`}
+                                        >
+                                            <TokenLogo symbol={chain.label} logo={chain.logo} size="sm" />
+                                            <span className="min-w-0">
+                                                <span className="block truncate text-sm font-semibold leading-tight">{chain.label}</span>
+                                                <span className="block truncate text-xs leading-tight text-white/40">{chain.name}</span>
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                {/* Tab selector */}
-                <div className="flex gap-1 rounded-2xl border border-white/10 bg-black/20 p-1 sm:rounded-3xl">
+                <div className="flex gap-1 rounded-full border border-white/8 bg-black/25 p-1">
                     {TABS.filter(tab => tab.id !== "swap" || isSwapSupported).map(({ id, label }) => (
                         <button
                             key={id}
                             type="button"
                             onClick={() => setActiveTab(id)}
-                            className={`min-w-0 flex-1 rounded-xl px-2 py-2.5 text-[13px] font-semibold capitalize transition sm:rounded-2xl sm:px-3 sm:py-3 sm:text-sm ${activeTab === id
+                            className={`min-w-0 flex-1 rounded-full px-2 py-2 text-[12px] font-semibold capitalize transition sm:px-3 ${activeTab === id
                                 ? "bg-[rgba(212,175,55,0.95)] text-black"
                                 : "bg-transparent text-white/70 hover:bg-white/5"
                                 }`}
@@ -771,14 +867,18 @@ function SwapCardInner() {
 
                 {isSwapSupported && activeTab === "swap" ? (
                     <>
-                        {/* Sell panel */}
-                        <div className="hoj-panel rounded-3xl p-3 sm:p-4">
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_11.875rem] sm:items-start">
+                        <div className="relative !z-30 space-y-1">
+                            <div className="hoj-panel rounded-[26px] p-4 sm:p-5">
+                                <div className="mb-3 flex items-start justify-between gap-3">
+                                    <div className="text-[15px] font-semibold text-white/55">Sell</div>
+                                    <div className="w-[8.5rem] shrink-0 sm:w-[9.25rem]">
+                                        <TokenSelect tokens={availableTokens} value={sellToken} onChange={onSellTokenChange} />
+                                    </div>
+                                </div>
                                 <div className="min-w-0 overflow-hidden">
-                                    <div className="text-[11px] uppercase tracking-[0.18em] text-white/55">You pay</div>
                                     <input
                                         inputMode="decimal"
-                                        placeholder="0.0"
+                                        placeholder="0"
                                         value={sellAmountInput}
                                         onChange={(e) => {
                                             const nextRaw = e.target.value.replaceAll(",", ".");
@@ -786,37 +886,30 @@ function SwapCardInner() {
                                             const next = sellDecimals != null ? clampToDecimals(nextRaw, sellDecimals) : nextRaw;
                                             setSellAmountInput(next);
                                         }}
-                                        className="hoj-input mt-2 w-full min-w-0 bg-transparent text-2xl text-white outline-none placeholder:text-white/25"
+                                        className="hoj-input w-full min-w-0 bg-transparent text-5xl font-semibold leading-none text-white outline-none placeholder:text-white/25 sm:text-6xl"
                                     />
                                 </div>
-                                <div className="min-w-0 sm:w-[11.875rem]">
-                                    <div className="text-left text-[11px] uppercase tracking-[0.18em] text-white/55">Token</div>
-                                    <div className="mt-2">
-                                        <TokenSelect tokens={availableTokens} value={sellToken} onChange={onSellTokenChange} />
-                                    </div>
-                                    <TokenBalance token={sellToken} chainId={selectedChainId} isConnected={isConnected} walletChainId={chainId} onMax={walletOnSelectedChain ? setMaxAmount : undefined} />
-                                </div>
+                                <TokenBalance token={sellToken} chainId={selectedChainId} isConnected={isConnected} walletChainId={chainId} onMax={walletOnSelectedChain ? setMaxAmount : undefined} />
                             </div>
-                        </div>
 
-                        {/* Flip */}
-                        <div className="flex justify-center py-1">
                             <button
                                 type="button"
                                 onClick={flipTokens}
-                                className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(212,175,55,0.3)] bg-black/40 text-[rgba(212,175,55,0.9)] hover:border-[rgba(212,175,55,0.6)] hover:bg-black/60 transition shadow-sm text-lg"
+                                className="absolute left-1/2 top-1/2 z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl border-4 border-[#101012] bg-[#19191b] text-2xl text-[rgba(212,175,55,0.95)] shadow-[0_14px_28px_rgba(0,0,0,0.45)] transition hover:bg-[#202022] hover:text-[rgba(255,222,85,1)]"
                                 aria-label="Flip tokens"
                             >
-                                ⇅
+                                ↓
                             </button>
-                        </div>
 
-                        {/* Buy panel */}
-                        <div className="hoj-panel rounded-3xl p-3 sm:p-4">
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_11.875rem] sm:items-start">
+                            <div className="hoj-panel rounded-[26px] p-4 pt-7 sm:p-5 sm:pt-8">
+                                <div className="mb-3 flex items-start justify-between gap-3">
+                                    <div className="text-[15px] font-semibold text-white/55">Buy</div>
+                                    <div className="w-[8.5rem] shrink-0 sm:w-[9.25rem]">
+                                        <TokenSelect tokens={availableTokens} value={buyToken} onChange={onBuyTokenChange} />
+                                    </div>
+                                </div>
                                 <div className="min-w-0 overflow-hidden">
-                                    <div className="text-[11px] uppercase tracking-[0.18em] text-white/55">You receive</div>
-                                    <div className="mt-2 truncate text-xl font-medium tabular-nums text-white/90 sm:text-2xl" title={buyAmountRaw ?? undefined}>
+                                    <div className="truncate text-4xl font-semibold leading-none tabular-nums text-white/90 sm:text-5xl" title={buyAmountRaw ?? undefined}>
                                         {(() => {
                                             if (isQuoting) return "…";
                                             if (!sellAmountInput) return "—";
@@ -831,13 +924,7 @@ function SwapCardInner() {
                                         </div>
                                     )}
                                 </div>
-                                <div className="min-w-0 sm:w-[11.875rem]">
-                                    <div className="text-left text-[11px] uppercase tracking-[0.18em] text-white/55">Token</div>
-                                    <div className="mt-2">
-                                        <TokenSelect tokens={availableTokens} value={buyToken} onChange={onBuyTokenChange} />
-                                    </div>
-                                    <TokenBalance token={buyToken} chainId={selectedChainId} isConnected={isConnected} walletChainId={chainId} />
-                                </div>
+                                <TokenBalance token={buyToken} chainId={selectedChainId} isConnected={isConnected} walletChainId={chainId} />
                             </div>
                         </div>
 
@@ -861,6 +948,19 @@ function SwapCardInner() {
                             </div>
                         )}
 
+                        <SwapCoach
+                            quote={quote}
+                            price={price}
+                            sellToken={sellToken}
+                            buyToken={buyToken}
+                            selectedChainId={selectedChainId}
+                            isConnected={isConnected}
+                            isQuoting={isQuoting}
+                            gasDisplay={gasDisplay}
+                            nativeUsdPrice={nativeUsdPrice}
+                            hasNativeGas={hasNativeGas}
+                        />
+
                         <SwapShowMore
                             slippageBps={slippageBps} onSlippageChange={setSlippageBps}
                             quote={quote} price={price}
@@ -880,7 +980,7 @@ function SwapCardInner() {
                                 type="button"
                                 onClick={() => switchChainAsync({ chainId: selectedChainId })}
                                 disabled={isSwitching}
-                                className="w-full rounded-2xl bg-[rgba(212,175,55,0.95)] px-4 py-3 text-sm font-semibold text-black hover:bg-[rgba(212,175,55,0.85)] disabled:opacity-60 transition"
+                                className="w-full rounded-[22px] bg-[rgba(212,175,55,0.95)] px-4 py-4 text-base font-semibold text-black transition hover:bg-[rgba(212,175,55,0.85)] disabled:opacity-60"
                             >
                                 {isSwitching ? "Switching…" : `Switch to ${selectedChainName}`}
                             </button>
@@ -893,7 +993,7 @@ function SwapCardInner() {
                                 type="button"
                                 onClick={needsApproval ? approveAndSwap : () => swap()}
                                 disabled={primaryDisabled}
-                                className="w-full rounded-2xl bg-[rgba(255,222,85,0.98)] px-4 py-3 text-sm font-semibold text-black shadow-[0_12px_25px_-12px_rgba(255,222,85,0.9)] hover:bg-[rgba(255,210,65,0.98)] disabled:opacity-60 transition"
+                                className="w-full rounded-[24px] bg-[rgba(255,222,85,0.98)] px-4 py-4 text-base font-bold text-black shadow-[0_14px_28px_-18px_rgba(255,222,85,0.9)] transition hover:bg-[rgba(255,210,65,0.98)] disabled:opacity-60"
                             >
                                 {primaryLabel}
                             </button>

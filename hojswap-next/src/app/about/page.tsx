@@ -18,6 +18,7 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "KINGJOSHI", name: "King Joshi", logo: HOUSE_LOGO },
       { symbol: "AERO", name: "Aerodrome Finance", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x940181a94A35A4569E4529A3CDfB74e38FD98631/logo.png" },
       { symbol: "BRETT", name: "Brett", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x532f27101965dd16442E59d40670FaF5eBB142E4/logo.png" },
+      { symbol: "SHIB", name: "SchismaticShib", logo: "/tokens/shib-base.png" },
       { symbol: "MOG", name: "Mog Coin", logo: "/tokens/mog.png" },
       { symbol: "TOSHI", name: "Toshi", logo: "/tokens/toshi.png" },
     ],
@@ -68,6 +69,7 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "BNB", name: "Binance Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/info/logo.png" },
       { symbol: "USDT", name: "Tether USD", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x55d398326f99059fF775485246999027B3197955/logo.png" },
       { symbol: "USDC", name: "USD Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x8AC76a51cc950d9822D68b83FE1Ad97B32Cd580d/logo.png" },
+      { symbol: "DOGE", name: "Binance-Peg Dogecoin", logo: "https://assets.coingecko.com/coins/images/5/standard/dogecoin.png" },
       { symbol: "FDUSD", name: "First Digital USD", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xc5f0f7b66764F6ec8C8Dff7BA684102245B16472/logo.png" },
       { symbol: "CAKE", name: "PancakeSwap Token", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x0E09FaBB73Bd3Ade0A17ECC321fD13a19E81cE82/logo.png" },
       { symbol: "BabyDoge", name: "Baby Doge Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xc748673057861a797275CD8A068AbB95A902e8de/logo.png" },
@@ -112,9 +114,9 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
 
 const networks = [
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity for SHIB, BONE, TREAT, OSCAR, BNB, MAME, WETH, DAI, LINK, UNI, AAVE, PEPE, FLOKI, USDC, USDT, and ETH." },
-  { name: "Base", badge: "Swap + Bridge", desc: "Home for QUEENJOSHI, KINGJOSHI, AERO, BRETT, MOG, and TOSHI with faster, lower-cost trading." },
+  { name: "Base", badge: "Swap + Bridge", desc: "Home for QUEENJOSHI, KINGJOSHI, SHIB, AERO, BRETT, MOG, and TOSHI with faster, lower-cost trading." },
   { name: "Polygon", badge: "Swap", desc: "POL, WETH, WBTC, USDC, and USDT routed through 0x liquidity." },
-  { name: "BNB Chain", badge: "Swap", desc: "BNB, USDT, USDC, FDUSD, CAKE, and BabyDoge through 0x liquidity." },
+  { name: "BNB Chain", badge: "Swap", desc: "BNB, USDT, USDC, DOGE, FDUSD, CAKE, and BabyDoge through 0x liquidity." },
   { name: "Arbitrum", badge: "Swap", desc: "ARB, ETH, USDC, GMX, and MAGIC across Ethereum L2 liquidity." },
   { name: "Optimism", badge: "Swap", desc: "OP, ETH, USDC, and VELO across Ethereum L2 liquidity." },
   { name: "Cronos", badge: "Bridge", desc: "USDC, USDT, and ETH routes via Li.Fi between Ethereum, Base, and Cronos." },
@@ -123,7 +125,7 @@ const networks = [
 
 const highlights = [
   { value: "8", label: "Supported chains" },
-  { value: "46", label: "Shown assets" },
+  { value: "52", label: "Shown assets" },
   { value: "1%", label: "House fee" },
 ];
 

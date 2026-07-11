@@ -12,6 +12,12 @@ out-tsc
 node_modules
 .pnpm-store/
 
+# env files - keep real secrets local
+.env
+.env.*
+!.env.example
+!.env.*.example
+
 # IDEs and editors
 /.idea
 .project

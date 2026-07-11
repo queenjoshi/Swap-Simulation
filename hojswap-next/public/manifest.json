@@ -1,0 +1,25 @@
+{
+  "name": "House of Joshi - Swap & Bridge",
+  "short_name": "House of Joshi",
+  "description": "Swap and bridge HOJ community tokens across supported EVM chains.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b0b0d",
+  "theme_color": "#d4af37",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["finance", "web3"]
+}

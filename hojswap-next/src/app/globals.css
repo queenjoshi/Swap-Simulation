@@ -26,17 +26,6 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-.hoj-input {
-  font-size: 16px;
-}
-
-@media (min-width: 640px) {
-  .hoj-input {
-    font-size: 1.5rem;
-    line-height: 2rem;
-  }
-}
-
 .hoj-display {
   font-family: var(--font-display);
   letter-spacing: 0.02em;
@@ -44,14 +33,13 @@ body {
 
 .hoj-card {
   position: relative;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(212, 175, 55, 0.18);
+  background: rgba(212, 175, 55, 0.035);
+  border: 1px solid rgba(212, 175, 55, 0.12);
   box-shadow:
-    0 1px 0 rgba(212, 175, 55, 0.1) inset,
-    0 32px 90px rgba(0, 0, 0, 0.45),
-    0 48px 120px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(24px);
-  overflow: hidden;
+    0 1px 0 rgba(255, 236, 166, 0.06) inset,
+    0 18px 44px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(10px);
+  overflow: visible;
 }
 
 .hoj-card::before {
@@ -59,9 +47,7 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    radial-gradient(circle at top left, rgba(212, 175, 55, 0.16), transparent 22%),
-    radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.08), transparent 24%);
+  display: none;
 }
 
 .hoj-card::after {
@@ -69,7 +55,7 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 42%);
+  display: none;
 }
 
 .hoj-card > * {
@@ -78,12 +64,11 @@ body {
 }
 
 .hoj-panel {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.055);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.02),
-    0 18px 40px rgba(0, 0, 0, 0.24);
-  backdrop-filter: blur(18px);
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 12px 26px rgba(0, 0, 0, 0.2);
 }
 
 .hoj-surface {

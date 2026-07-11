@@ -5,25 +5,29 @@ import { useState } from "react";
 type TokenLogoProps = {
   symbol: string;
   logo?: string;
-  size?: "sm" | "lg";
+  size?: "xs" | "sm" | "lg";
 };
 
 export function TokenLogo({ symbol, logo, size = "sm" }: TokenLogoProps) {
-  const [failed, setFailed] = useState(false);
-  const sizeClass = size === "lg" ? "h-14 w-14 text-[11px]" : "h-9 w-9 text-[10px]";
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const preferredSrc = logo ?? "/logo.png";
+  const imageSrc = failedSrc === preferredSrc ? "/logo.png" : preferredSrc;
+  const sizeClass =
+    size === "lg"
+      ? "h-14 w-14"
+      : size === "xs"
+        ? "h-6 w-6"
+        : "h-9 w-9";
 
   return (
-    <div className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-[rgba(212,175,55,0.3)] bg-[rgba(212,175,55,0.08)] font-bold text-[rgba(212,175,55,0.9)] ${sizeClass}`}>
-      <span>{symbol.slice(0, 4)}</span>
-      {logo && !failed ? (
-        <img
-          src={logo}
-          alt={`${symbol} logo`}
-          className="absolute inset-0 h-full w-full object-cover"
-          loading="lazy"
-          onError={() => setFailed(true)}
-        />
-      ) : null}
+    <div className={`relative flex shrink-0 items-center justify-center overflow-hidden ${sizeClass}`}>
+      <img
+        src={imageSrc}
+        alt={`${symbol} logo`}
+        className="h-full w-full rounded-full object-contain"
+        loading="lazy"
+        onError={() => setFailedSrc(imageSrc)}
+      />
     </div>
   );
 }
