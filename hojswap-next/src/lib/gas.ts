@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, bsc, cronos, optimism, polygon } from "@/lib/chains";
+import { arbitrum, avalanche, bsc, cronos, optimism, polygon, unichain } from "@/lib/chains";
 import { formatCompactNumber } from "@/lib/format";
 import { apiUrl } from "@/lib/api";
 
@@ -15,12 +15,15 @@ const USDC_BY_CHAIN: Record<number, string> = {
   [bsc.id]:     "0x8AC76a51cc950d9822D68b83FE1Ad97B32Cd580d",
   [arbitrum.id]: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
   [optimism.id]: "0x0b2C639c533813f4Aa9D7837CAe62653423a6504",
+  [avalanche.id]: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+  [unichain.id]: "0x078D782b760474a361dDA0AF3839290b0EF57AD6",
 };
 
 export function getNativeSymbol(chainId: number): string {
   if (chainId === cronos.id) return "CRO";
   if (chainId === polygon.id) return "POL";
   if (chainId === bsc.id) return "BNB";
+  if (chainId === avalanche.id) return "AVAX";
   return "ETH";
 }
 

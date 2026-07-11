@@ -1,6 +1,6 @@
 import { getAddress } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, bsc, cronos, optimism, polygon, xrp } from "@/lib/chains";
+import { arbitrum, avalanche, bsc, cronos, optimism, polygon, unichain, xrp } from "@/lib/chains";
 
 export type Token = {
   symbol: string;
@@ -53,6 +53,20 @@ export const TOKENS: Token[] = [
     decimals: 6,
   },
   {
+    symbol: "WETH",
+    name: "Wrapped Ether",
+    address: getAddress("0x4200000000000000000000000000000000000006"),
+    chainId: base.id,
+    decimals: 18,
+  },
+  {
+    symbol: "cbBTC",
+    name: "Coinbase Wrapped BTC",
+    address: getAddress("0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf"),
+    chainId: base.id,
+    decimals: 8,
+  },
+  {
     symbol: "QUEENJOSHI",
     name: "Queen Joshi",
     address: getAddress("0x1f2f727f043e5f92371f853084242a3584c70aa5"),
@@ -98,6 +112,20 @@ export const TOKENS: Token[] = [
     symbol: "TOSHI",
     name: "Toshi",
     address: getAddress("0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2b4"),
+    chainId: base.id,
+    decimals: 18,
+  },
+  {
+    symbol: "VIRTUAL",
+    name: "Virtuals Protocol",
+    address: getAddress("0x0b3e328455c4059eeb9e3f84b5543f74e24e7e1b"),
+    chainId: base.id,
+    decimals: 18,
+  },
+  {
+    symbol: "DEGEN",
+    name: "Degen",
+    address: getAddress("0x4ed4e862860bed7a9570b96d89af5e1b0efefed"),
     chainId: base.id,
     decimals: 18,
   },
@@ -293,6 +321,27 @@ export const TOKENS: Token[] = [
     chainId: polygon.id,
     decimals: 8,
   },
+  {
+    symbol: "AAVE",
+    name: "Aave",
+    address: getAddress("0xd6df932a45c0f255f85145f286ea0b292b21c90b"),
+    chainId: polygon.id,
+    decimals: 18,
+  },
+  {
+    symbol: "LINK",
+    name: "Chainlink",
+    address: getAddress("0x53e0bca35ec356bd5dddfebbd1fc0fd03fabad39"),
+    chainId: polygon.id,
+    decimals: 18,
+  },
+  {
+    symbol: "DAI",
+    name: "Dai Stablecoin",
+    address: getAddress("0x8f3cf7ad23cd3cadbd9735aff958023239c6a063"),
+    chainId: polygon.id,
+    decimals: 18,
+  },
 
   // ─── BNB Chain ───────────────────────────────────────────
   {
@@ -366,6 +415,27 @@ export const TOKENS: Token[] = [
     decimals: 6,
   },
   {
+    symbol: "WETH",
+    name: "Wrapped Ether",
+    address: getAddress("0x82af49447d8a07e3bd95bd0d56f35241523fbab1"),
+    chainId: arbitrum.id,
+    decimals: 18,
+  },
+  {
+    symbol: "USDT",
+    name: "Tether USD",
+    address: getAddress("0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9"),
+    chainId: arbitrum.id,
+    decimals: 6,
+  },
+  {
+    symbol: "WBTC",
+    name: "Wrapped BTC",
+    address: getAddress("0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f"),
+    chainId: arbitrum.id,
+    decimals: 8,
+  },
+  {
     symbol: "GMX",
     name: "GMX",
     address: getAddress("0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a"),
@@ -402,11 +472,90 @@ export const TOKENS: Token[] = [
     decimals: 6,
   },
   {
+    symbol: "WETH",
+    name: "Wrapped Ether",
+    address: getAddress("0x4200000000000000000000000000000000000006"),
+    chainId: optimism.id,
+    decimals: 18,
+  },
+  {
+    symbol: "USDT",
+    name: "Tether USD",
+    address: getAddress("0x94b008aa00579c1307b0ef2c499ad98a8ce58e58"),
+    chainId: optimism.id,
+    decimals: 6,
+  },
+  {
+    symbol: "SNX",
+    name: "Synthetix Network",
+    address: getAddress("0x8700daec35af8ff88c16bdf0418774cb3d7599b4"),
+    chainId: optimism.id,
+    decimals: 18,
+  },
+  {
     symbol: "VELO",
     name: "Velodrome",
     address: getAddress("0x9560e827aF36c94D2Ac33a39bCE1Fe78631088Db"),
     chainId: optimism.id,
     decimals: 18,
+  },
+
+  // ─── Avalanche ──────────────────────────────────────────
+  {
+    symbol: "AVAX",
+    name: "Avalanche",
+    chainId: avalanche.id,
+    decimals: 18,
+  },
+  {
+    symbol: "USDC",
+    name: "USD Coin",
+    address: getAddress("0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e"),
+    chainId: avalanche.id,
+    decimals: 6,
+  },
+  {
+    symbol: "USDT",
+    name: "Tether USD",
+    address: getAddress("0xc7198437980c041c805a1edcba50c1ce5db95118"),
+    chainId: avalanche.id,
+    decimals: 6,
+  },
+  {
+    symbol: "WETH",
+    name: "Wrapped Ether",
+    address: getAddress("0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab"),
+    chainId: avalanche.id,
+    decimals: 18,
+  },
+  {
+    symbol: "WBTC",
+    name: "Wrapped BTC",
+    address: getAddress("0x50b7545627a5162f82a992c33b87adc75187b218"),
+    chainId: avalanche.id,
+    decimals: 8,
+  },
+
+  // ─── Unichain ───────────────────────────────────────────
+  {
+    symbol: "ETH",
+    name: "Ether",
+    chainId: unichain.id,
+    decimals: 18,
+  },
+  {
+    symbol: "WETH",
+    name: "Wrapped Ether",
+    address: getAddress("0x4200000000000000000000000000000000000006"),
+    chainId: unichain.id,
+    decimals: 18,
+  },
+  {
+    symbol: "USDC",
+    name: "USD Coin",
+    address: getAddress("0x078d782b760474a361dda0af3839290b0ef57ad6"),
+    chainId: unichain.id,
+    decimals: 6,
   },
 
   // ─── XRP Ledger EVM Sidechain ────────────────────────────
@@ -453,6 +602,8 @@ export function defaultSellForChain(chainId: number) {
   if (chainId === bsc.id) return list.find((t) => t.symbol === "BNB") ?? list[0]!;
   if (chainId === arbitrum.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
   if (chainId === optimism.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
+  if (chainId === avalanche.id) return list.find((t) => t.symbol === "AVAX") ?? list[0]!;
+  if (chainId === unichain.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
   return list.find((t) => t.symbol === "ETH") ?? list[0]!;
 }
 
@@ -466,6 +617,8 @@ export function defaultBuyForChain(chainId: number) {
   if (chainId === bsc.id) return list.find((t) => t.symbol === "USDT") ?? list[1] ?? list[0]!;
   if (chainId === arbitrum.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
   if (chainId === optimism.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
+  if (chainId === avalanche.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
+  if (chainId === unichain.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
   return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
 }
 

@@ -16,11 +16,15 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
     tokens: [
       { symbol: "QUEENJOSHI", name: "Queen Joshi", logo: HOUSE_LOGO },
       { symbol: "KINGJOSHI", name: "King Joshi", logo: HOUSE_LOGO },
+      { symbol: "WETH", name: "Wrapped Ether", logo: "https://assets.coingecko.com/coins/images/2518/standard/weth.png" },
+      { symbol: "cbBTC", name: "Coinbase Wrapped BTC", logo: "https://assets.coingecko.com/coins/images/40143/standard/cbbtc.webp" },
       { symbol: "AERO", name: "Aerodrome Finance", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x940181a94A35A4569E4529A3CDfB74e38FD98631/logo.png" },
       { symbol: "BRETT", name: "Brett", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x532f27101965dd16442E59d40670FaF5eBB142E4/logo.png" },
       { symbol: "SHIB", name: "SchismaticShib", logo: "/tokens/shib-base.png" },
       { symbol: "MOG", name: "Mog Coin", logo: "/tokens/mog.png" },
       { symbol: "TOSHI", name: "Toshi", logo: "/tokens/toshi.png" },
+      { symbol: "VIRTUAL", name: "Virtuals Protocol", logo: "https://assets.coingecko.com/coins/images/34057/standard/LOGOMARK.png" },
+      { symbol: "DEGEN", name: "Degen", logo: "https://assets.coingecko.com/coins/images/34515/standard/android-chrome-512x512.png" },
     ],
   },
   {
@@ -60,6 +64,9 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "USDT", name: "Tether USD", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/assets/0xc2132D05D31c914a87C6611C10748AEb04B58e8F/logo.png" },
       { symbol: "WETH", name: "Wrapped Ether", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/assets/0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619/logo.png" },
       { symbol: "WBTC", name: "Wrapped BTC", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/assets/0x1BFD62B7D66453f26932296AB7c5409E839A7656/logo.png" },
+      { symbol: "AAVE", name: "Aave", logo: "https://assets.coingecko.com/coins/images/12645/standard/AAVE.png" },
+      { symbol: "LINK", name: "Chainlink", logo: "https://assets.coingecko.com/coins/images/877/standard/chainlink-new-logo.png" },
+      { symbol: "DAI", name: "Dai Stablecoin", logo: "https://assets.coingecko.com/coins/images/9956/standard/Badge_Dai.png" },
     ],
   },
   {
@@ -82,6 +89,9 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "ARB", name: "Arbitrum", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0x912CE59144191C1204E64559FE8253a0e49E6548/logo.png" },
       { symbol: "ETH", name: "Ether", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png" },
       { symbol: "USDC", name: "USD Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0xaf88d065e77c8cC2239327C5EDb3A432268e5831/logo.png" },
+      { symbol: "WETH", name: "Wrapped Ether", logo: "https://assets.coingecko.com/coins/images/2518/standard/weth.png" },
+      { symbol: "USDT", name: "Tether USD", logo: "https://assets.coingecko.com/coins/images/325/standard/Tether.png" },
+      { symbol: "WBTC", name: "Wrapped BTC", logo: "https://assets.coingecko.com/coins/images/7598/standard/wrapped_bitcoin_wbtc.png" },
       { symbol: "GMX", name: "GMX", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a/logo.png" },
       { symbol: "MAGIC", name: "MAGIC", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0x539bdE0d7Dbd336b79148AA742883198BBF60342/logo.png" },
     ],
@@ -93,7 +103,30 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "OP", name: "Optimism", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/assets/0x4200000000000000000000000000000000000042/logo.png" },
       { symbol: "ETH", name: "Ether", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png" },
       { symbol: "USDC", name: "USD Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/assets/0x0b2C639c533813f4Aa9D7837CAe62653423a6504/logo.png" },
+      { symbol: "WETH", name: "Wrapped Ether", logo: "https://assets.coingecko.com/coins/images/2518/standard/weth.png" },
+      { symbol: "USDT", name: "Tether USD", logo: "https://assets.coingecko.com/coins/images/325/standard/Tether.png" },
+      { symbol: "SNX", name: "Synthetix Network", logo: "https://assets.coingecko.com/coins/images/3406/standard/SNX.png" },
       { symbol: "VELO", name: "Velodrome", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/assets/0x9560e827aF36c94D2Ac33a39bCE1Fe78631088Db/logo.png" },
+    ],
+  },
+  {
+    title: "Avalanche",
+    eyebrow: "Avalanche",
+    tokens: [
+      { symbol: "AVAX", name: "Avalanche", logo: "https://assets.coingecko.com/coins/images/12559/standard/Avalanche_Circle_RedWhite_Trans.png" },
+      { symbol: "USDC", name: "USD Coin", logo: "https://assets.coingecko.com/coins/images/6319/standard/usdc.png" },
+      { symbol: "USDT", name: "Tether USD", logo: "https://assets.coingecko.com/coins/images/325/standard/Tether.png" },
+      { symbol: "WETH", name: "Wrapped Ether", logo: "https://assets.coingecko.com/coins/images/2518/standard/weth.png" },
+      { symbol: "WBTC", name: "Wrapped BTC", logo: "https://assets.coingecko.com/coins/images/7598/standard/wrapped_bitcoin_wbtc.png" },
+    ],
+  },
+  {
+    title: "Unichain",
+    eyebrow: "Unichain",
+    tokens: [
+      { symbol: "ETH", name: "Ether", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png" },
+      { symbol: "WETH", name: "Wrapped Ether", logo: "https://assets.coingecko.com/coins/images/2518/standard/weth.png" },
+      { symbol: "USDC", name: "USD Coin", logo: "https://assets.coingecko.com/coins/images/6319/standard/usdc.png" },
     ],
   },
   {
@@ -114,18 +147,20 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
 
 const networks = [
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity for SHIB, BONE, TREAT, OSCAR, BNB, MAME, WETH, DAI, LINK, UNI, AAVE, PEPE, FLOKI, USDC, USDT, and ETH." },
-  { name: "Base", badge: "Swap + Bridge", desc: "Home for QUEENJOSHI, KINGJOSHI, SHIB, AERO, BRETT, MOG, and TOSHI with faster, lower-cost trading." },
-  { name: "Polygon", badge: "Swap", desc: "POL, WETH, WBTC, USDC, and USDT routed through 0x liquidity." },
+  { name: "Base", badge: "Swap + Bridge", desc: "Home for QUEENJOSHI, KINGJOSHI, SHIB, WETH, cbBTC, AERO, BRETT, MOG, TOSHI, VIRTUAL, and DEGEN with faster, lower-cost trading." },
+  { name: "Polygon", badge: "Swap", desc: "POL, WETH, WBTC, USDC, USDT, AAVE, LINK, and DAI routed through 0x liquidity." },
   { name: "BNB Chain", badge: "Swap", desc: "BNB, USDT, USDC, DOGE, FDUSD, CAKE, and BabyDoge through 0x liquidity." },
-  { name: "Arbitrum", badge: "Swap", desc: "ARB, ETH, USDC, GMX, and MAGIC across Ethereum L2 liquidity." },
-  { name: "Optimism", badge: "Swap", desc: "OP, ETH, USDC, and VELO across Ethereum L2 liquidity." },
+  { name: "Arbitrum", badge: "Swap", desc: "ARB, ETH, USDC, WETH, USDT, WBTC, GMX, and MAGIC across Ethereum L2 liquidity." },
+  { name: "Optimism", badge: "Swap", desc: "OP, ETH, USDC, WETH, USDT, SNX, and VELO across Ethereum L2 liquidity." },
+  { name: "Avalanche", badge: "Swap", desc: "AVAX, USDC, USDT, WETH, and WBTC on Avalanche C-Chain." },
+  { name: "Unichain", badge: "Swap", desc: "ETH, WETH, and USDC on Unichain for new Uniswap-native liquidity." },
   { name: "Cronos", badge: "Bridge", desc: "USDC, USDT, and ETH routes via Li.Fi between Ethereum, Base, and Cronos." },
   { name: "XRP Ledger EVM", badge: "Coming Soon", desc: "Listed for network continuity while swap and bridge routes mature." },
 ];
 
 const highlights = [
-  { value: "8", label: "Supported chains" },
-  { value: "52", label: "Shown assets" },
+  { value: "10", label: "Supported chains" },
+  { value: "73", label: "Shown assets" },
   { value: "1%", label: "House fee" },
 ];
 
@@ -141,7 +176,7 @@ export default function About() {
             House of Joshi across every chain that matters.
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-white/66 sm:text-base">
-            Trade community tokens, blue-chip assets, stablecoins, and chain-native coins across 8 supported networks from one non-custodial interface.
+            Trade community tokens, blue-chip assets, stablecoins, and chain-native coins across 10 supported networks from one non-custodial interface.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link

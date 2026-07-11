@@ -78,17 +78,45 @@ export const optimism = {
   testnet: false,
 } as const;
 
-export const SUPPORTED_CHAIN_IDS = [base.id, mainnet.id, cronos.id, xrp.id, polygon.id, bsc.id, arbitrum.id, optimism.id] as const;
+export const avalanche = {
+  id: 43114,
+  name: "Avalanche",
+  network: "avalanche",
+  nativeCurrency: { name: "Avalanche", symbol: "AVAX", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://api.avax.network/ext/bc/C/rpc"] },
+    public: { http: ["https://api.avax.network/ext/bc/C/rpc"] },
+  },
+  blockExplorers: { default: { name: "Snowtrace", url: "https://snowtrace.io" } },
+  testnet: false,
+} as const;
+
+export const unichain = {
+  id: 130,
+  name: "Unichain",
+  network: "unichain",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://mainnet.unichain.org"] },
+    public: { http: ["https://mainnet.unichain.org"] },
+  },
+  blockExplorers: { default: { name: "Uniscan", url: "https://uniscan.xyz" } },
+  testnet: false,
+} as const;
+
+export const SUPPORTED_CHAIN_IDS = [base.id, mainnet.id, cronos.id, xrp.id, polygon.id, bsc.id, arbitrum.id, optimism.id, avalanche.id, unichain.id] as const;
 export type SupportedChainId = (typeof SUPPORTED_CHAIN_IDS)[number];
 
 export const CHAIN_OPTIONS = [
   { id: arbitrum.id, label: "Arbitrum", shortLabel: "Arbitrum", swap: true },
+  { id: avalanche.id, label: "Avalanche", shortLabel: "Avalanche", swap: true },
   { id: base.id, label: "Base", shortLabel: "Base", swap: true },
   { id: bsc.id, label: "BNB Chain", shortLabel: "BNB", swap: true },
   { id: cronos.id, label: "Cronos", shortLabel: "Cronos", swap: false },
   { id: mainnet.id, label: "Ethereum", shortLabel: "ETH", swap: true },
   { id: optimism.id, label: "Optimism", shortLabel: "Optimism", swap: true },
   { id: polygon.id, label: "Polygon", shortLabel: "Polygon", swap: true },
+  { id: unichain.id, label: "Unichain", shortLabel: "Unichain", swap: true },
   { id: xrp.id, label: "XRP EVM", shortLabel: "XRP", swap: false },
 ] as const;
 
@@ -105,6 +133,8 @@ export function getChainName(chainId: number) {
   if (chainId === bsc.id) return "BNB Chain";
   if (chainId === arbitrum.id) return "Arbitrum";
   if (chainId === optimism.id) return "Optimism";
+  if (chainId === avalanche.id) return "Avalanche";
+  if (chainId === unichain.id) return "Unichain";
   return "Unknown";
 }
 
@@ -117,6 +147,8 @@ export function explorerName(chainId: number) {
   if (chainId === bsc.id) return "BscScan";
   if (chainId === arbitrum.id) return "Arbiscan";
   if (chainId === optimism.id) return "Optimism Explorer";
+  if (chainId === avalanche.id) return "Snowtrace";
+  if (chainId === unichain.id) return "Uniscan";
   return "Explorer";
 }
 
@@ -129,6 +161,8 @@ export function explorerTxUrl(chainId: number, hash: string) {
   if (chainId === bsc.id) return `https://bscscan.com/tx/${hash}`;
   if (chainId === arbitrum.id) return `https://arbiscan.io/tx/${hash}`;
   if (chainId === optimism.id) return `https://optimistic.etherscan.io/tx/${hash}`;
+  if (chainId === avalanche.id) return `https://snowtrace.io/tx/${hash}`;
+  if (chainId === unichain.id) return `https://uniscan.xyz/tx/${hash}`;
   return `https://basescan.org/tx/${hash}`;
 }
 
@@ -141,5 +175,7 @@ export function explorerAddressUrl(chainId: number, address: string) {
   if (chainId === bsc.id) return `https://bscscan.com/address/${address}`;
   if (chainId === arbitrum.id) return `https://arbiscan.io/address/${address}`;
   if (chainId === optimism.id) return `https://optimistic.etherscan.io/address/${address}`;
+  if (chainId === avalanche.id) return `https://snowtrace.io/address/${address}`;
+  if (chainId === unichain.id) return `https://uniscan.xyz/address/${address}`;
   return `https://basescan.org/address/${address}`;
 }

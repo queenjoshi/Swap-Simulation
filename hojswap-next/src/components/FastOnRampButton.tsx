@@ -23,6 +23,8 @@ export function FastOnRampButton({ walletAddress, selectedChainId, onSuccess }: 
       56: "bsc",
       42161: "arbitrum",
       10: "optimism",
+      43114: "avalanche",
+      130: "unichain",
     };
     return chainMap[chainId] || "ethereum";
   };

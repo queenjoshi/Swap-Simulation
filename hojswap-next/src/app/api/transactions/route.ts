@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 const ETHERSCAN_KEY = process.env.ETHERSCAN_API_KEY ?? "";
 const HOUSE_WALLET = "0x6736d2eA9807297F0e56967361B9410854B86a5f";
 const XRP_EVM_CHAIN_ID = 1440002;
+const AVALANCHE_CHAIN_ID = 43114;
+const UNICHAIN_CHAIN_ID = 130;
 
 type EtherscanTx = {
   hash: string;
@@ -42,8 +44,18 @@ function getEtherscanApiUrl(chainId: number): string | null {
   if (chainId === 56) return "https://api.bscscan.com/api";
   if (chainId === 42161) return "https://api.arbiscan.io/api";
   if (chainId === 10) return "https://api-optimistic.etherscan.io/api";
+  if (chainId === AVALANCHE_CHAIN_ID) return "https://api.snowtrace.io/api";
+  if (chainId === UNICHAIN_CHAIN_ID) return "https://api.uniscan.xyz/api";
   if (chainId === XRP_EVM_CHAIN_ID) return null; // No Etherscan-compatible API for XRP EVM
   return null;
+}
+
+function nativeSymbolForChain(chainId: number): string {
+  if (chainId === AVALANCHE_CHAIN_ID) return "AVAX";
+  if (chainId === 56) return "BNB";
+  if (chainId === 137) return "POL";
+  if (chainId === 25) return "CRO";
+  return "ETH";
 }
 
 async function fetchEtherscanTxns(
@@ -116,6 +128,7 @@ export async function GET(request: Request) {
           ? "<0.000001"
           : amount.toLocaleString(undefined, { maximumFractionDigits: 6 });
       const kind = tx.to?.toLowerCase() === HOUSE_WALLET.toLowerCase() ? "fee" : "wallet";
+      const nativeSymbol = nativeSymbolForChain(chainId);
       return {
         hash: tx.hash,
         chainId,
@@ -151,10 +164,10 @@ export async function GET(request: Request) {
         status: tx.isError === "1" ? "failed" : "success",
         kind,
         type: "eth",
-        summary: `${amtStr} ETH`,
+        summary: `${amtStr} ${nativeSymbol}`,
         from: tx.from,
         to: tx.to,
-        tokenSymbol: "ETH",
+        tokenSymbol: nativeSymbol,
         amount: amtStr,
       };
     };

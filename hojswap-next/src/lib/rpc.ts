@@ -1,5 +1,5 @@
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, bsc, cronos, optimism, polygon, xrp } from "@/lib/chains";
+import { arbitrum, avalanche, bsc, cronos, optimism, polygon, unichain, xrp } from "@/lib/chains";
 import type { Chain } from "viem";
 import { fallback, http } from "viem";
 
@@ -42,6 +42,15 @@ export const RPC_URLS: Record<number, readonly string[]> = {
     "https://optimism-rpc.publicnode.com",
     "https://optimism.llamarpc.com",
   ],
+  [avalanche.id]: [
+    "https://api.avax.network/ext/bc/C/rpc",
+    "https://avalanche-c-chain-rpc.publicnode.com",
+    "https://avalanche.drpc.org",
+  ],
+  [unichain.id]: [
+    "https://mainnet.unichain.org",
+    "https://unichain-rpc.publicnode.com",
+  ],
 };
 
 export function getRpcUrl(chainId: number) {
@@ -61,5 +70,7 @@ export function getViemChain(chainId: number) {
   if (chainId === bsc.id) return bsc as Chain;
   if (chainId === arbitrum.id) return arbitrum as Chain;
   if (chainId === optimism.id) return optimism as Chain;
+  if (chainId === avalanche.id) return avalanche as Chain;
+  if (chainId === unichain.id) return unichain as Chain;
   return base;
 }

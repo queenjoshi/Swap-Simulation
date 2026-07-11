@@ -1,4 +1,4 @@
-import { arbitrum, bsc, optimism, polygon } from "@/lib/chains";
+import { arbitrum, avalanche, bsc, optimism, polygon, unichain } from "@/lib/chains";
 import { NATIVE_ETH_ADDRESS } from "@/lib/quote";
 import { isNative, type Token } from "@/lib/tokens";
 import { base, mainnet } from "wagmi/chains";
@@ -51,11 +51,13 @@ export const hojswapRouterAbi = [
 
 const ROUTER_ENV_BY_CHAIN_ID: Record<number, `0x${string}` | undefined> = {
   [arbitrum.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_ARBITRUM as `0x${string}` | undefined,
+  [avalanche.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_AVALANCHE as `0x${string}` | undefined,
   [base.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_BASE as `0x${string}` | undefined,
   [bsc.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_BNB as `0x${string}` | undefined,
   [mainnet.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_ETHEREUM as `0x${string}` | undefined,
   [optimism.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_OPTIMISM as `0x${string}` | undefined,
   [polygon.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_POLYGON as `0x${string}` | undefined,
+  [unichain.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_UNICHAIN as `0x${string}` | undefined,
 };
 
 export function getHojswapRouterAddress(chainId: number): `0x${string}` | null {

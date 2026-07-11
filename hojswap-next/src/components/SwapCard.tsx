@@ -40,8 +40,10 @@ const CHAIN_LOGOS: Record<number, string> = {
     10: "https://assets.coingecko.com/coins/images/25244/standard/Optimism.png",
     25: "https://assets.coingecko.com/coins/images/7310/standard/cro_token_logo.png",
     56: "https://assets.coingecko.com/coins/images/825/standard/bnb-icon2_2x.png",
+    130: "https://assets.coingecko.com/coins/images/12504/standard/uniswap-logo.png",
     137: "https://assets.coingecko.com/coins/images/32440/standard/polygon.png",
     8453: "https://assets.coingecko.com/asset_platforms/images/131/small/base.jpeg",
+    43114: "https://assets.coingecko.com/coins/images/12559/standard/Avalanche_Circle_RedWhite_Trans.png",
     42161: "https://assets.coingecko.com/coins/images/16547/standard/arb.jpg",
     1440002: "/tokens/xrp.png",
 };

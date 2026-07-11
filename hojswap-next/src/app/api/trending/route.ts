@@ -14,6 +14,8 @@ export async function GET(request: Request) {
       '56': ['binance-smart-chain', 'defi'],
       '42161': ['arbitrum-ecosystem', 'defi'],
       '10': ['optimism-ecosystem', 'defi'],
+      '43114': ['avalanche-ecosystem', 'defi'],
+      '130': ['unichain-ecosystem', 'defi'],
     };
 
     const categories = categoryMap[chainId] || ['base-ecosystem'];

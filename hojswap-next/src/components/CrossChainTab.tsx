@@ -12,7 +12,7 @@ import {
 } from "wagmi";
 import { formatUnits, parseUnits, maxUint256 } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { CHAIN_OPTIONS, getChainName, polygon, bsc, arbitrum, optimism, xrp, cronos } from "@/lib/chains";
+import { CHAIN_OPTIONS, getChainName, polygon, bsc, arbitrum, optimism, xrp, cronos, avalanche, unichain } from "@/lib/chains";
 import { clampToDecimals, formatCompactNumber, isValidNumberInput } from "@/lib/format";
 import { useToast } from "@/components/Toast";
 import { SIMPLE_TRANSFER_ABI } from "@/lib/stargate";
@@ -81,6 +81,18 @@ const TOKENS_BY_CHAIN: Record<number, XToken[]> = {
     { symbol: "USDT", address: "0x94b008Aa00d79E0C0f9bc64dDf02Ed379797EcAd", decimals: 6 },
     { symbol: "DAI",  address: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", decimals: 18 },
     { symbol: "WBTC", address: "0x68505E8F81b86E4e9405f1D920Ce9404f8A25E3C", decimals: 8 },
+  ],
+  [avalanche.id]: [
+    { symbol: "AVAX", address: "0x0000000000000000000000000000000000000000", decimals: 18 },
+    { symbol: "USDC", address: "0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e", decimals: 6 },
+    { symbol: "USDT", address: "0xc7198437980c041c805a1edcba50c1ce5db95118", decimals: 6 },
+    { symbol: "WETH", address: "0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab", decimals: 18 },
+    { symbol: "WBTC", address: "0x50b7545627a5162f82a992c33b87adc75187b218", decimals: 8 },
+  ],
+  [unichain.id]: [
+    { symbol: "ETH", address: "0x0000000000000000000000000000000000000000", decimals: 18 },
+    { symbol: "WETH", address: "0x4200000000000000000000000000000000000006", decimals: 18 },
+    { symbol: "USDC", address: "0x078d782b760474a361dda0af3839290b0ef57ad6", decimals: 6 },
   ],
 };
 
