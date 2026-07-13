@@ -25,7 +25,6 @@ import { SwapShowMore } from "@/components/SwapShowMore";
 import { TokenBalance } from "@/components/TokenBalance";
 import { TokenSelect } from "@/components/TokenSelect";
 import { TokenLogo } from "@/components/TokenLogo";
-import { TransactionsPanel } from "@/components/TransactionsPanel";
 import { BridgeTab } from "@/components/BridgeTab";
 import { TrendingTokens } from "@/components/TrendingTokens";
 import { SwapCoach } from "@/components/SwapCoach";
@@ -50,7 +49,7 @@ const CHAIN_LOGOS: Record<number, string> = {
     1440002: "/tokens/xrp.png",
 };
 
-type ActiveTab = "swap" | "bridge" | "transactions";
+type ActiveTab = "swap" | "bridge";
 type ApiKeyError = "api_key_missing" | "api_key_invalid" | null;
 
 function SwapCardInner() {
@@ -97,7 +96,6 @@ function SwapCardInner() {
 
     const [sellDecimals, setSellDecimals] = useState<number | null>(null);
     const [buyDecimals, setBuyDecimals] = useState<number | null>(null);
-    const [txHistoryVersion, setTxHistoryVersion] = useState(0);
     const [swapStep, setSwapStep] = useState<"approve" | "quote" | "fee" | "swap" | null>(null);
 
     const quoteDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -727,7 +725,6 @@ function SwapCardInner() {
             });
 
             if (swapSuccess) {
-                setTxHistoryVersion((v) => v + 1);
                 setSellAmountInput("");
                 setQuote(null);
                 setPrice(null);
@@ -787,7 +784,6 @@ function SwapCardInner() {
     const TABS: { id: ActiveTab; label: string }[] = [
         { id: "swap", label: "Swap" },
         { id: "bridge", label: "Bridge" },
-        { id: "transactions", label: "Transactions" },
     ];
 
     return (
@@ -1054,10 +1050,8 @@ function SwapCardInner() {
                             </div>
                         )}
                     </>
-                ) : activeTab === "bridge" ? (
-                    <BridgeTab selectedChainId={selectedChainId} onChainChange={pickChain} />
                 ) : (
-                    <TransactionsPanel key={txHistoryVersion} walletAddress={address} selectedChainId={selectedChainId} />
+                    <BridgeTab selectedChainId={selectedChainId} onChainChange={pickChain} />
                 )}
             </div>
 
