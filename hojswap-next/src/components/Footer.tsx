@@ -1,4 +1,5 @@
-"use client";
+import Image from "next/image";
+import Link from "next/link";
 
 const SOCIAL_LINKS = [
   {
@@ -52,101 +53,123 @@ const PRODUCT_LINKS = [
   { label: "Dreamweaver", href: "https://dreamweaver.thehouseofjoshi.com/" },
 ];
 
+const HOUSE_LINKS = [
+  { label: "Website", href: "https://thehouseofjoshi.com", external: true },
+  { label: "About", href: "/about" },
+  { label: "FAQ", href: "/faq" },
+  { label: "Contact", href: "/contact" },
+];
+
 export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-[rgba(212,175,55,0.1)] bg-[#0b0b0d]">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:grid-cols-2 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_1fr_1fr]">
-        <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="House of Joshi" className="h-8 w-8 object-contain" />
-          <div>
-            <p className="hoj-display text-sm font-semibold text-[rgba(212,175,55,0.9)]">
-              House of Joshi
-            </p>
-            <p className="text-[11px] text-white/35">Swap with care. Verify every token.</p>
+    <footer
+      aria-label="House of Joshi footer"
+      className="border-t border-[rgba(212,175,55,0.14)] bg-[linear-gradient(180deg,#0d0d0f_0%,#070708_100%)]"
+    >
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <div className="flex flex-col gap-5 border-b border-white/8 pb-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/logo.png"
+              alt="House of Joshi"
+              width={40}
+              height={40}
+              className="h-10 w-10 shrink-0 object-contain"
+            />
+            <div>
+              <p className="hoj-display text-base font-semibold text-[rgba(226,190,72,0.95)]">
+                House of Joshi
+              </p>
+              <p className="text-xs text-white/45">Swap & Bridge with House Guide checks.</p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {SOCIAL_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                target={link.href.startsWith("mailto:") ? undefined : "_blank"}
+                rel={link.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
+                aria-label={link.label}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/45 transition hover:border-[rgba(212,175,55,0.4)] hover:bg-[rgba(212,175,55,0.08)] hover:text-[rgba(226,190,72,0.95)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(226,190,72,0.95)]"
+              >
+                {link.icon}
+              </a>
+            ))}
           </div>
         </div>
 
-        <div>
-          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40">
-            Products
-          </h3>
-          <ul className="space-y-2">
-            {PRODUCT_LINKS.map((link) => (
-              <li key={link.label}>
-                <a
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-white/55 transition hover:text-[rgba(212,175,55,0.9)]"
-                >
-                  {link.label} ↗
-                </a>
-              </li>
-            ))}
-          </ul>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-8 py-7 sm:grid-cols-3 sm:gap-8">
+          <div>
+            <h3 className="mb-3 text-xs font-semibold uppercase text-white/42">House</h3>
+            <ul className="space-y-2.5">
+              {HOUSE_LINKS.map((link) => (
+                <li key={link.label}>
+                  {link.external ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-white/58 transition hover:text-[rgba(226,190,72,0.95)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(226,190,72,0.95)]"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className="text-sm text-white/58 transition hover:text-[rgba(226,190,72,0.95)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(226,190,72,0.95)]"
+                    >
+                      {link.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="mb-3 text-xs font-semibold uppercase text-white/42">Products</h3>
+            <ul className="space-y-2.5">
+              {PRODUCT_LINKS.map((link) => (
+                <li key={link.label}>
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-white/58 transition hover:text-[rgba(226,190,72,0.95)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(226,190,72,0.95)]"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="col-span-2 sm:col-span-1">
+            <h3 className="mb-3 text-xs font-semibold uppercase text-white/42">Protocol</h3>
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 sm:block sm:space-y-2.5">
+              {PROTOCOL_LINKS.map((link) => (
+                <li key={link.label}>
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-white/58 transition hover:text-[rgba(226,190,72,0.95)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(226,190,72,0.95)]"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-        <div>
-          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40">
-            Protocol
-          </h3>
-          <ul className="space-y-2">
-            {PROTOCOL_LINKS.map((link) => (
-              <li key={link.label}>
-                <a
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-white/55 transition hover:text-[rgba(212,175,55,0.9)]"
-                >
-                  {link.label} ↗
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="flex flex-wrap items-start gap-3 lg:justify-end">
-          <a
-            href="https://thehouseofjoshi.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-full border border-white/10 px-3 py-1.5 text-[11px] text-white/45 transition hover:border-[rgba(212,175,55,0.35)] hover:text-[rgba(212,175,55,0.9)]"
-          >
-            Website ↗
-          </a>
-          <a
-            href="/about"
-            className="rounded-full border border-white/10 px-3 py-1.5 text-[11px] text-white/45 transition hover:border-[rgba(212,175,55,0.35)] hover:text-[rgba(212,175,55,0.9)]"
-          >
-            About
-          </a>
-          <a
-            href="/faq"
-            className="rounded-full border border-white/10 px-3 py-1.5 text-[11px] text-white/45 transition hover:border-[rgba(212,175,55,0.35)] hover:text-[rgba(212,175,55,0.9)]"
-          >
-            FAQ
-          </a>
-          {SOCIAL_LINKS.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              target={link.href.startsWith("mailto:") ? undefined : "_blank"}
-              rel={link.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
-              aria-label={link.label}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-white/40 transition hover:border-[rgba(212,175,55,0.35)] hover:text-[rgba(212,175,55,0.9)]"
-            >
-              {link.icon}
-            </a>
-          ))}
-        </div>
-      </div>
-      <div className="border-t border-white/8 bg-black/20">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 text-[11px] text-white/35 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="flex flex-col gap-2 border-t border-white/8 pt-4 text-xs leading-relaxed text-white/35 sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} The House of Joshi. All rights reserved.</p>
-          <p className="leading-relaxed">Not financial advice. Swap at your own risk.</p>
+          <p>Verify tokens before swapping. Not financial advice.</p>
         </div>
       </div>
     </footer>
