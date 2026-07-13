@@ -12,7 +12,7 @@ import {
 } from "wagmi";
 import { formatUnits, parseUnits, maxUint256 } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { cronos, xrp, getChainName } from "@/lib/chains";
+import { cronos, robinhood, xrp, getChainName } from "@/lib/chains";
 import { clampToDecimals, formatCompactNumber, isValidNumberInput } from "@/lib/format";
 import { useToast } from "@/components/Toast";
 import {
@@ -40,6 +40,7 @@ const ALL_CHAINS = [
   { id: mainnet.id, name: "Ethereum" },
   { id: base.id, name: "Base" },
   { id: cronos.id, name: "Cronos" },
+  { id: robinhood.id, name: "Robinhood Chain" },
   { id: xrp.id, name: "XRP Ledger" },
 ];
 
@@ -485,9 +486,8 @@ export function BridgeTab({
         <div className="hoj-panel rounded-2xl p-5 space-y-2">
           <p className="text-sm font-semibold text-amber-200/90">Bridge not available for this route yet</p>
           <p className="text-[12px] leading-relaxed text-white/55">
-            The XRP Ledger EVM sidechain is very new — no major bridge aggregator supports it yet.
-            You can still <strong className="text-white/75">swap on XRP EVM</strong> using the Swap tab.
-            We'll add bridging to/from XRP EVM as soon as a reliable protocol becomes available.
+            Hojswap does not have an integrated route between {getChainName(fromChainId)} and {getChainName(toChainId)} yet.
+            We'll add this route when it is available through one of the app's bridge providers.
           </p>
           <p className="text-[11px] text-white/35">
             Alternatively, you can bridge USDC to Ethereum or Base, then swap.

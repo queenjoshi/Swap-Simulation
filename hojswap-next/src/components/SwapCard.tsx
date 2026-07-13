@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useSearchParams } from "next/navigation";
 import {
     useAccount,
@@ -42,6 +43,7 @@ const CHAIN_LOGOS: Record<number, string> = {
     56: "https://assets.coingecko.com/coins/images/825/standard/bnb-icon2_2x.png",
     130: "https://assets.coingecko.com/coins/images/12504/standard/uniswap-logo.png",
     137: "https://assets.coingecko.com/coins/images/32440/standard/polygon.png",
+    4663: "https://robinhood.com/favicon.ico",
     8453: "https://assets.coingecko.com/asset_platforms/images/131/small/base.jpeg",
     43114: "https://assets.coingecko.com/coins/images/12559/standard/Avalanche_Circle_RedWhite_Trans.png",
     42161: "https://assets.coingecko.com/coins/images/16547/standard/arb.jpg",
@@ -101,6 +103,9 @@ function SwapCardInner() {
     const quoteDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
     const quoteAbort = useRef<AbortController | null>(null);
     const chainMenuRef = useRef<HTMLDivElement>(null);
+    const chainButtonRef = useRef<HTMLButtonElement>(null);
+    const chainDropdownRef = useRef<HTMLDivElement>(null);
+    const [chainMenuRect, setChainMenuRect] = useState<{ top: number; left: number; width: number } | null>(null);
 
     const walletOnSelectedChain = chainId === selectedChainId;
     const needsCorrectChain = isConnected && !walletOnSelectedChain;
@@ -108,6 +113,7 @@ function SwapCardInner() {
 
     function pickChain(newChainId: number) {
         setChainMenuOpen(false);
+        setChainMenuRect(null);
         setSelectedChainId(newChainId);
         setSellToken(defaultSellForChain(newChainId));
         setBuyToken(defaultBuyForChain(newChainId));
@@ -126,11 +132,26 @@ function SwapCardInner() {
         }
     }, [selectedChainId, isSwapSupported, activeTab]);
 
+    const updateChainMenuRect = useCallback(() => {
+        const rect = chainButtonRef.current?.getBoundingClientRect();
+        if (!rect || typeof window === "undefined") return;
+        const width = Math.min(288, window.innerWidth - 32);
+        const left = Math.min(Math.max(16, rect.right - width), window.innerWidth - width - 16);
+        setChainMenuRect({ top: rect.bottom + 8, left, width });
+    }, []);
+
     useEffect(() => {
         if (!chainMenuOpen) return;
+        updateChainMenuRect();
 
         function onPointerDown(event: PointerEvent) {
-            if (!chainMenuRef.current?.contains(event.target as Node)) setChainMenuOpen(false);
+            const target = event.target as Node;
+            if (
+                !chainMenuRef.current?.contains(target) &&
+                !chainDropdownRef.current?.contains(target)
+            ) {
+                setChainMenuOpen(false);
+            }
         }
 
         function onKeyDown(event: KeyboardEvent) {
@@ -139,11 +160,15 @@ function SwapCardInner() {
 
         window.addEventListener("pointerdown", onPointerDown);
         window.addEventListener("keydown", onKeyDown);
+        window.addEventListener("resize", updateChainMenuRect);
+        window.addEventListener("scroll", updateChainMenuRect, true);
         return () => {
             window.removeEventListener("pointerdown", onPointerDown);
             window.removeEventListener("keydown", onKeyDown);
+            window.removeEventListener("resize", updateChainMenuRect);
+            window.removeEventListener("scroll", updateChainMenuRect, true);
         };
-    }, [chainMenuOpen]);
+    }, [chainMenuOpen, updateChainMenuRect]);
 
     const onSellTokenChange = useCallback(
         (next: Token) => {
@@ -750,10 +775,11 @@ function SwapCardInner() {
     ), [quote, price, nativeUsdPrice, nativeSymbol]);
     const hasNativeGas = !isConnected ? null : nativeBalanceData ? nativeBalanceData.value > 0n : null;
 
-    const CHAINS = CHAIN_OPTIONS.map(({ id, label, shortLabel }) => ({
+    const CHAINS = CHAIN_OPTIONS.map(({ id, label, shortLabel, swap }) => ({
         id,
-        label: shortLabel,
         name: label,
+        ticker: shortLabel,
+        mode: swap ? "Swap" : "Bridge",
         logo: CHAIN_LOGOS[id],
     }));
     const selectedChainOption = CHAINS.find((chain) => chain.id === selectedChainId) ?? CHAINS[0];
@@ -792,15 +818,19 @@ function SwapCardInner() {
             )}
 
             <div className="hoj-card space-y-2.5 rounded-[28px] p-2.5 sm:p-3">
-                <div className="flex items-center justify-between gap-2 px-1 pb-1">
+                <div className="relative z-[90] flex items-center justify-between gap-2 px-1 pb-1">
                     <div className="min-w-0">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Trade</p>
                         <p className="truncate text-sm font-semibold text-white/80">{selectedChainName}</p>
                     </div>
-                    <div ref={chainMenuRef} className="relative">
+                    <div ref={chainMenuRef} className="relative z-[100]">
                         <button
+                            ref={chainButtonRef}
                             type="button"
-                            onClick={() => setChainMenuOpen((next) => !next)}
+                            onClick={() => {
+                                updateChainMenuRect();
+                                setChainMenuOpen((next) => !next);
+                            }}
                             className="flex min-w-[8.75rem] items-center justify-between gap-2 rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-2 text-left outline-none transition hover:border-[rgba(212,175,55,0.3)] focus:border-[rgba(212,175,55,0.55)]"
                             aria-haspopup="listbox"
                             aria-expanded={chainMenuOpen}
@@ -808,48 +838,65 @@ function SwapCardInner() {
                         >
                             <span className="flex min-w-0 items-center gap-2">
                                 <TokenLogo
-                                    symbol={selectedChainOption.label}
+                                    symbol={selectedChainOption.ticker}
                                     logo={selectedChainOption.logo}
                                     size="xs"
                                 />
                                 <span className="truncate text-xs font-semibold text-white/80">
-                                    {selectedChainOption.label}
+                                    {selectedChainOption.name}
                                 </span>
                             </span>
                             <span className={`text-xs text-[rgba(212,175,55,0.9)] transition ${chainMenuOpen ? "rotate-180" : ""}`}>▾</span>
                         </button>
-
-                        {chainMenuOpen && (
-                            <div
-                                role="listbox"
-                                className="absolute right-0 top-full z-50 mt-2 max-h-72 min-w-[14rem] overflow-y-auto rounded-2xl border border-white/10 bg-[#151517] p-1.5 shadow-[0_22px_55px_rgba(0,0,0,0.55)]"
-                            >
-                                {CHAINS.map((chain) => {
-                                    const selected = chain.id === selectedChainId;
-                                    return (
-                                        <button
-                                            key={chain.id}
-                                            type="button"
-                                            role="option"
-                                            aria-selected={selected}
-                                            onClick={() => pickChain(chain.id)}
-                                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${selected
-                                                ? "bg-[rgba(212,175,55,0.14)] text-white"
-                                                : "text-white/78 hover:bg-white/[0.06] hover:text-white"
-                                                }`}
-                                        >
-                                            <TokenLogo symbol={chain.label} logo={chain.logo} size="sm" />
-                                            <span className="min-w-0">
-                                                <span className="block truncate text-sm font-semibold leading-tight">{chain.label}</span>
-                                                <span className="block truncate text-xs leading-tight text-white/40">{chain.name}</span>
-                                            </span>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        )}
                     </div>
                 </div>
+
+                {chainMenuOpen && chainMenuRect && typeof document !== "undefined" && createPortal(
+                    <div
+                        ref={chainDropdownRef}
+                        role="listbox"
+                        style={{
+                            top: chainMenuRect.top,
+                            left: chainMenuRect.left,
+                            width: chainMenuRect.width,
+                            maxHeight: "min(18rem, calc(100vh - 2rem))",
+                        }}
+                        className="fixed z-[9999] overflow-y-auto rounded-2xl border border-white/10 bg-[#111113] p-1.5 shadow-[0_24px_70px_rgba(0,0,0,0.82)] ring-1 ring-black/50"
+                    >
+                        {CHAINS.map((chain) => {
+                            const selected = chain.id === selectedChainId;
+                            return (
+                                <button
+                                    key={chain.id}
+                                    type="button"
+                                    role="option"
+                                    aria-selected={selected}
+                                    onClick={() => pickChain(chain.id)}
+                                    className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${selected
+                                        ? "bg-[rgba(212,175,55,0.14)] text-white"
+                                        : "text-white/78 hover:bg-white/[0.06] hover:text-white"
+                                        }`}
+                                >
+                                    <TokenLogo symbol={chain.ticker} logo={chain.logo} size="sm" />
+                                    <span className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                                        <span className="min-w-0">
+                                            <span className="block truncate text-sm font-semibold leading-tight">{chain.name}</span>
+                                            <span className="block truncate text-xs leading-tight text-white/40">{chain.ticker}</span>
+                                        </span>
+                                        <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
+                                            chain.mode === "Swap"
+                                                ? "border-[rgba(212,175,55,0.3)] text-[rgba(212,175,55,0.82)]"
+                                                : "border-white/10 text-white/40"
+                                        }`}>
+                                            {chain.mode}
+                                        </span>
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>,
+                    document.body,
+                )}
 
                 <div className="flex gap-1 rounded-full border border-white/8 bg-black/25 p-1">
                     {TABS.filter(tab => tab.id !== "swap" || isSwapSupported).map(({ id, label }) => (

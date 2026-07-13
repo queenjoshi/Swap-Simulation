@@ -12,7 +12,7 @@ import {
 } from "wagmi";
 import { formatUnits, parseUnits, maxUint256 } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { CHAIN_OPTIONS, getChainName, polygon, bsc, arbitrum, optimism, xrp, cronos, avalanche, unichain } from "@/lib/chains";
+import { CHAIN_OPTIONS, getChainName, polygon, bsc, arbitrum, optimism, xrp, cronos, avalanche, robinhood, unichain } from "@/lib/chains";
 import { clampToDecimals, formatCompactNumber, isValidNumberInput } from "@/lib/format";
 import { useToast } from "@/components/Toast";
 import { SIMPLE_TRANSFER_ABI } from "@/lib/stargate";
@@ -93,6 +93,21 @@ const TOKENS_BY_CHAIN: Record<number, XToken[]> = {
     { symbol: "ETH", address: "0x0000000000000000000000000000000000000000", decimals: 18 },
     { symbol: "WETH", address: "0x4200000000000000000000000000000000000006", decimals: 18 },
     { symbol: "USDC", address: "0x078d782b760474a361dda0af3839290b0ef57ad6", decimals: 6 },
+  ],
+  [robinhood.id]: [
+    { symbol: "ETH", address: "0x0000000000000000000000000000000000000000", decimals: 18 },
+    { symbol: "WETH", address: "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73", decimals: 18 },
+    { symbol: "USDG", address: "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168", decimals: 6 },
+    { symbol: "CASHCAT", address: "0x020bfC650A365f8BB26819deAAbF3E21291018b4", decimals: 18 },
+    { symbol: "VEX", address: "0x8Ff92566f2e81BDd68EDfAa8cde73942A723796b", decimals: 18 },
+    { symbol: "HOODRAT", address: "0x8e62F281f282686fCa6dCB39288069a93fC23F1c", decimals: 18 },
+    { symbol: "JUGGERNAUT", address: "0xD7321801CAae694090694Ff55A9323139F043B88", decimals: 18 },
+    { symbol: "MYSTERY", address: "0xa5baC17a919A10Ba0628CDA5BCf273681e1a8D4e", decimals: 18 },
+    { symbol: "ARROW", address: "0xf2915d1e3C1B0c769d0c756Ec43F1c1f6c99cD03", decimals: 18 },
+    { symbol: "VIBE CAT", address: "0x2355431b83B1A8E40172D099d90243D8D666b56B", decimals: 18 },
+    { symbol: "ROBIN", address: "0x55796b27Aa48444Fa2cAEF2BF902E12E9c280Dc9", decimals: 18 },
+    { symbol: "CashDog", address: "0x473C2D32E28c66d7EF55a9c9f392325007366dDf", decimals: 18 },
+    { symbol: "BOW", address: "0x6f271710Cf296827E1249d305F9d3Ab8b77BBb03", decimals: 18 },
   ],
 };
 

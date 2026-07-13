@@ -1,6 +1,6 @@
 import { getAddress } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, avalanche, bsc, cronos, optimism, polygon, unichain, xrp } from "@/lib/chains";
+import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp } from "@/lib/chains";
 
 export type Token = {
   symbol: string;
@@ -119,13 +119,6 @@ export const TOKENS: Token[] = [
     symbol: "VIRTUAL",
     name: "Virtuals Protocol",
     address: getAddress("0x0b3e328455c4059eeb9e3f84b5543f74e24e7e1b"),
-    chainId: base.id,
-    decimals: 18,
-  },
-  {
-    symbol: "DEGEN",
-    name: "Degen",
-    address: getAddress("0x4ed4e862860bed7a9570b96d89af5e1b0efefed"),
     chainId: base.id,
     decimals: 18,
   },
@@ -558,6 +551,98 @@ export const TOKENS: Token[] = [
     decimals: 6,
   },
 
+  // ─── Robinhood Chain ────────────────────────────────────
+  {
+    symbol: "ETH",
+    name: "Ether",
+    chainId: robinhood.id,
+    decimals: 18,
+  },
+  {
+    symbol: "WETH",
+    name: "Wrapped Ether",
+    address: getAddress("0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73"),
+    chainId: robinhood.id,
+    decimals: 18,
+  },
+  {
+    symbol: "USDG",
+    name: "Global Dollar",
+    address: getAddress("0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168"),
+    chainId: robinhood.id,
+    decimals: 6,
+  },
+  {
+    symbol: "CASHCAT",
+    name: "Cash Cat",
+    address: getAddress("0x020bfC650A365f8BB26819deAAbF3E21291018b4"),
+    chainId: robinhood.id,
+    decimals: 18,
+  },
+  {
+    symbol: "VEX",
+    name: "ProjectVex",
+    address: getAddress("0x8Ff92566f2e81BDd68EDfAa8cde73942A723796b"),
+    chainId: robinhood.id,
+    decimals: 18,
+  },
+  {
+    symbol: "HOODRAT",
+    name: "Hoodrat",
+    address: getAddress("0x8e62F281f282686fCa6dCB39288069a93fC23F1c"),
+    chainId: robinhood.id,
+    decimals: 18,
+  },
+  {
+    symbol: "JUGGERNAUT",
+    name: "The Juggernaut",
+    address: getAddress("0xD7321801CAae694090694Ff55A9323139F043B88"),
+    chainId: robinhood.id,
+    decimals: 18,
+  },
+  {
+    symbol: "MYSTERY",
+    name: "Mystery",
+    address: getAddress("0xa5baC17a919A10Ba0628CDA5BCf273681e1a8D4e"),
+    chainId: robinhood.id,
+    decimals: 18,
+  },
+  {
+    symbol: "ARROW",
+    name: "Arrow",
+    address: getAddress("0xf2915d1e3C1B0c769d0c756Ec43F1c1f6c99cD03"),
+    chainId: robinhood.id,
+    decimals: 18,
+  },
+  {
+    symbol: "VIBE CAT",
+    name: "Vibing Cat",
+    address: getAddress("0x2355431b83B1A8E40172D099d90243D8D666b56B"),
+    chainId: robinhood.id,
+    decimals: 18,
+  },
+  {
+    symbol: "ROBIN",
+    name: "ROBIN",
+    address: getAddress("0x55796b27Aa48444Fa2cAEF2BF902E12E9c280Dc9"),
+    chainId: robinhood.id,
+    decimals: 18,
+  },
+  {
+    symbol: "CashDog",
+    name: "CashDog",
+    address: getAddress("0x473C2D32E28c66d7EF55a9c9f392325007366dDf"),
+    chainId: robinhood.id,
+    decimals: 18,
+  },
+  {
+    symbol: "BOW",
+    name: "bow.fun",
+    address: getAddress("0x6f271710Cf296827E1249d305F9d3Ab8b77BBb03"),
+    chainId: robinhood.id,
+    decimals: 18,
+  },
+
   // ─── XRP Ledger EVM Sidechain ────────────────────────────
   {
     symbol: "XRP",
@@ -603,6 +688,7 @@ export function defaultSellForChain(chainId: number) {
   if (chainId === arbitrum.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
   if (chainId === optimism.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
   if (chainId === avalanche.id) return list.find((t) => t.symbol === "AVAX") ?? list[0]!;
+  if (chainId === robinhood.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
   if (chainId === unichain.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
   return list.find((t) => t.symbol === "ETH") ?? list[0]!;
 }
@@ -618,6 +704,7 @@ export function defaultBuyForChain(chainId: number) {
   if (chainId === arbitrum.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
   if (chainId === optimism.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
   if (chainId === avalanche.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
+  if (chainId === robinhood.id) return list.find((t) => t.symbol === "USDG") ?? list[1] ?? list[0]!;
   if (chainId === unichain.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
   return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
 }
@@ -638,5 +725,5 @@ export function tokenDecimals(t: Token): number {
 }
 
 export function isUsdStableToken(t: Token) {
-  return t.symbol === "USDC" || t.symbol === "USDT" || t.symbol === "DAI";
+  return t.symbol === "USDC" || t.symbol === "USDT" || t.symbol === "USDG" || t.symbol === "DAI";
 }

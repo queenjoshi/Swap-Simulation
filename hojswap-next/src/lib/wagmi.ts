@@ -12,7 +12,7 @@ import {
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, avalanche, bsc, cronos, optimism, polygon, unichain, xrp } from "@/lib/chains";
+import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp } from "@/lib/chains";
 import { getRpcTransport } from "@/lib/rpc";
 
 const walletConnectProjectId =
@@ -26,7 +26,7 @@ const appUrl =
 export const wagmiConfig = getDefaultConfig({
   appName: "House of Joshi — Swap & Bridge",
   appDescription:
-    "Swap and bridge BONE, TREAT, OSCAR, ETH, USDC, USDT across Ethereum, Base, Cronos, XRP EVM, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, and Unichain.",
+    "Swap and bridge assets across Ethereum, Base, Cronos, XRP EVM, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Robinhood Chain, and Unichain.",
   appUrl,
   appIcon: `${appUrl}/logo.png`,
   projectId: walletConnectProjectId,
@@ -40,6 +40,7 @@ export const wagmiConfig = getDefaultConfig({
     arbitrum as Chain,
     optimism as Chain,
     avalanche as Chain,
+    robinhood as Chain,
     unichain as Chain,
   ],
   transports: {
@@ -52,13 +53,14 @@ export const wagmiConfig = getDefaultConfig({
     [arbitrum.id]: getRpcTransport(arbitrum.id),
     [optimism.id]: getRpcTransport(optimism.id),
     [avalanche.id]: getRpcTransport(avalanche.id),
+    [robinhood.id]: getRpcTransport(robinhood.id),
     [unichain.id]: getRpcTransport(unichain.id),
   },
   walletConnectParameters: {
     metadata: {
       name: "House of Joshi — Swap & Bridge",
       description:
-        "Swap and bridge HOJ tokens across Ethereum, Base, Cronos, XRP EVM, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, and Unichain.",
+        "Swap and bridge assets across Ethereum, Base, Cronos, XRP EVM, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Robinhood Chain, and Unichain.",
       url: appUrl,
       icons: [`${appUrl}/logo.png`],
     },

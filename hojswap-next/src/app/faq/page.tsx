@@ -5,7 +5,7 @@ const faqs = [
   {
     question: "What is Hojswap?",
     answer:
-      "Hojswap is a House of Joshi swap and bridge interface for trading supported tokens across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Cronos, and XRP EVM.",
+      "Hojswap is a House of Joshi swap and bridge interface for trading supported tokens across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Cronos, and XRP EVM.",
   },
   {
     question: "Do I need to create an account?",
@@ -15,7 +15,7 @@ const faqs = [
   {
     question: "Which chains are supported?",
     answer:
-      "The app lists Ethereum, Base, Cronos, XRP EVM, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, and Unichain. Swap availability depends on routing support and liquidity for each chain.",
+      "The app lists Ethereum, Base, Cronos, XRP EVM, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Robinhood Chain, and Unichain. Swap availability depends on routing support and liquidity for each chain.",
   },
   {
     question: "Why do some chains show bridge instead of swap?",

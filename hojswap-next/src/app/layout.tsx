@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Cinzel, Cormorant_Garamond } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Providers } from "@/components/providers";
@@ -7,19 +8,34 @@ import { Footer } from "@/components/Footer";
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://hojswap.com";
 
+const displayFont = Cinzel({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-cinzel",
+  display: "swap",
+});
+
+const bodyFont = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-cormorant",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   applicationName: "House of Joshi",
   title: "House of Joshi — Swap & Bridge",
   description:
-    "Swap and bridge HOJ community tokens across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Cronos, and XRP EVM.",
+    "Swap and bridge assets across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Cronos, and XRP EVM.",
   manifest: "/manifest.json",
   icons: {
     icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.png", type: "image/png" },
       { url: "/logo.png", type: "image/png" },
     ],
-    apple: [{ url: "/logo.png", type: "image/png" }],
+    shortcut: [{ url: "/favicon.png", type: "image/png" }],
+    apple: [{ url: "/favicon.png", type: "image/png" }],
   },
   openGraph: {
     type: "website",
@@ -27,14 +43,14 @@ export const metadata: Metadata = {
     siteName: "House of Joshi",
     title: "House of Joshi — Swap & Bridge",
     description:
-      "Swap and bridge HOJ community tokens across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Cronos, and XRP EVM.",
+      "Swap and bridge assets across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Cronos, and XRP EVM.",
     images: [{ url: "/opengraph.jpg", width: 1200, height: 630, alt: "House of Joshi" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "House of Joshi — Swap & Bridge",
     description:
-      "Swap and bridge HOJ community tokens across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Cronos, and XRP EVM.",
+      "Swap and bridge assets across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Cronos, and XRP EVM.",
     images: ["/opengraph.jpg"],
   },
 };
@@ -45,7 +61,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="antialiased">
+    <html lang="en" className={`${displayFont.variable} ${bodyFont.variable} antialiased`}>
       <head>
         <Script
           async
@@ -61,7 +77,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className="flex min-h-dvh flex-col bg-[#0b0b0d] text-[#f5f1e6] font-sans">
+      <body className="flex min-h-dvh flex-col bg-[#0b0b0d] text-[#f5f1e6]">
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8905064413166970"
