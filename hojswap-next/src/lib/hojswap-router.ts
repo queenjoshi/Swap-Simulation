@@ -7,6 +7,20 @@ export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000" as cons
 
 export const hojswapRouterAbi = [
   {
+    type: "event",
+    name: "SwapExecuted",
+    inputs: [
+      { name: "sender", type: "address", indexed: true },
+      { name: "recipient", type: "address", indexed: true },
+      { name: "sellToken", type: "address", indexed: true },
+      { name: "buyToken", type: "address", indexed: false },
+      { name: "sellAmount", type: "uint256", indexed: false },
+      { name: "feeAmount", type: "uint256", indexed: false },
+      { name: "buyAmount", type: "uint256", indexed: false },
+      { name: "swapTarget", type: "address", indexed: false },
+    ],
+  },
+  {
     type: "function",
     name: "swapExactNative",
     stateMutability: "payable",

@@ -12,7 +12,7 @@ import {
     useSwitchChain,
     useWriteContract,
 } from "wagmi";
-import { parseUnits, formatUnits, concat, numberToHex, size } from "viem";
+import { concat, decodeEventLog, encodeFunctionData, formatUnits, numberToHex, parseUnits, size, type Hex } from "viem";
 import { base } from "wagmi/chains";
 import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, getChainName } from "@/lib/chains";
 import { clampToDecimals, formatSwapAmountDisplay, isValidNumberInput } from "@/lib/format";
@@ -28,6 +28,7 @@ import { TokenLogo } from "@/components/TokenLogo";
 import { BridgeTab } from "@/components/BridgeTab";
 import { TrendingTokens } from "@/components/TrendingTokens";
 import { SwapCoach } from "@/components/SwapCoach";
+import { HouseGuard, type HouseGuardReceiptData, type HouseGuardVerification } from "@/components/HouseGuard";
 import { useToast } from "@/components/Toast";
 import { saveTransaction } from "@/lib/transactions";
 import { useNativeTokenPrice, getNativeSymbol, formatNetworkFee } from "@/lib/gas";
@@ -51,6 +52,79 @@ const CHAIN_LOGOS: Record<number, string> = {
 
 type ActiveTab = "swap" | "bridge";
 type ApiKeyError = "api_key_missing" | "api_key_invalid" | null;
+
+type GuardReceiptLog = {
+    address: `0x${string}`;
+    data: Hex;
+    topics: readonly Hex[];
+};
+
+function quoteGuardKey(quote: QuoteResponse | null, chainId: number, sellToken: Token, buyToken: Token) {
+    if (!quote?.transaction) return "no-quote";
+    return [
+        chainId,
+        sellToken.address ?? sellToken.symbol,
+        buyToken.address ?? buyToken.symbol,
+        quote.sellAmount ?? "",
+        quote.buyAmount ?? "",
+        quote.minBuyAmount ?? "",
+        quote.transaction.to,
+        quote.transaction.data.slice(-18),
+    ].join(":");
+}
+
+function extractBoughtAmountFromLogs({
+    logs,
+    routerAddress,
+    buyToken,
+    recipient,
+}: {
+    logs: readonly GuardReceiptLog[];
+    routerAddress: `0x${string}` | null;
+    buyToken: Token;
+    recipient: `0x${string}`;
+}): bigint | null {
+    if (routerAddress) {
+        for (const log of logs) {
+            if (log.address.toLowerCase() !== routerAddress.toLowerCase() || log.topics.length === 0) continue;
+            try {
+                const decoded = decodeEventLog({
+                    abi: hojswapRouterAbi,
+                    eventName: "SwapExecuted",
+                    data: log.data,
+                    topics: log.topics as [Hex, ...Hex[]],
+                });
+                if (decoded.args.recipient.toLowerCase() === recipient.toLowerCase()) return decoded.args.buyAmount;
+            } catch {
+                // A router transaction can emit other events; only SwapExecuted is relevant.
+            }
+        }
+        return null;
+    }
+
+    if (!buyToken.address) return null;
+    let netReceived = 0n;
+    let foundTransfer = false;
+    for (const log of logs) {
+        if (log.address.toLowerCase() !== buyToken.address.toLowerCase() || log.topics.length === 0) continue;
+        try {
+            const decoded = decodeEventLog({
+                abi: erc20Abi,
+                eventName: "Transfer",
+                data: log.data,
+                topics: log.topics as [Hex, ...Hex[]],
+            });
+            if (decoded.args.to.toLowerCase() === recipient.toLowerCase()) {
+                netReceived += decoded.args.value;
+                foundTransfer = true;
+            }
+            if (decoded.args.from.toLowerCase() === recipient.toLowerCase()) netReceived -= decoded.args.value;
+        } catch {
+            // Ignore non-standard token logs instead of presenting an unverified amount.
+        }
+    }
+    return foundTransfer && netReceived >= 0n ? netReceived : null;
+}
 
 function SwapCardInner() {
     const searchParams = useSearchParams();
@@ -469,6 +543,22 @@ function SwapCardInner() {
         }
     }, [sellAmountInput, sellDecimals, sellToken]);
 
+    const currentGuardQuoteKey = useMemo(
+        () => quoteGuardKey(quote, selectedChainId, sellToken, buyToken),
+        [buyToken, quote, selectedChainId, sellToken],
+    );
+    const guardExpectedReceive = buyAmountFormatted
+        ? `${buyAmountFormatted} ${buyToken.symbol}`
+        : `Not available`;
+    const guardMinimumReceive = minBuyFormatted ?? "Not verified";
+    const hasGuardMinimum = useMemo(() => {
+        try {
+            return !!quote?.minBuyAmount && BigInt(quote.minBuyAmount) > 0n;
+        } catch {
+            return false;
+        }
+    }, [quote?.minBuyAmount]);
+
     const routerSwap = quote?.hojswapRouter?.enabled ? quote.hojswapRouter : null;
     const routerAddress = routerSwap?.address;
     const [routerAllowance, setRouterAllowance] = useState<bigint | null>(null);
@@ -516,6 +606,24 @@ function SwapCardInner() {
         return !!quote?.issues?.allowance;
     }, [inputSellAmountBig, quote?.issues?.allowance, routerAddress, routerAllowance, sellToken]);
 
+    const approvalScope: HouseGuardReceiptData["approvalScope"] = useMemo(() => {
+        if (isNative(sellToken)) return "none";
+        if (needsApproval && inputSellAmountBig != null) {
+            const requestedApproval = quote?.hojswapRouter?.sellAmount
+                ?? quote?.issues?.allowance?.expected
+                ?? inputSellAmountBig.toString();
+            try {
+                return BigInt(requestedApproval) === inputSellAmountBig ? "exact" : "unknown";
+            } catch {
+                return "unknown";
+            }
+        }
+        if (routerAddress && routerAllowance != null && inputSellAmountBig != null) {
+            return routerAllowance === inputSellAmountBig ? "exact" : "unknown";
+        }
+        return "unknown";
+    }, [inputSellAmountBig, needsApproval, quote?.hojswapRouter?.sellAmount, quote?.issues?.allowance?.expected, routerAddress, routerAllowance, sellToken]);
+
     const { writeContractAsync: approveAsync } = useWriteContract();
     const { writeContractAsync: writeRouterAsync } = useWriteContract();
     const { writeContractAsync: writeTokenAsync } = useWriteContract();
@@ -524,6 +632,48 @@ function SwapCardInner() {
     const [swapTxHash, setSwapTxHash] = useState<`0x${string}` | undefined>();
     const [isSwapping, setIsSwapping] = useState(false);
     const [isApproving, setIsApproving] = useState(false);
+    const [guardVerification, setGuardVerification] = useState<HouseGuardVerification>({
+        quoteKey: "no-quote",
+        status: "idle",
+    });
+    const [guardReceipt, setGuardReceipt] = useState<HouseGuardReceiptData | null>(null);
+
+    async function verifyWithHouseGuard({
+        quoteKey,
+        to,
+        data,
+        value,
+    }: {
+        quoteKey: string;
+        to: `0x${string}`;
+        data: Hex;
+        value: bigint;
+    }) {
+        if (!publicClient || !address) throw new Error("House Guard needs a connected wallet and chain client");
+        setGuardVerification({ quoteKey, status: "checking" });
+        try {
+            const blockNumber = await publicClient.getBlockNumber();
+            await publicClient.call({
+                account: address,
+                to,
+                data,
+                value,
+                blockNumber,
+            });
+            setGuardVerification({ quoteKey, status: "verified", blockNumber });
+            return blockNumber;
+        } catch (error: unknown) {
+            const detail = error instanceof Error && error.message
+                ? error.message.split("\n")[0].slice(0, 180)
+                : "The chain rejected the simulated transaction";
+            setGuardVerification({
+                quoteKey,
+                status: "failed",
+                message: detail,
+            });
+            throw new Error(`House Guard blocked this swap: ${detail}`);
+        }
+    }
 
     async function approveAndSwap() {
         if (!sellToken.address || !approvalSpender) return;
@@ -620,7 +770,28 @@ function SwapCardInner() {
         const capturedSellAmount = sellAmountInput;
         const capturedSellToken = sellToken;
         const capturedBuyToken = buyToken;
-        const capturedBuyAmount = buyAmountRaw ?? "?";
+        const capturedBuyDecimals = buyDecimals ?? tokenDecimals(capturedBuyToken);
+        const capturedBuyAmountRaw = quoteToSwap.buyAmount ?? "0";
+        const executionGuardKey = quoteGuardKey(quoteToSwap, selectedChainId, capturedSellToken, capturedBuyToken);
+        const capturedApprovalScope = approvalScope;
+        let capturedMinBuyAmountRaw: string;
+        let capturedBuyAmount: string;
+        let capturedMinBuyAmount: string;
+        try {
+            if (!quoteToSwap.minBuyAmount || BigInt(quoteToSwap.minBuyAmount) <= 0n) throw new Error("missing minimum");
+            capturedMinBuyAmountRaw = quoteToSwap.minBuyAmount;
+            capturedBuyAmount = formatUnits(BigInt(capturedBuyAmountRaw), capturedBuyDecimals);
+            capturedMinBuyAmount = formatUnits(BigInt(capturedMinBuyAmountRaw), capturedBuyDecimals);
+        } catch {
+            setGuardVerification({
+                quoteKey: executionGuardKey,
+                status: "failed",
+                message: "The route did not provide a valid, enforceable minimum receive amount",
+            });
+            setIsSwapping(false);
+            showToast({ kind: "error", title: "House Guard blocked the swap", message: "The route did not provide a valid minimum receive amount." });
+            return;
+        }
         try {
             setSwapStep("swap");
             const { to, value, gas } = quoteToSwap.transaction;
@@ -636,17 +807,29 @@ function SwapCardInner() {
                 const buyTokenForRouter = tokenToRouterAddress(capturedBuyToken);
 
                 if (isNative(capturedSellToken)) {
+                    const routerParams = {
+                        swapTarget: to,
+                        swapCallData: txData,
+                        buyToken: buyTokenForRouter,
+                        minBuyAmount,
+                        recipient: address,
+                    };
+                    const guardedData = encodeFunctionData({
+                        abi: hojswapRouterAbi,
+                        functionName: "swapExactNative",
+                        args: [routerParams],
+                    });
+                    await verifyWithHouseGuard({
+                        quoteKey: executionGuardKey,
+                        to: router.address,
+                        data: guardedData,
+                        value: sellAmountForRouter,
+                    });
                     txHash = await writeRouterAsync({
                         address: router.address,
                         abi: hojswapRouterAbi,
                         functionName: "swapExactNative",
-                        args: [{
-                            swapTarget: to,
-                            swapCallData: txData,
-                            buyToken: buyTokenForRouter,
-                            minBuyAmount,
-                            recipient: address,
-                        }],
+                        args: [routerParams],
                         value: sellAmountForRouter,
                         chainId: selectedChainId,
                     });
@@ -655,20 +838,32 @@ function SwapCardInner() {
                     if (!router.spender || router.spender === "0x0000000000000000000000000000000000000000") {
                         throw new Error("Missing allowance spender in router quote");
                     }
+                    const routerParams = {
+                        sellToken: capturedSellToken.address,
+                        sellAmount: sellAmountForRouter,
+                        spender: router.spender,
+                        swapTarget: to,
+                        swapCallData: txData,
+                        buyToken: buyTokenForRouter,
+                        minBuyAmount,
+                        recipient: address,
+                    };
+                    const guardedData = encodeFunctionData({
+                        abi: hojswapRouterAbi,
+                        functionName: "swapExactToken",
+                        args: [routerParams],
+                    });
+                    await verifyWithHouseGuard({
+                        quoteKey: executionGuardKey,
+                        to: router.address,
+                        data: guardedData,
+                        value: 0n,
+                    });
                     txHash = await writeRouterAsync({
                         address: router.address,
                         abi: hojswapRouterAbi,
                         functionName: "swapExactToken",
-                        args: [{
-                            sellToken: capturedSellToken.address,
-                            sellAmount: sellAmountForRouter,
-                            spender: router.spender,
-                            swapTarget: to,
-                            swapCallData: txData,
-                            buyToken: buyTokenForRouter,
-                            minBuyAmount,
-                            recipient: address,
-                        }],
+                        args: [routerParams],
                         chainId: selectedChainId,
                     });
                 }
@@ -685,6 +880,13 @@ function SwapCardInner() {
                     const signatureLengthInHex = numberToHex(size(signature), { signed: false, size: 32 });
                     txData = concat([txData, signatureLengthInHex, signature]) as `0x${string}`;
                 }
+
+                await verifyWithHouseGuard({
+                    quoteKey: executionGuardKey,
+                    to,
+                    data: txData,
+                    value: value ? BigInt(value) : 0n,
+                });
 
                 if (manualHouseFee) {
                     await payManualHouseFee(manualHouseFee, capturedSellToken);
@@ -706,6 +908,44 @@ function SwapCardInner() {
             setSwapTxHash(undefined);
 
             const swapSuccess = receipt?.status === "success";
+            const actualBuyAmountRaw = swapSuccess && receipt && address
+                ? extractBoughtAmountFromLogs({
+                    logs: receipt.logs as readonly GuardReceiptLog[],
+                    routerAddress: router?.address ?? null,
+                    buyToken: capturedBuyToken,
+                    recipient: address,
+                })
+                : null;
+            const actualBuyAmount = actualBuyAmountRaw != null
+                ? formatUnits(actualBuyAmountRaw, capturedBuyDecimals)
+                : undefined;
+            const outcomeVerified = actualBuyAmountRaw != null && actualBuyAmountRaw >= BigInt(capturedMinBuyAmountRaw);
+            const receiptStatus: HouseGuardReceiptData["status"] = !swapSuccess
+                ? "failed"
+                : outcomeVerified
+                    ? "verified"
+                    : "not_verified";
+            const receiptMessage = !swapSuccess
+                ? "The chain confirmed that the transaction reverted. No successful swap outcome is being claimed."
+                : outcomeVerified
+                    ? "The on-chain received amount met or exceeded the minimum promised before signing."
+                    : isNative(capturedBuyToken)
+                        ? "The swap succeeded, but this route did not emit a token transfer that House Guard can use to independently prove the native-token output."
+                        : "The swap succeeded, but House Guard could not decode a standard on-chain transfer for the output token. The amount is intentionally marked Not verified.";
+            setGuardReceipt({
+                txHash,
+                chainId: selectedChainId,
+                blockNumber: receipt?.blockNumber,
+                status: receiptStatus,
+                sellAmount: capturedSellAmount,
+                sellToken: capturedSellToken.symbol,
+                expectedReceive: formatSwapAmountDisplay(capturedBuyAmount),
+                minimumReceive: formatSwapAmountDisplay(capturedMinBuyAmount),
+                actualReceive: actualBuyAmount ? formatSwapAmountDisplay(actualBuyAmount) : undefined,
+                buyToken: capturedBuyToken.symbol,
+                approvalScope: capturedApprovalScope,
+                message: receiptMessage,
+            });
             showToast({
                 kind: swapSuccess ? "success" : "error",
                 title: swapSuccess ? "Swap complete!" : "Swap reverted",
@@ -753,7 +993,7 @@ function SwapCardInner() {
         if (swapTxHash) return "Confirming swap…";
         if (needsApproval) return `Approve & swap ${sellToken.symbol}`;
         if (!quote?.transaction) return "Enter amount";
-        return `Swap ${sellToken.symbol} → ${buyToken.symbol}`;
+        return `Verify & swap ${sellToken.symbol} → ${buyToken.symbol}`;
     }, [sellAmountInput, isQuoting, isApproving, swapStep, isSwapping, swapTxHash, needsApproval, sellToken.symbol, buyToken.symbol, quote?.transaction]);
 
     const primaryDisabled =
@@ -993,6 +1233,21 @@ function SwapCardInner() {
                             </div>
                         )}
 
+                        <HouseGuard
+                            quoteKey={currentGuardQuoteKey}
+                            hasQuote={!!quote?.transaction}
+                            isConnected={isConnected}
+                            sellAmount={sellAmountInput || "0"}
+                            sellToken={sellToken.symbol}
+                            expectedReceive={guardExpectedReceive}
+                            minimumReceive={guardMinimumReceive}
+                            hasMinimumReceive={hasGuardMinimum}
+                            approvalScope={approvalScope}
+                            verification={guardVerification}
+                            receipt={guardReceipt}
+                            onDismissReceipt={() => setGuardReceipt(null)}
+                        />
+
                         <SwapCoach
                             quote={quote}
                             price={price}
@@ -1051,7 +1306,7 @@ function SwapCardInner() {
                         )}
                     </>
                 ) : (
-                    <BridgeTab selectedChainId={selectedChainId} onChainChange={pickChain} />
+                    <BridgeTab key={selectedChainId} selectedChainId={selectedChainId} onChainChange={pickChain} />
                 )}
             </div>
 
