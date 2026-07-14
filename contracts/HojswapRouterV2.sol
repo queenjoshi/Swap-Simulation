@@ -44,6 +44,8 @@ contract HojswapRouterV2 {
 
     mapping(address => mapping(address => bool)) public approvedRouterSpenders;
     mapping(uint256 => bool) public supportedDestinationChains;
+    mapping(uint256 => bool) private registeredDestinationChains;
+    uint256[] private destinationChainIds;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed nextOwner);
     event HouseWalletUpdated(address indexed previousWallet, address indexed nextWallet);
@@ -115,6 +117,19 @@ contract HojswapRouterV2 {
         for (uint256 i = 0; i < initialRouters.length; i++) {
             _setRouterSpenderApproval(initialRouters[i], initialSpenders[i], true);
         }
+
+        // Keep this list aligned with hojswap-next/src/lib/chains.ts.
+        _setDestinationChainSupport(1, true); // Ethereum
+        _setDestinationChainSupport(10, true); // Optimism
+        _setDestinationChainSupport(25, true); // Cronos
+        _setDestinationChainSupport(56, true); // BNB Chain
+        _setDestinationChainSupport(130, true); // Unichain
+        _setDestinationChainSupport(137, true); // Polygon
+        _setDestinationChainSupport(4663, true); // Robinhood Chain
+        _setDestinationChainSupport(8453, true); // Base
+        _setDestinationChainSupport(42161, true); // Arbitrum
+        _setDestinationChainSupport(43114, true); // Avalanche
+        _setDestinationChainSupport(1440002, true); // XRP EVM
     }
 
     receive() external payable {}
@@ -141,9 +156,11 @@ contract HojswapRouterV2 {
     }
 
     function setDestinationChainSupport(uint256 destinationChainId, bool supported) external onlyOwner {
-        if (destinationChainId == 0) revert DestinationChainNotSupported();
-        supportedDestinationChains[destinationChainId] = supported;
-        emit DestinationChainSupportUpdated(destinationChainId, supported);
+        _setDestinationChainSupport(destinationChainId, supported);
+    }
+
+    function getDestinationChainIds() external view returns (uint256[] memory) {
+        return destinationChainIds;
     }
 
     function swapExactNative(SwapParams calldata params)
@@ -292,6 +309,18 @@ contract HojswapRouterV2 {
         if (router == address(0)) revert ZeroAddress();
         approvedRouterSpenders[router][spender] = approved;
         emit RouterSpenderApprovalUpdated(router, spender, approved);
+    }
+
+    function _setDestinationChainSupport(uint256 destinationChainId, bool supported) private {
+        if (destinationChainId == 0) revert DestinationChainNotSupported();
+
+        if (!registeredDestinationChains[destinationChainId]) {
+            registeredDestinationChains[destinationChainId] = true;
+            destinationChainIds.push(destinationChainId);
+        }
+
+        supportedDestinationChains[destinationChainId] = supported;
+        emit DestinationChainSupportUpdated(destinationChainId, supported);
     }
 
     function _settleBoughtAsset(address buyToken, address recipient, uint256 buyAmount, uint256 nativeBalanceBefore)

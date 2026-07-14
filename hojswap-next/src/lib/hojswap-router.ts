@@ -1,9 +1,18 @@
-import { arbitrum, avalanche, bsc, optimism, polygon, unichain } from "@/lib/chains";
+import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp } from "@/lib/chains";
 import { NATIVE_ETH_ADDRESS } from "@/lib/quote";
 import { isNative, type Token } from "@/lib/tokens";
 import { base, mainnet } from "wagmi/chains";
 
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000" as const;
+const BASE_ROUTER = "0x6aCaf964bCf4551CC55Afaf12d6e6a8ef7138875" as const;
+const SHARED_ROUTER = "0x2C5F372746330465C3f4084CE6C6aBce22a48B4d" as const;
+
+function configuredRouter(
+  environmentValue: string | undefined,
+  fallback?: `0x${string}`,
+): `0x${string}` | undefined {
+  return environmentValue ? (environmentValue as `0x${string}`) : fallback;
+}
 
 export const hojswapRouterAbi = [
   {
@@ -64,14 +73,17 @@ export const hojswapRouterAbi = [
 ] as const;
 
 const ROUTER_ENV_BY_CHAIN_ID: Record<number, `0x${string}` | undefined> = {
-  [arbitrum.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_ARBITRUM as `0x${string}` | undefined,
-  [avalanche.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_AVALANCHE as `0x${string}` | undefined,
-  [base.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_BASE as `0x${string}` | undefined,
-  [bsc.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_BNB as `0x${string}` | undefined,
-  [mainnet.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_ETHEREUM as `0x${string}` | undefined,
-  [optimism.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_OPTIMISM as `0x${string}` | undefined,
-  [polygon.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_POLYGON as `0x${string}` | undefined,
-  [unichain.id]: process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_UNICHAIN as `0x${string}` | undefined,
+  [arbitrum.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_ARBITRUM, SHARED_ROUTER),
+  [avalanche.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_AVALANCHE, SHARED_ROUTER),
+  [base.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_BASE, BASE_ROUTER),
+  [bsc.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_BNB, SHARED_ROUTER),
+  [cronos.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_CRONOS, SHARED_ROUTER),
+  [mainnet.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_ETHEREUM),
+  [optimism.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_OPTIMISM, SHARED_ROUTER),
+  [polygon.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_POLYGON, SHARED_ROUTER),
+  [robinhood.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_ROBINHOOD, SHARED_ROUTER),
+  [unichain.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_UNICHAIN, SHARED_ROUTER),
+  [xrp.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_XRP),
 };
 
 export function getHojswapRouterAddress(chainId: number): `0x${string}` | null {

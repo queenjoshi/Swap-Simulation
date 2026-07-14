@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
-    "compile:contracts": "node scripts/compile-contracts.mjs",
+    "compile:contracts": "node scripts/check-router-chains.mjs && node scripts/compile-contracts.mjs",
     "deploy:router": "node scripts/deploy-hojswap-router-v2.mjs",
     "router:approve-pair": "node scripts/set-router-spender-approval.mjs",
     "typecheck:libs": "tsc --build",

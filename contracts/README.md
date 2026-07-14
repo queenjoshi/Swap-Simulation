@@ -71,7 +71,21 @@ The app should call:
 - `swapExactToken((sellToken, sellAmount, spender, swapTarget, swapCallData, buyToken, minBuyAmount, recipient))` for ERC-20 sells.
 - `swapExactNativeWithBridgeMetadata(...)` or `swapExactTokenWithBridgeMetadata(...)` when the quote is a bridge route and the UI should record the destination chain/address on-chain.
 
-Before using the bridge metadata functions, call `setDestinationChainSupport(destinationChainId, true)` for every supported destination chain.
+New deployments register every chain currently exposed by the app as a bridge-metadata destination:
+
+- Ethereum (`1`)
+- Optimism (`10`)
+- Cronos (`25`)
+- BNB Chain (`56`)
+- Unichain (`130`)
+- Polygon (`137`)
+- Robinhood Chain (`4663`)
+- Base (`8453`)
+- Arbitrum (`42161`)
+- Avalanche (`43114`)
+- XRP EVM (`1440002`)
+
+Call `getDestinationChainIds()` to enumerate the configured chain IDs. The owner can still add, disable, or re-enable a destination with `setDestinationChainSupport(destinationChainId, supported)`.
 
 ## Deploy And Approve
 
