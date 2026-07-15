@@ -652,7 +652,10 @@ function SwapCardInner() {
         if (!publicClient || !address) throw new Error("House Guard needs a connected wallet and chain client");
         setGuardVerification({ quoteKey, status: "checking" });
         try {
-            const blockNumber = await publicClient.getBlockNumber();
+            // Do not reuse viem's short-lived block-number cache here. Immediately
+            // after an ERC-20 approval, a cached pre-approval block produces a false
+            // simulation failure even though the subsequent swap is valid.
+            const blockNumber = await publicClient.getBlockNumber({ cacheTime: 0 });
             await publicClient.call({
                 account: address,
                 to,
@@ -695,7 +698,10 @@ function SwapCardInner() {
                 chainId: selectedChainId,
             });
             showToast({ kind: "info", title: "Approval submitted", message: "Waiting for confirmation…" });
-            await publicClient?.waitForTransactionReceipt({ hash });
+            const approvalReceipt = await publicClient?.waitForTransactionReceipt({ hash });
+            if (!approvalReceipt || approvalReceipt.status !== "success") {
+                throw new Error("Token approval did not confirm successfully");
+            }
             if (routerAddress) setRouterAllowance(approvalAmount);
             showToast({ kind: "success", title: "Approval confirmed", message: "Continuing to swap…" });
             setSwapStep("quote");
@@ -932,6 +938,16 @@ function SwapCardInner() {
                     : isNative(capturedBuyToken)
                         ? "The swap succeeded, but this route did not emit a token transfer that House Guard can use to independently prove the native-token output."
                         : "The swap succeeded, but House Guard could not decode a standard on-chain transfer for the output token. The amount is intentionally marked Not verified.";
+            if (receipt) {
+                setGuardVerification({
+                    quoteKey: executionGuardKey,
+                    status: swapSuccess ? "verified" : "failed",
+                    blockNumber: receipt.blockNumber,
+                    message: swapSuccess
+                        ? "The mined transaction confirmed successfully on-chain"
+                        : "The mined transaction reverted on-chain",
+                });
+            }
             setGuardReceipt({
                 txHash,
                 chainId: selectedChainId,
