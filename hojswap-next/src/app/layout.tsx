@@ -6,7 +6,7 @@ import { Providers } from "@/components/providers";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://hojswap.com";
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://swap.thehouseofjoshi.com";
 
 const displayFont = Cinzel({
   subsets: ["latin"],
@@ -44,14 +44,21 @@ export const metadata: Metadata = {
     title: "House of Joshi — Swap & Bridge",
     description:
       "Swap and bridge assets across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Cronos, and XRP EVM.",
-    images: [{ url: "/opengraph.jpg", width: 1200, height: 630, alt: "House of Joshi" }],
+    images: [
+      {
+        url: "/social/hojswap-share-cover.png",
+        width: 1200,
+        height: 630,
+        alt: "Hojswap — Swap & Bridge Across Chains",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "House of Joshi — Swap & Bridge",
     description:
       "Swap and bridge assets across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Cronos, and XRP EVM.",
-    images: ["/opengraph.jpg"],
+    images: ["/social/hojswap-share-cover.png"],
   },
 };
 
