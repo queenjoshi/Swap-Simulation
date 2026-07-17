@@ -78,7 +78,7 @@ const ROUTER_ENV_BY_CHAIN_ID: Record<number, `0x${string}` | undefined> = {
   [base.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_BASE, BASE_ROUTER),
   [bsc.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_BNB, SHARED_ROUTER),
   [cronos.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_CRONOS, SHARED_ROUTER),
-  [mainnet.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_ETHEREUM),
+  [mainnet.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_ETHEREUM, SHARED_ROUTER),
   [optimism.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_OPTIMISM, SHARED_ROUTER),
   [polygon.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_POLYGON, SHARED_ROUTER),
   [robinhood.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_ROBINHOOD, SHARED_ROUTER),
