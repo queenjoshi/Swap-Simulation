@@ -24,6 +24,8 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "MOG", name: "Mog Coin", logo: "/tokens/mog.png" },
       { symbol: "TOSHI", name: "Toshi", logo: "/tokens/toshi.png" },
       { symbol: "VIRTUAL", name: "Virtuals Protocol", logo: "https://assets.coingecko.com/coins/images/34057/standard/LOGOMARK.png" },
+      { symbol: "MORPHO", name: "Morpho", logo: "https://assets.coingecko.com/coins/images/29837/standard/Morpho-token-icon.png" },
+      { symbol: "DEGEN", name: "Degen", logo: "https://assets.coingecko.com/coins/images/34515/standard/android-chrome-512x512.png" },
     ],
   },
   {
@@ -43,6 +45,13 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "AAVE", name: "Aave", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9/logo.png" },
       { symbol: "PEPE", name: "Pepe", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6982508145454Ce325dDbE47a25d4ec3d2311933/logo.png" },
       { symbol: "FLOKI", name: "FLOKI", logo: "/tokens/floki.png" },
+      { symbol: "ONDO", name: "Ondo", logo: "https://assets.coingecko.com/coins/images/26580/standard/ONDO.png" },
+      { symbol: "ENA", name: "Ethena", logo: "https://assets.coingecko.com/coins/images/36530/standard/ethena.png" },
+      { symbol: "USDe", name: "Ethena USDe", logo: "https://assets.coingecko.com/coins/images/33613/standard/usde.png" },
+      { symbol: "PENDLE", name: "Pendle", logo: "https://assets.coingecko.com/coins/images/15069/standard/Pendle_Logo_Normal-03.png" },
+      { symbol: "LDO", name: "Lido DAO", logo: "https://assets.coingecko.com/coins/images/13573/standard/Lido_DAO.png" },
+      { symbol: "EIGEN", name: "EigenLayer", logo: "https://assets.coingecko.com/coins/images/37441/standard/eigenlayer.png" },
+      { symbol: "PYUSD", name: "PayPal USD", logo: "https://assets.coingecko.com/coins/images/31212/standard/PYUSD_Logo_%282%29.png" },
     ],
   },
   {
@@ -93,6 +102,7 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "WBTC", name: "Wrapped BTC", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png" },
       { symbol: "GMX", name: "GMX", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a/logo.png" },
       { symbol: "MAGIC", name: "MAGIC", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0x539bdE0d7Dbd336b79148AA742883198BBF60342/logo.png" },
+      { symbol: "PENDLE", name: "Pendle", logo: "https://assets.coingecko.com/coins/images/15069/standard/Pendle_Logo_Normal-03.png" },
     ],
   },
   {
@@ -106,6 +116,7 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "USDT", name: "Tether USD", logo: "https://assets.coingecko.com/coins/images/325/standard/Tether.png" },
       { symbol: "SNX", name: "Synthetix Network", logo: "https://assets.coingecko.com/coins/images/3406/standard/SNX.png" },
       { symbol: "VELO", name: "Velodrome", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/assets/0x9560e827aF36c94D2Ac33a39bCE1Fe78631088Db/logo.png" },
+      { symbol: "WLD", name: "World", logo: "https://assets.coingecko.com/coins/images/31069/standard/worldcoin.jpeg" },
     ],
   },
   {
@@ -117,6 +128,7 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "USDT", name: "Tether USD", logo: "https://assets.coingecko.com/coins/images/325/standard/Tether.png" },
       { symbol: "WETH", name: "Wrapped Ether", logo: "https://assets.coingecko.com/coins/images/2518/standard/weth.png" },
       { symbol: "WBTC", name: "Wrapped BTC", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png" },
+      { symbol: "JOE", name: "JoeToken", logo: "https://assets.coingecko.com/coins/images/17569/standard/traderjoe.png" },
     ],
   },
   {
@@ -164,13 +176,13 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
 ];
 
 const networks = [
-  { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity for SHIB, BONE, TREAT, OSCAR, BNB, MAME, WETH, DAI, LINK, UNI, AAVE, PEPE, FLOKI, USDC, USDT, and ETH." },
-  { name: "Base", badge: "Swap + Bridge", desc: "Home for QUEENJOSHI, KINGJOSHI, SHIB, WETH, cbBTC, AERO, BRETT, MOG, TOSHI, and VIRTUAL with faster, lower-cost trading." },
+  { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity including ONDO, ENA, USDe, PENDLE, LDO, EIGEN, PYUSD, blue chips, community tokens, and stablecoins." },
+  { name: "Base", badge: "Swap + Bridge", desc: "Home for MORPHO, DEGEN, VIRTUAL, AERO, BRETT, TOSHI, House of Joshi tokens, and core assets with faster, lower-cost trading." },
   { name: "Polygon", badge: "Swap", desc: "POL, WETH, WBTC, USDC, USDT, AAVE, LINK, and DAI routed through 0x liquidity." },
   { name: "BNB Chain", badge: "Swap", desc: "BNB, USDT, USDC, DOGE, FDUSD, CAKE, and BabyDoge through 0x liquidity." },
-  { name: "Arbitrum", badge: "Swap", desc: "ARB, ETH, USDC, WETH, USDT, WBTC, GMX, and MAGIC across Ethereum L2 liquidity." },
-  { name: "Optimism", badge: "Swap", desc: "OP, ETH, USDC, WETH, USDT, SNX, and VELO across Ethereum L2 liquidity." },
-  { name: "Avalanche", badge: "Swap", desc: "AVAX, USDC, USDT, WETH, and WBTC on Avalanche C-Chain." },
+  { name: "Arbitrum", badge: "Swap", desc: "ARB, PENDLE, ETH, stablecoins, GMX, MAGIC, and wrapped assets across Ethereum L2 liquidity." },
+  { name: "Optimism", badge: "Swap", desc: "OP, WLD, ETH, stablecoins, SNX, and VELO across Ethereum L2 liquidity." },
+  { name: "Avalanche", badge: "Swap", desc: "AVAX, JOE, stablecoins, WETH, and WBTC on Avalanche C-Chain." },
   { name: "Unichain", badge: "Swap", desc: "ETH, WETH, and USDC on Unichain for new Uniswap-native liquidity." },
   { name: "Robinhood Chain", badge: "Swap", desc: "ETH, WETH, USDG, CASHCAT, VEX, HOODRAT, JUGGERNAUT, MYSTERY, ARROW, VIBE CAT, ROBIN, CashDog, and BOW through 0x liquidity." },
   { name: "Cronos", badge: "Bridge", desc: "USDC, USDT, and ETH routes via Li.Fi between Ethereum, Base, and Cronos." },
@@ -179,7 +191,7 @@ const networks = [
 
 const highlights = [
   { value: "11", label: "Supported chains" },
-  { value: "85", label: "Shown assets" },
+  { value: "97", label: "Shown assets" },
   { value: "1%", label: "House fee" },
 ];
 

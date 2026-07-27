@@ -122,6 +122,20 @@ export const TOKENS: Token[] = [
     chainId: base.id,
     decimals: 18,
   },
+  {
+    symbol: "MORPHO",
+    name: "Morpho",
+    address: getAddress("0xbaa5cc21fd487b8fcc2f632f3f4e8d37262a0842"),
+    chainId: base.id,
+    decimals: 18,
+  },
+  {
+    symbol: "DEGEN",
+    name: "Degen",
+    address: getAddress("0x4ed4e862860bed51a9570b96d89af5e1b0efefed"),
+    chainId: base.id,
+    decimals: 18,
+  },
 
   // ─── Ethereum mainnet ────────────────────────────────────
   {
@@ -234,6 +248,55 @@ export const TOKENS: Token[] = [
     address: getAddress("0xcf0c122c6b73ff809c693db761e7baebe62b6a2e"),
     chainId: mainnet.id,
     decimals: 9,
+  },
+  {
+    symbol: "ONDO",
+    name: "Ondo",
+    address: getAddress("0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "ENA",
+    name: "Ethena",
+    address: getAddress("0x57e114b691db790c35207b2e685d4a43181e6061"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "USDe",
+    name: "Ethena USDe",
+    address: getAddress("0x4c9edd5852cd905f086c759e8383e09bff1e68b3"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "PENDLE",
+    name: "Pendle",
+    address: getAddress("0x808507121b80c02388fad14726482e061b8da827"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "LDO",
+    name: "Lido DAO",
+    address: getAddress("0x5a98fcbea516cf06857215779fd812ca3bef1b32"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "EIGEN",
+    name: "EigenLayer",
+    address: getAddress("0xec53bf9167f50cdeb3ae105f56099aaab9061f83"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "PYUSD",
+    name: "PayPal USD",
+    address: getAddress("0x6c3ea9036406852006290770bedfcaba0e23a0e8"),
+    chainId: mainnet.id,
+    decimals: 6,
   },
 
   // ─── Cronos ─────────────────────────────────────────────
@@ -442,6 +505,13 @@ export const TOKENS: Token[] = [
     chainId: arbitrum.id,
     decimals: 18,
   },
+  {
+    symbol: "PENDLE",
+    name: "Pendle",
+    address: getAddress("0x0c880f6761f1af8d9aa9c466984b80dab9a8c9e8"),
+    chainId: arbitrum.id,
+    decimals: 18,
+  },
 
   // ─── Optimism ────────────────────────────────────────────
   {
@@ -492,6 +562,13 @@ export const TOKENS: Token[] = [
     chainId: optimism.id,
     decimals: 18,
   },
+  {
+    symbol: "WLD",
+    name: "World",
+    address: getAddress("0xdc6ff44d5d932cbd77b52e5612ba0529dc6226f1"),
+    chainId: optimism.id,
+    decimals: 18,
+  },
 
   // ─── Avalanche ──────────────────────────────────────────
   {
@@ -527,6 +604,13 @@ export const TOKENS: Token[] = [
     address: getAddress("0x50b7545627a5162f82a992c33b87adc75187b218"),
     chainId: avalanche.id,
     decimals: 8,
+  },
+  {
+    symbol: "JOE",
+    name: "JoeToken",
+    address: getAddress("0x6e84a6216ea6dacc71ee8e6b0a5b7322eebc0fdd"),
+    chainId: avalanche.id,
+    decimals: 18,
   },
 
   // ─── Unichain ───────────────────────────────────────────
@@ -725,5 +809,5 @@ export function tokenDecimals(t: Token): number {
 }
 
 export function isUsdStableToken(t: Token) {
-  return t.symbol === "USDC" || t.symbol === "USDT" || t.symbol === "USDG" || t.symbol === "DAI";
+  return ["USDC", "USDT", "USDG", "DAI", "USDE", "PYUSD"].includes(t.symbol.toUpperCase());
 }
