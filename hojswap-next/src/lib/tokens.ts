@@ -1,6 +1,6 @@
 import { getAddress } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp } from "@/lib/chains";
+import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp, zora } from "@/lib/chains";
 
 export type Token = {
   symbol: string;
@@ -8,6 +8,7 @@ export type Token = {
   address?: `0x${string}`;
   decimals?: number;
   chainId: number;
+  logo?: string;
 };
 
 export const HOUSE_WALLET: `0x${string}` = getAddress(
@@ -135,6 +136,14 @@ export const TOKENS: Token[] = [
     address: getAddress("0x4ed4e862860bed51a9570b96d89af5e1b0efefed"),
     chainId: base.id,
     decimals: 18,
+  },
+  {
+    symbol: "mr_lightspeed",
+    name: "Mr. Lightspeed Creator Coin",
+    address: getAddress("0xf0cb96a4011a0a6f73d100c7080bf8020d10f87a"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://scontent-iad4-1.choicecdn.com/-/rs:fit:600:600/f:best/aHR0cHM6Ly9tYWdpYy5kZWNlbnRyYWxpemVkLWNvbnRlbnQuY29tL2lwZnMvYmFmeWJlaWEzZXVpN29tamNmaG41enIyNDIzdGdtbG9kYm5kcm03bWQ0aWJ2bTVueGticnlpZmlzNjQ=",
   },
 
   // ─── Ethereum mainnet ────────────────────────────────────
@@ -727,6 +736,21 @@ export const TOKENS: Token[] = [
     decimals: 18,
   },
 
+  // ─── Zora Network ───────────────────────────────────────
+  {
+    symbol: "ETH",
+    name: "Ether",
+    chainId: zora.id,
+    decimals: 18,
+  },
+  {
+    symbol: "WETH",
+    name: "Wrapped Ether",
+    address: getAddress("0x4200000000000000000000000000000000000006"),
+    chainId: zora.id,
+    decimals: 18,
+  },
+
   // ─── XRP Ledger EVM Sidechain ────────────────────────────
   {
     symbol: "XRP",
@@ -774,6 +798,7 @@ export function defaultSellForChain(chainId: number) {
   if (chainId === avalanche.id) return list.find((t) => t.symbol === "AVAX") ?? list[0]!;
   if (chainId === robinhood.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
   if (chainId === unichain.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
+  if (chainId === zora.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
   return list.find((t) => t.symbol === "ETH") ?? list[0]!;
 }
 
@@ -790,6 +815,7 @@ export function defaultBuyForChain(chainId: number) {
   if (chainId === avalanche.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
   if (chainId === robinhood.id) return list.find((t) => t.symbol === "USDG") ?? list[1] ?? list[0]!;
   if (chainId === unichain.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
+  if (chainId === zora.id) return list.find((t) => t.symbol === "WETH") ?? list[1] ?? list[0]!;
   return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
 }
 

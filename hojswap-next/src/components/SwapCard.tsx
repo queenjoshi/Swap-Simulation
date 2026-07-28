@@ -14,7 +14,7 @@ import {
 } from "wagmi";
 import { concat, decodeEventLog, encodeFunctionData, formatUnits, numberToHex, parseUnits, size, type Hex } from "viem";
 import { base } from "wagmi/chains";
-import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, getChainName } from "@/lib/chains";
+import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, getChainName, zora } from "@/lib/chains";
 import { clampToDecimals, formatSwapAmountDisplay, isValidNumberInput } from "@/lib/format";
 import { calculateHouseFeeAmount, tokenTo0xParam, type QuoteResponse, type PriceResponse } from "@/lib/quote";
 import { erc20Abi } from "@/lib/erc20";
@@ -45,6 +45,7 @@ const CHAIN_LOGOS: Record<number, string> = {
     137: "https://assets.coingecko.com/coins/images/32440/standard/polygon.png",
     4663: "https://robinhood.com/favicon.ico",
     8453: "https://assets.coingecko.com/asset_platforms/images/131/small/base.jpeg",
+    7777777: "https://zora.co/favicon.ico",
     43114: "https://assets.coingecko.com/coins/images/12559/standard/Avalanche_Circle_RedWhite_Trans.png",
     42161: "https://assets.coingecko.com/coins/images/16547/standard/arb.jpg",
     1440002: "/tokens/xrp.png",
@@ -138,8 +139,27 @@ function SwapCardInner() {
     const [activeTab, setActiveTab] = useState<ActiveTab>("swap");
     const [apiKeyError, setApiKeyError] = useState<ApiKeyError>(null);
     const [chainMenuOpen, setChainMenuOpen] = useState(false);
+    const [zoraProfileTokens, setZoraProfileTokens] = useState<Token[]>([]);
 
-    const availableTokens = useMemo(() => tokensForChain(selectedChainId), [selectedChainId]);
+    const availableTokens = useMemo(() => {
+        const staticTokens = tokensForChain(selectedChainId);
+        if (selectedChainId !== base.id && selectedChainId !== zora.id) return staticTokens;
+
+        const byAddress = new Map(
+            staticTokens
+                .filter((token) => token.address)
+                .map((token) => [token.address!.toLowerCase(), token]),
+        );
+        for (const token of zoraProfileTokens.filter((token) => token.chainId === selectedChainId)) {
+            if (token.address && !byAddress.has(token.address.toLowerCase())) {
+                byAddress.set(token.address.toLowerCase(), token);
+            }
+        }
+        return [
+            ...staticTokens.filter((token) => !token.address),
+            ...byAddress.values(),
+        ];
+    }, [selectedChainId, zoraProfileTokens]);
 
     const [sellToken, setSellToken] = useState<Token>(() => {
         const sellSymbol = searchParams.get("sell");
@@ -196,13 +216,26 @@ function SwapCardInner() {
     }
 
     const isSwapSupported = SWAP_SUPPORTED_CHAIN_IDS.includes(selectedChainId);
+    const isTokenCatalog = selectedChainId === zora.id;
+
+    useEffect(() => {
+        const controller = new AbortController();
+        void fetch("/api/zora-profile-tokens", { signal: controller.signal })
+            .then((response) => response.ok ? response.json() : [])
+            .then((tokens: Token[]) => setZoraProfileTokens(Array.isArray(tokens) ? tokens : []))
+            .catch((error: unknown) => {
+                if (error instanceof DOMException && error.name === "AbortError") return;
+                console.error("Error loading Zora profile tokens:", error);
+            });
+        return () => controller.abort();
+    }, []);
 
     // Auto-switch to bridge tab if swap is not supported on the selected chain
     useEffect(() => {
-        if (!isSwapSupported && activeTab === "swap") {
+        if (!isSwapSupported && !isTokenCatalog && activeTab === "swap") {
             setActiveTab("bridge");
         }
-    }, [selectedChainId, isSwapSupported, activeTab]);
+    }, [selectedChainId, isSwapSupported, isTokenCatalog, activeTab]);
 
     const updateChainMenuRect = useCallback(() => {
         const rect = chainButtonRef.current?.getBoundingClientRect();
@@ -1028,12 +1061,12 @@ function SwapCardInner() {
     ), [quote, price, nativeUsdPrice, nativeSymbol]);
     const hasNativeGas = !isConnected ? null : nativeBalanceData ? nativeBalanceData.value > 0n : null;
 
-    const CHAINS = CHAIN_OPTIONS.map(({ id, label, shortLabel, swap }) => ({
-        id,
-        name: label,
-        ticker: shortLabel,
-        mode: swap ? "Swap" : "Bridge",
-        logo: CHAIN_LOGOS[id],
+    const CHAINS = CHAIN_OPTIONS.map((chain) => ({
+        id: chain.id,
+        name: chain.label,
+        ticker: chain.shortLabel,
+        mode: "catalog" in chain && chain.catalog ? "Catalog" : chain.swap ? "Swap" : "Bridge",
+        logo: CHAIN_LOGOS[chain.id],
     }));
     const selectedChainOption = CHAINS.find((chain) => chain.id === selectedChainId) ?? CHAINS[0];
 
@@ -1150,7 +1183,7 @@ function SwapCardInner() {
                     document.body,
                 )}
 
-                <div className="flex gap-1 rounded-full border border-white/8 bg-black/25 p-1">
+                {!isTokenCatalog && <div className="flex gap-1 rounded-full border border-white/8 bg-black/25 p-1">
                     {TABS.filter(tab => tab.id !== "swap" || isSwapSupported).map(({ id, label }) => (
                         <button
                             key={id}
@@ -1164,9 +1197,47 @@ function SwapCardInner() {
                             {label}
                         </button>
                     ))}
-                </div>
+                </div>}
 
-                {isSwapSupported && activeTab === "swap" ? (
+                {isTokenCatalog ? (
+                    <div className="space-y-3">
+                        <div className="hoj-panel rounded-[26px] p-4 sm:p-5">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[rgba(212,175,55,0.72)]">
+                                Zora token catalog
+                            </p>
+                            <h2 className="mt-2 text-lg font-semibold text-white/90">
+                                Tokens created on Zora Network
+                            </h2>
+                            <p className="mt-2 text-xs leading-6 text-white/50">
+                                Only profile tokens reported on chain 7777777 appear here. Newer Zora creator coins deployed on Base remain in the Base catalog.
+                            </p>
+                        </div>
+                        <div className="hoj-panel rounded-[26px] p-4 sm:p-5">
+                            <div className="mb-3 flex items-center justify-between gap-3">
+                                <div>
+                                    <div className="text-[15px] font-semibold text-white/70">Browse token</div>
+                                    <div className="mt-1 text-xs text-white/40">{availableTokens.length} available</div>
+                                </div>
+                                <div className="w-[9.5rem] shrink-0">
+                                    <TokenSelect tokens={availableTokens} value={buyToken} onChange={setBuyToken} />
+                                </div>
+                            </div>
+                            {buyToken.address && (
+                                <a
+                                    href={`https://explorer.zora.energy/address/${buyToken.address}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block truncate rounded-xl border border-white/8 bg-black/20 px-3 py-2 font-mono text-[11px] text-white/45 transition hover:text-[rgba(212,175,55,0.9)]"
+                                >
+                                    {buyToken.address}
+                                </a>
+                            )}
+                        </div>
+                        <div className="rounded-2xl border border-amber-400/20 bg-amber-400/[0.07] px-4 py-3 text-xs leading-5 text-amber-100/70">
+                            Zora Network swaps are catalog-only for now because the current 0x integration does not support this chain.
+                        </div>
+                    </div>
+                ) : isSwapSupported && activeTab === "swap" ? (
                     <>
                         <div className="relative !z-30 space-y-1">
                             <div className="hoj-panel rounded-[26px] p-4 sm:p-5">
