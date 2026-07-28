@@ -742,6 +742,7 @@ export const TOKENS: Token[] = [
     name: "Ether",
     chainId: zora.id,
     decimals: 18,
+    logo: "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
   },
   {
     symbol: "WETH",
@@ -749,6 +750,7 @@ export const TOKENS: Token[] = [
     address: getAddress("0x4200000000000000000000000000000000000006"),
     chainId: zora.id,
     decimals: 18,
+    logo: "https://assets.coingecko.com/coins/images/2518/standard/weth.png",
   },
 
   // ─── XRP Ledger EVM Sidechain ────────────────────────────
