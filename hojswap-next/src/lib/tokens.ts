@@ -143,7 +143,7 @@ export const TOKENS: Token[] = [
     address: getAddress("0xf0cb96a4011a0a6f73d100c7080bf8020d10f87a"),
     chainId: base.id,
     decimals: 18,
-    logo: "https://scontent-iad4-1.choicecdn.com/-/rs:fit:600:600/f:best/aHR0cHM6Ly9tYWdpYy5kZWNlbnRyYWxpemVkLWNvbnRlbnQuY29tL2lwZnMvYmFmeWJlaWEzZXVpN29tamNmaG41enIyNDIzdGdtbG9kYm5kcm03bWQ0aWJ2bTVueGticnlpZmlzNjQ=",
+    logo: "/tokens/mr-lightspeed.jpg",
   },
   {
     symbol: "ZORA",

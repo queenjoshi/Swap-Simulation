@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const PROFILE = "mr_lightspeed";
-const PROFILE_LOGO = "https://scontent-iad4-1.choicecdn.com/-/rs:fit:600:600/f:best/aHR0cHM6Ly9tYWdpYy5kZWNlbnRyYWxpemVkLWNvbnRlbnQuY29tL2lwZnMvYmFmeWJlaWEzZXVpN29tamNmaG41enIyNDIzdGdtbG9kYm5kcm03bWQ0aWJ2bTVueGticnlpZmlzNjQ=";
+const PROFILE_LOGO = "/tokens/mr-lightspeed.jpg";
 const PROFILE_CHAIN_IDS = new Set([8453, 7777777]);
 const PAGE_SIZE = 100;
 const MAX_PAGES = 25;
