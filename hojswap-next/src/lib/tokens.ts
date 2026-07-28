@@ -145,6 +145,62 @@ export const TOKENS: Token[] = [
     decimals: 18,
     logo: "https://scontent-iad4-1.choicecdn.com/-/rs:fit:600:600/f:best/aHR0cHM6Ly9tYWdpYy5kZWNlbnRyYWxpemVkLWNvbnRlbnQuY29tL2lwZnMvYmFmeWJlaWEzZXVpN29tamNmaG41enIyNDIzdGdtbG9kYm5kcm03bWQ0aWJ2bTVueGticnlpZmlzNjQ=",
   },
+  {
+    symbol: "ZORA",
+    name: "Zora",
+    address: getAddress("0x1111111111166b7FE7bd91427724B487980aFc69"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/54693/large/zora.jpg",
+  },
+  {
+    symbol: "cbETH",
+    name: "Coinbase Wrapped Staked ETH",
+    address: getAddress("0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://assets.coingecko.com/coins/images/27008/large/cbeth.png",
+  },
+  {
+    symbol: "EURC",
+    name: "EURC",
+    address: getAddress("0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42"),
+    chainId: base.id,
+    decimals: 6,
+    logo: "https://assets.coingecko.com/coins/images/26045/standard/euro.png",
+  },
+  {
+    symbol: "WELL",
+    name: "Moonwell",
+    address: getAddress("0xA88594D404727625A9437C3f886C7643872296AE"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://assets.coingecko.com/coins/images/26133/large/WELL.png",
+  },
+  {
+    symbol: "AIXBT",
+    name: "aixbt by Virtuals",
+    address: getAddress("0x4F9Fd6Be4a90f2620860d680c0d4d5Fb53d1A825"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/51784/large/3.png",
+  },
+  {
+    symbol: "KAITO",
+    name: "Kaito",
+    address: getAddress("0x98d0baa52b2D063E780DE12F615f963Fe8537553"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/54411/large/Qm4DW488_400x400.jpg",
+  },
+  {
+    symbol: "CLANKER",
+    name: "tokenbot",
+    address: getAddress("0x1bc0c42215582d5A085795f4baDbaC3ff36d1Bcb"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/51440/large/CLANKER.png",
+  },
 
   // ─── Ethereum mainnet ────────────────────────────────────
   {
@@ -307,6 +363,55 @@ export const TOKENS: Token[] = [
     chainId: mainnet.id,
     decimals: 6,
   },
+  {
+    symbol: "WBTC",
+    name: "Wrapped BTC",
+    address: getAddress("0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"),
+    chainId: mainnet.id,
+    decimals: 8,
+  },
+  {
+    symbol: "CRV",
+    name: "Curve DAO",
+    address: getAddress("0xD533a949740bb3306d119CC777fa900bA034cd52"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "COMP",
+    name: "Compound",
+    address: getAddress("0xc00e94Cb662C3520282E6f5717214004A7f26888"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "ENS",
+    name: "Ethereum Name Service",
+    address: getAddress("0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "GRT",
+    name: "The Graph",
+    address: getAddress("0xc944E90C64B2c07662A292be6244BDf05Cda44a7"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "RPL",
+    name: "Rocket Pool",
+    address: getAddress("0xD33526068D116cE69F19A9ee46F0bd304F21A51f"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "SKY",
+    name: "Sky",
+    address: getAddress("0x56072C95FAA701256059aa122697B133aDEd9279"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
 
   // ─── Cronos ─────────────────────────────────────────────
   {
@@ -407,6 +512,27 @@ export const TOKENS: Token[] = [
     chainId: polygon.id,
     decimals: 18,
   },
+  {
+    symbol: "QUICK",
+    name: "QuickSwap",
+    address: getAddress("0xB5C064F955D8e7F38fE0460C556a72987494eE17"),
+    chainId: polygon.id,
+    decimals: 18,
+  },
+  {
+    symbol: "SAND",
+    name: "The Sandbox",
+    address: getAddress("0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683"),
+    chainId: polygon.id,
+    decimals: 18,
+  },
+  {
+    symbol: "GHST",
+    name: "Aavegotchi",
+    address: getAddress("0x385Eeac5cB85A38A9a07A70c73eA0eE1bC732679"),
+    chainId: polygon.id,
+    decimals: 18,
+  },
 
   // ─── BNB Chain ───────────────────────────────────────────
   {
@@ -456,6 +582,27 @@ export const TOKENS: Token[] = [
     address: getAddress("0xc748673057861a797275CD8A068AbB95A902e8de"),
     chainId: bsc.id,
     decimals: 9,
+  },
+  {
+    symbol: "FLOKI",
+    name: "FLOKI",
+    address: getAddress("0xfb5B838b6cfEEdC2873aB27866079AC55363D37E"),
+    chainId: bsc.id,
+    decimals: 9,
+  },
+  {
+    symbol: "XVS",
+    name: "Venus",
+    address: getAddress("0xcf6bb5389c92bdda8a3747ddb454cb7a64626c63"),
+    chainId: bsc.id,
+    decimals: 18,
+  },
+  {
+    symbol: "TWT",
+    name: "Trust Wallet Token",
+    address: getAddress("0x4B0F1812e5Df2A09796481Ff14017e6005508003"),
+    chainId: bsc.id,
+    decimals: 18,
   },
 
   // ─── Arbitrum ────────────────────────────────────────────
@@ -521,6 +668,20 @@ export const TOKENS: Token[] = [
     chainId: arbitrum.id,
     decimals: 18,
   },
+  {
+    symbol: "GRAIL",
+    name: "Camelot Token",
+    address: getAddress("0x3d9907F9a368ad0a51Be60f7Da3b97cf940982D8"),
+    chainId: arbitrum.id,
+    decimals: 18,
+  },
+  {
+    symbol: "RDNT",
+    name: "Radiant Capital",
+    address: getAddress("0x3082CC23568eA640225c2467653dB90e9250AaA0"),
+    chainId: arbitrum.id,
+    decimals: 18,
+  },
 
   // ─── Optimism ────────────────────────────────────────────
   {
@@ -578,6 +739,13 @@ export const TOKENS: Token[] = [
     chainId: optimism.id,
     decimals: 18,
   },
+  {
+    symbol: "LUSD",
+    name: "Liquity USD",
+    address: getAddress("0xc40F949F8a4e094D1b49a23ea9241D289B7b2819"),
+    chainId: optimism.id,
+    decimals: 18,
+  },
 
   // ─── Avalanche ──────────────────────────────────────────
   {
@@ -621,6 +789,34 @@ export const TOKENS: Token[] = [
     chainId: avalanche.id,
     decimals: 18,
   },
+  {
+    symbol: "PNG",
+    name: "Pangolin",
+    address: getAddress("0x60781C2586D68229fde47564546784ab3fACA982"),
+    chainId: avalanche.id,
+    decimals: 18,
+  },
+  {
+    symbol: "QI",
+    name: "BENQI",
+    address: getAddress("0x8729438Eb15e2C8B576fCc6AeCdA6A148776C0F5"),
+    chainId: avalanche.id,
+    decimals: 18,
+  },
+  {
+    symbol: "COQ",
+    name: "Coq Inu",
+    address: getAddress("0x420FcA0121DC28039145009570975747295f2329"),
+    chainId: avalanche.id,
+    decimals: 18,
+  },
+  {
+    symbol: "sAVAX",
+    name: "BENQI Liquid Staked AVAX",
+    address: getAddress("0x2b2C81e08f1Af8835a78Bb2A90AE924ACE0eA4bE"),
+    chainId: avalanche.id,
+    decimals: 18,
+  },
 
   // ─── Unichain ───────────────────────────────────────────
   {
@@ -642,6 +838,13 @@ export const TOKENS: Token[] = [
     address: getAddress("0x078d782b760474a361dda0af3839290b0ef57ad6"),
     chainId: unichain.id,
     decimals: 6,
+  },
+  {
+    symbol: "UNI",
+    name: "Uniswap",
+    address: getAddress("0x8f187aA05619a017077f5308904739877ce9eA21"),
+    chainId: unichain.id,
+    decimals: 18,
   },
 
   // ─── Robinhood Chain ────────────────────────────────────

@@ -64,6 +64,31 @@ const TOKEN_LOGOS: Record<string, string> = {
   CASHDOG: "https://cdn.dexscreener.com/cms/images/ZCcTasJqsozOQ5zI?width=800&height=800&quality=95&format=auto",
   BOW: "https://cdn.dexscreener.com/cms/images/4Xon0TNmgTw8pn76?width=800&height=800&quality=95&format=auto",
   BABYDOGE: "https://assets.coingecko.com/coins/images/16125/standard/babydoge.jpg",
+  ZORA: "https://coin-images.coingecko.com/coins/images/54693/large/zora.jpg",
+  CBETH: "https://assets.coingecko.com/coins/images/27008/large/cbeth.png",
+  EURC: "https://assets.coingecko.com/coins/images/26045/standard/euro.png",
+  WELL: "https://assets.coingecko.com/coins/images/26133/large/WELL.png",
+  AIXBT: "https://coin-images.coingecko.com/coins/images/51784/large/3.png",
+  KAITO: "https://coin-images.coingecko.com/coins/images/54411/large/Qm4DW488_400x400.jpg",
+  CLANKER: "https://coin-images.coingecko.com/coins/images/51440/large/CLANKER.png",
+  CRV: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xD533a949740bb3306d119CC777fa900bA034cd52/logo.png",
+  COMP: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xc00e94Cb662C3520282E6f5717214004A7f26888/logo.png",
+  ENS: "https://assets.coingecko.com/coins/images/19785/standard/acatxTm8_400x400.jpg",
+  GRT: "https://assets.coingecko.com/coins/images/13397/standard/Graph_Token.png",
+  RPL: "https://coin-images.coingecko.com/coins/images/2090/large/rocket_pool_%28RPL%29.png",
+  SKY: "https://assets.coingecko.com/coins/images/39925/large/sky.jpg",
+  GRAIL: "https://assets.coingecko.com/coins/images/28416/standard/v2.png",
+  RDNT: "https://assets.coingecko.com/coins/images/26536/standard/Radiant-Logo-200x200.png",
+  LUSD: "https://assets.coingecko.com/coins/images/14666/standard/Group_3.png",
+  PNG: "https://assets.coingecko.com/coins/images/13423/standard/pangolin.jpg",
+  QI: "https://assets.coingecko.com/coins/images/16362/standard/GergDDN3_400x400.jpg",
+  COQ: "https://assets.coingecko.com/coins/images/34656/standard/coq200x200.png",
+  SAVAX: "https://assets.coingecko.com/coins/images/23657/standard/savax_blue.png",
+  XVS: "https://assets.coingecko.com/coins/images/12677/standard/XVS_Token.jpg",
+  TWT: "https://assets.coingecko.com/coins/images/11085/standard/Trust.png",
+  QUICK: "https://assets.coingecko.com/coins/images/13970/standard/1_pOU6pBMEmiL-ZJVb0CYRjQ.png",
+  SAND: "https://assets.coingecko.com/coins/images/12129/standard/sandbox_logo.jpg",
+  GHST: "https://assets.coingecko.com/coins/images/12467/standard/ghst_200.png",
   QUEENJOSHI: "/logo.png",
   KINGJOSHI: "/logo.png",
   KIND: "/logo.png",
@@ -71,6 +96,7 @@ const TOKEN_LOGOS: Record<string, string> = {
 };
 
 function tokenLogo(token: Token) {
+  if (token.logo) return token.logo;
   if (token.chainId === base.id && token.symbol.toUpperCase() === "SHIB") {
     return "/tokens/shib-base.png";
   }
@@ -87,6 +113,7 @@ export function TokenSelect({
   onChange: (t: Token) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
 
   const options = useMemo(
@@ -100,6 +127,15 @@ export function TokenSelect({
       })),
     [tokens],
   );
+  const filteredOptions = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return options;
+    return options.filter(({ symbol, name, token }) =>
+      symbol.toLowerCase().includes(normalized)
+      || name.toLowerCase().includes(normalized)
+      || token.address?.toLowerCase().includes(normalized),
+    );
+  }, [options, query]);
 
   useEffect(() => {
     if (!open) return;
@@ -141,7 +177,16 @@ export function TokenSelect({
           role="listbox"
           className="absolute right-0 top-full z-40 mt-2 max-h-72 min-w-[15rem] overflow-y-auto rounded-2xl border border-white/10 bg-[#151517] p-1.5 shadow-[0_22px_55px_rgba(0,0,0,0.55)]"
         >
-          {options.map((option) => {
+          <div className="sticky top-0 z-10 bg-[#151517] p-1">
+            <input
+              autoFocus
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search name, symbol, or address"
+              className="w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-[rgba(212,175,55,0.45)]"
+            />
+          </div>
+          {filteredOptions.map((option) => {
             const selected = option.id === tokenId(value);
             return (
               <button
@@ -151,6 +196,7 @@ export function TokenSelect({
                 aria-selected={selected}
                 onClick={() => {
                   onChange(option.token);
+                  setQuery("");
                   setOpen(false);
                 }}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
@@ -167,6 +213,9 @@ export function TokenSelect({
               </button>
             );
           })}
+          {filteredOptions.length === 0 && (
+            <p className="px-3 py-5 text-center text-xs text-white/40">No matching token</p>
+          )}
         </div>
       )}
     </div>
