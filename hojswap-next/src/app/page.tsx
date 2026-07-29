@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { SwapCard } from "@/components/SwapCard";
-import { HowToSwap } from "@/components/HowToSwap";
 
 export default function Home() {
   return (
@@ -20,7 +19,6 @@ export default function Home() {
         <Suspense fallback={<div className="text-center text-white/50">Loading...</div>}>
           <SwapCard />
         </Suspense>
-        <HowToSwap />
       </div>
     </div>
   );

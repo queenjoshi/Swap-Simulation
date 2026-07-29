@@ -31,10 +31,10 @@ const steps = [
   },
 ];
 
-export function HowToSwap() {
+export function HowToSwap({ expanded = false }: { expanded?: boolean }) {
   return (
     <section className="mt-7 w-full" aria-labelledby="how-to-swap-title">
-      <details className="group overflow-hidden rounded-[26px] border border-[rgba(212,175,55,0.18)] bg-[rgba(212,175,55,0.045)]">
+      <details open={expanded} className="group overflow-hidden rounded-[26px] border border-[rgba(212,175,55,0.18)] bg-[rgba(212,175,55,0.045)]">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4">
           <span>
             <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] text-[rgba(212,175,55,0.72)]">
