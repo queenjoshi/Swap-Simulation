@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
   { label: "Swap & Bridge", href: "/" },
+  { label: "How to Swap", href: "/how-to-swap" },
   { label: "Prices", href: "/prices" },
   { label: "Transactions", href: "/transactions" },
   { label: "FAQ", href: "/faq" },
@@ -19,6 +20,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/": "Swap & Bridge",
   "/about": "About",
   "/faq": "FAQ",
+  "/how-to-swap": "How to Swap",
   "/prices": "Prices",
   "/transactions": "Transactions",
 };
