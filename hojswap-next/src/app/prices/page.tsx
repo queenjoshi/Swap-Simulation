@@ -45,7 +45,11 @@ function normalizeSymbol(symbol: string) {
 }
 
 function preferredLogo(tokens: Token[], market?: MarketRow) {
-  return tokens.find((token) => token.logo)?.logo ?? market?.image ?? FALLBACK_LOGOS[normalizeSymbol(tokens[0]?.symbol ?? "")];
+  const tokenWithLogo = tokens.find(
+    (token): token is Token & { logo: string } =>
+      "logo" in token && typeof token.logo === "string" && token.logo.length > 0,
+  );
+  return tokenWithLogo?.logo ?? market?.image ?? FALLBACK_LOGOS[normalizeSymbol(tokens[0]?.symbol ?? "")];
 }
 
 function formatMoney(value: number | null, compact = false) {
