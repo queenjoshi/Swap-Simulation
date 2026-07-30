@@ -80,6 +80,12 @@ function numberOrNull(value: unknown) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function optionalTokenLogo(token: (typeof TOKENS)[number]) {
+  return "logo" in token && typeof token.logo === "string" && token.logo.length > 0
+    ? token.logo
+    : undefined;
+}
+
 function chunks<T>(items: T[], size: number) {
   return Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
     items.slice(index * size, index * size + size),
@@ -180,7 +186,7 @@ async function fetchCoinGeckoContracts(): Promise<MarketRow[]> {
         id: `coingecko-contract:${result.value.platform}:${address}`,
         symbol: token.symbol.toUpperCase(),
         name: token.name,
-        image: token.logo,
+        image: optionalTokenLogo(token),
         price: numberOrNull(quote.usd),
         change1h: null,
         change24h: numberOrNull(quote.usd_24h_change),
