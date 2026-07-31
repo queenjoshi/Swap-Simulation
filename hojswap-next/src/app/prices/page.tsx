@@ -1,219 +1,392 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowDownUp, ChevronDown, Flame, LayoutList, RefreshCw, Search, Sparkles, Star } from "lucide-react";
+import { TokenLogo } from "@/components/TokenLogo";
+import { CHAIN_OPTIONS, getChainName, SWAP_SUPPORTED_CHAIN_IDS } from "@/lib/chains";
+import { TOKENS, type Token } from "@/lib/tokens";
 
-declare global {
-  interface Window {
-    adsbygoogle: any[];
-  }
-}
-
-interface CryptoPrice {
+type MarketRow = {
+  id: string;
   symbol: string;
   name: string;
-  id: string;
-  price: number;
-  change24h?: number;
+  image?: string;
+  price: number | null;
+  change1h: number | null;
+  change24h: number | null;
+  change7d: number | null;
+  change30d: number | null;
+  volume24h: number | null;
+  fdv: number | null;
+  marketCap: number | null;
+  sparkline: number[];
+};
+
+type ViewMode = "trending" | "top" | "watchlist" | "new";
+type SortKey = "price" | "change1h" | "change24h" | "change30d" | "volume24h" | "fdv";
+
+const supportedTokens = TOKENS.filter((token) => SWAP_SUPPORTED_CHAIN_IDS.includes(token.chainId));
+
+const FALLBACK_LOGOS: Record<string, string> = {
+  ETH: "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
+  WETH: "https://assets.coingecko.com/coins/images/2518/standard/weth.png",
+  USDC: "https://assets.coingecko.com/coins/images/6319/standard/usdc.png",
+  USDT: "https://assets.coingecko.com/coins/images/325/standard/Tether.png",
+  XRP: "/tokens/xrp.png",
+  BNB: "https://assets.coingecko.com/coins/images/825/standard/bnb-icon2_2x.png",
+  POL: "https://assets.coingecko.com/coins/images/32440/standard/polygon.png",
+  ARB: "https://assets.coingecko.com/coins/images/16547/standard/arb.jpg",
+  OP: "https://assets.coingecko.com/coins/images/25244/standard/Optimism.png",
+  AVAX: "https://assets.coingecko.com/coins/images/12559/standard/Avalanche_Circle_RedWhite_Trans.png",
+};
+
+function normalizeSymbol(symbol: string) {
+  return symbol.toUpperCase().replace(/\s+/g, "");
+}
+
+function preferredLogo(tokens: Token[], market?: MarketRow) {
+  const tokenWithLogo = tokens.find(
+    (token): token is Token & { logo: string } =>
+      "logo" in token && typeof token.logo === "string" && token.logo.length > 0,
+  );
+  return tokenWithLogo?.logo ?? market?.image ?? FALLBACK_LOGOS[normalizeSymbol(tokens[0]?.symbol ?? "")];
+}
+
+function formatMoney(value: number | null, compact = false) {
+  if (value == null || !Number.isFinite(value)) return "—";
+  if (compact) {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(value);
+  }
+  const digits = value >= 1 ? 2 : value >= 0.01 ? 4 : value >= 0.0001 ? 6 : 8;
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: digits,
+  }).format(value);
+}
+
+function Percent({ value }: { value: number | null }) {
+  if (value == null || !Number.isFinite(value)) return <span className="text-white/25">—</span>;
+  const positive = value >= 0;
+  return (
+    <span className={positive ? "text-emerald-400" : "text-rose-400"}>
+      {positive ? "+" : ""}{value.toFixed(Math.abs(value) >= 100 ? 0 : 1)}%
+    </span>
+  );
+}
+
+function Sparkline({ values, positive }: { values: number[]; positive: boolean }) {
+  const points = useMemo(() => {
+    const source = values.length > 1 ? values.slice(-24) : [0, 0];
+    const min = Math.min(...source);
+    const max = Math.max(...source);
+    const range = max - min || 1;
+    return source
+      .map((value, index) => `${(index / (source.length - 1)) * 92 + 4},${35 - ((value - min) / range) * 28}`)
+      .join(" ");
+  }, [values]);
+  return (
+    <svg viewBox="0 0 100 40" className="h-9 w-24" aria-hidden="true">
+      <polyline
+        fill="none"
+        stroke={positive ? "#34d399" : "#fb7185"}
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        points={points}
+      />
+    </svg>
+  );
 }
 
 export default function PricesPage() {
-  const [prices, setPrices] = useState<CryptoPrice[]>([]);
+  const [market, setMarket] = useState<MarketRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [query, setQuery] = useState("");
+  const [selectedChain, setSelectedChain] = useState<number | "all">("all");
+  const [view, setView] = useState<ViewMode>("trending");
+  const [watchlist, setWatchlist] = useState<string[]>([]);
+  const [sort, setSort] = useState<{ key: SortKey; direction: "asc" | "desc" }>({
+    key: "volume24h",
+    direction: "desc",
+  });
 
-  const cryptoIds = [
-    { id: "bitcoin", symbol: "BTC", name: "Bitcoin" },
-    { id: "ethereum", symbol: "ETH", name: "Ethereum" },
-    { id: "ripple", symbol: "XRP", name: "Ripple" },
-    { id: "binancecoin", symbol: "BNB", name: "Binance Coin" },
-    { id: "polygon-ecosystem-token", symbol: "POL", name: "Polygon Ecosystem Token" },
-    { id: "arbitrum", symbol: "ARB", name: "Arbitrum" },
-    { id: "optimism", symbol: "OP", name: "Optimism" },
-    { id: "pancakeswap-token", symbol: "CAKE", name: "PancakeSwap" },
-    { id: "aerodrome-finance", symbol: "AERO", name: "Aerodrome Finance" },
-    { id: "cardano", symbol: "ADA", name: "Cardano" },
-    { id: "solana", symbol: "SOL", name: "Solana" },
-  ];
+  useEffect(() => {
+    try {
+      setWatchlist(JSON.parse(localStorage.getItem("hojswap-price-watchlist") ?? "[]"));
+    } catch {
+      setWatchlist([]);
+    }
+  }, []);
 
-  const fetchPrices = async () => {
+  async function loadMarket() {
     setLoading(true);
     setError(null);
     try {
-      const ids = cryptoIds.map((c) => c.id).join(",");
-      const response = await fetch(
-        `https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=${ids}&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&x_cg_demo_api_key=CG-7spNLu6znsvXHsnoxiaFKjt8`
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch prices");
-      }
-
-      const data = await response.json();
-
-      const formattedPrices: CryptoPrice[] = cryptoIds.map((crypto) => ({
-        ...crypto,
-        price: data[crypto.id]?.usd || 0,
-        change24h: data[crypto.id]?.usd_24h_change || 0,
-      }));
-
-      setPrices(formattedPrices);
-      setLastUpdated(new Date());
-    } catch (err) {
-      console.error("Error fetching prices:", err);
-      setError("Failed to fetch cryptocurrency prices. Please try again.");
+      const response = await fetch("/api/market-prices", { cache: "no-store" });
+      if (!response.ok) throw new Error("Market data is temporarily unavailable");
+      setMarket(await response.json());
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Market data is temporarily unavailable");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
-    fetchPrices();
-    // Refresh every 60 seconds
-    const interval = setInterval(fetchPrices, 60000);
-    return () => clearInterval(interval);
+    loadMarket();
+    const timer = window.setInterval(loadMarket, 60_000);
+    return () => window.clearInterval(timer);
   }, []);
 
-  // Push ads after component mounts
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.adsbygoogle) {
-      try {
-        window.adsbygoogle.push({});
-      } catch (e) {
-        console.error('AdSense push error:', e);
-      }
+  const rows = useMemo(() => {
+    const marketBySymbol = new Map(market.map((row) => [normalizeSymbol(row.symbol), row]));
+    const grouped = new Map<string, Token[]>();
+    for (const token of supportedTokens) {
+      const key = normalizeSymbol(token.symbol);
+      const list = grouped.get(key) ?? [];
+      list.push(token);
+      grouped.set(key, list);
     }
-  }, []);
+
+    let result = [...grouped.entries()].map(([key, tokens]) => {
+      const price = marketBySymbol.get(key);
+      return {
+        key,
+        tokens,
+        symbol: tokens[0].symbol,
+        name: price?.name ?? tokens[0].name,
+        market: price,
+        logo: preferredLogo(tokens, price),
+        chains: [...new Set(tokens.map((token) => token.chainId))],
+      };
+    });
+
+    if (selectedChain !== "all") result = result.filter((row) => row.chains.includes(selectedChain));
+    const needle = query.trim().toLowerCase();
+    if (needle) {
+      result = result.filter((row) =>
+        row.symbol.toLowerCase().includes(needle) || row.name.toLowerCase().includes(needle)
+      );
+    }
+    if (view === "watchlist") result = result.filter((row) => watchlist.includes(row.key));
+    if (view === "new") result = result.filter((row) =>
+      ["1INCH", "YFI", "BAL", "CVX", "GNO", "SPX", "SYRUP", "FLUID", "COW", "EUL", "ZRO", "W", "AXL", "SUSHI", "NPC", "TIBBIR", "WCT"].includes(row.key)
+    );
+
+    const getValue = (row: (typeof result)[number]) => row.market?.[sort.key] ?? Number.NEGATIVE_INFINITY;
+    result.sort((a, b) => {
+      if (view === "top" && sort.key === "volume24h") {
+        return (b.market?.marketCap ?? -1) - (a.market?.marketCap ?? -1);
+      }
+      const difference = getValue(a) - getValue(b);
+      return sort.direction === "asc" ? difference : -difference;
+    });
+    return result;
+  }, [market, query, selectedChain, sort, view, watchlist]);
+
+  function toggleWatchlist(key: string) {
+    setWatchlist((current) => {
+      const next = current.includes(key) ? current.filter((item) => item !== key) : [...current, key];
+      localStorage.setItem("hojswap-price-watchlist", JSON.stringify(next));
+      return next;
+    });
+  }
+
+  function updateSort(key: SortKey) {
+    setSort((current) => ({
+      key,
+      direction: current.key === key && current.direction === "desc" ? "asc" : "desc",
+    }));
+  }
 
   return (
-    <div className="min-h-screen bg-[#0b0b0d] text-white">
-      {/* Header */}
-      <div className="border-b border-[rgba(212,175,55,0.12)]">
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-          <h1 className="hoj-display text-4xl font-bold text-[rgba(212,175,55,0.9)]">
-            Cryptocurrency Prices
-          </h1>
-          <p className="mt-2 text-white/60">
-            Real-time prices for major swap and bridge assets, powered by CoinGecko
-          </p>
-        </div>
-      </div>
-
-      {/* AdSense Banner */}
-      <div className="border-b border-[rgba(212,175,55,0.12)]">
-        <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6">
-          <div className="flex justify-center">
-            <ins
-              className="adsbygoogle"
-              style={{ display: 'inline-block', width: '100%', maxWidth: '1000px', height: '90px' }}
-              data-ad-client="ca-pub-8905064413166970"
-              data-ad-slot="4854619850"
-            ></ins>
+    <div className="min-h-[calc(100dvh-72px)] bg-[#0b0b0d] text-white">
+      <div className="border-b border-white/[0.08] bg-[#101012]">
+        <div className="mx-auto flex max-w-[1600px] flex-col gap-5 px-4 py-7 sm:px-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#d4af37]">
+              <Sparkles className="h-4 w-4" /> HOJSwap markets
+            </div>
+            <h1 className="hoj-display text-3xl font-semibold sm:text-4xl">Token prices</h1>
+            <p className="mt-2 max-w-2xl text-sm text-white/50">
+              Explore market data for tokens available in the HOJSwap selector.
+            </p>
           </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        {/* Refresh Button & Last Updated */}
-        <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="text-sm text-white/50">
-            {lastUpdated && (
-              <>
-                Last updated:{" "}
-                <span className="text-[rgba(212,175,55,0.9)]">
-                  {lastUpdated.toLocaleTimeString()}
-                </span>
-              </>
-            )}
-          </div>
-          <button
-            onClick={fetchPrices}
-            disabled={loading}
-            className="rounded-2xl border border-[rgba(212,175,55,0.3)] bg-[rgba(212,175,55,0.1)] px-6 py-2 text-sm font-semibold text-[rgba(212,175,55,0.9)] hover:bg-[rgba(212,175,55,0.2)] disabled:opacity-50 transition"
-          >
-            {loading ? "Updating..." : "Refresh"}
-          </button>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3">
-            <p className="text-sm text-red-200">{error}</p>
-          </div>
-        )}
-
-        {/* Price Grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {prices.map((crypto) => (
-            <div
-              key={crypto.id}
-              className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 hover:bg-white/[0.05] transition"
+          <div className="flex w-full gap-2 lg:w-auto">
+            <label className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.035] px-4 lg:w-80">
+              <Search className="h-4 w-4 text-white/35" />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search supported tokens"
+                className="h-11 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-white/30"
+              />
+            </label>
+            <button
+              onClick={loadMarket}
+              disabled={loading}
+              className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/[0.035] text-white/60 transition hover:border-[#d4af37]/40 hover:text-[#d4af37] disabled:opacity-50"
+              aria-label="Refresh prices"
             >
-              {/* Symbol & Name */}
-              <div className="mb-4">
-                <h3 className="text-2xl font-bold text-white">
-                  {crypto.symbol}
-                </h3>
-                <p className="text-sm text-white/60">{crypto.name}</p>
-              </div>
-
-              {/* Price */}
-              <div className="mb-4">
-                <p className="text-4xl font-bold text-[rgba(212,175,55,0.95)]">
-                  ${crypto.price.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </p>
-              </div>
-
-              {/* 24h Change */}
-              {crypto.change24h !== undefined && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-white/60">24h Change:</span>
-                  <span
-                    className={`text-sm font-semibold ${
-                      crypto.change24h >= 0
-                        ? "text-green-400/80"
-                        : "text-red-400/80"
-                    }`}
-                  >
-                    {crypto.change24h >= 0 ? "+" : ""}
-                    {crypto.change24h.toFixed(2)}%
-                  </span>
-                </div>
-              )}
-            </div>
-          ))}
+              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            </button>
+          </div>
         </div>
-
-        {/* Loading State */}
-        {loading && prices.length === 0 && (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <p className="text-white/60">Loading prices...</p>
-            </div>
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!loading && prices.length === 0 && !error && (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <p className="text-white/60">No prices available</p>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-[rgba(212,175,55,0.12)]">
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-          <p className="text-center text-xs text-white/40">
-            Prices provided by CoinGecko API • Updated every 60 seconds
-          </p>
-        </div>
+      <div className="mx-auto grid max-w-[1600px] lg:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className="border-b border-white/[0.08] px-4 py-5 sm:px-6 lg:min-h-[720px] lg:border-b-0 lg:border-r">
+          <div className="mb-5 text-sm font-semibold">Filter by chain</div>
+          <div className="flex flex-wrap gap-2 lg:flex-col">
+            <button
+              onClick={() => setSelectedChain("all")}
+              className={`rounded-xl border px-3 py-2 text-left text-sm transition ${
+                selectedChain === "all"
+                  ? "border-[#d4af37]/50 bg-[#d4af37]/10 text-[#ead173]"
+                  : "border-white/[0.07] bg-white/[0.025] text-white/55 hover:text-white"
+              }`}
+            >
+              All supported chains
+            </button>
+            {CHAIN_OPTIONS.filter((chain) => chain.swap).map((chain) => (
+              <button
+                key={chain.id}
+                onClick={() => setSelectedChain(chain.id)}
+                className={`rounded-xl border px-3 py-2 text-left text-sm transition ${
+                  selectedChain === chain.id
+                    ? "border-[#d4af37]/50 bg-[#d4af37]/10 text-[#ead173]"
+                    : "border-white/[0.07] bg-white/[0.025] text-white/55 hover:text-white"
+                }`}
+              >
+                {chain.label}
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        <section className="min-w-0">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.08] px-4 py-4 sm:px-6">
+            <div className="flex flex-wrap gap-2">
+              {([
+                ["trending", Flame, "Trending"],
+                ["top", ArrowDownUp, "Top"],
+                ["watchlist", Star, "Watchlist"],
+                ["new", Sparkles, "New"],
+              ] as const).map(([key, Icon, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setView(key)}
+                  className={`flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-medium transition ${
+                    view === key
+                      ? "border-[#d4af37]/40 bg-[#d4af37]/10 text-[#ead173]"
+                      : "border-white/[0.08] text-white/45 hover:text-white"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" /> {label}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 text-xs text-white/35">
+              <span className={`h-2 w-2 rounded-full ${error ? "bg-rose-400" : "bg-emerald-400"}`} />
+              {error ? "Price feed unavailable" : `${rows.length} supported tokens`}
+              <LayoutList className="ml-2 h-4 w-4" />
+            </div>
+          </div>
+
+          {error && (
+            <div className="m-4 rounded-xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-sm text-rose-200 sm:m-6">
+              {error}. Supported tokens are still shown; refresh to try the price feed again.
+            </div>
+          )}
+
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1020px] border-collapse text-sm">
+              <thead className="border-b border-white/[0.08] text-[11px] uppercase tracking-[0.14em] text-white/35">
+                <tr>
+                  <th className="w-12 px-4 py-4 sm:px-6" />
+                  <th className="px-3 py-4 text-left font-medium">Token</th>
+                  {([
+                    ["price", "Price"],
+                    ["change1h", "1h"],
+                    ["change24h", "1d"],
+                    ["change30d", "30d"],
+                    ["volume24h", "1d vol"],
+                    ["fdv", "FDV"],
+                  ] as [SortKey, string][]).map(([key, label]) => (
+                    <th key={key} className="px-4 py-4 text-right font-medium">
+                      <button onClick={() => updateSort(key)} className="inline-flex items-center gap-1 hover:text-white">
+                        {label}<ChevronDown className={`h-3 w-3 ${sort.key === key && sort.direction === "asc" ? "rotate-180" : ""}`} />
+                      </button>
+                    </th>
+                  ))}
+                  <th className="px-5 py-4 text-right font-medium">Last 7d</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => {
+                  const watched = watchlist.includes(row.key);
+                  const marketRow = row.market;
+                  return (
+                    <tr key={row.key} className="border-b border-white/[0.065] transition hover:bg-white/[0.025]">
+                      <td className="px-4 py-4 sm:px-6">
+                        <button onClick={() => toggleWatchlist(row.key)} aria-label={`Watch ${row.symbol}`}>
+                          <Star className={`h-4 w-4 ${watched ? "fill-[#d4af37] text-[#d4af37]" : "text-white/35 hover:text-white"}`} />
+                        </button>
+                      </td>
+                      <td className="px-3 py-4">
+                        <div className="flex items-center gap-3">
+                          <TokenLogo symbol={row.symbol} logo={row.logo} size="sm" />
+                          <div className="min-w-0">
+                            <div className="flex items-baseline gap-2">
+                              <span className="max-w-44 truncate font-semibold text-white/90">{row.name}</span>
+                              <span className="text-xs text-white/35">{row.symbol}</span>
+                            </div>
+                            <div className="mt-1 flex max-w-64 gap-1 overflow-hidden">
+                              {row.chains.slice(0, 3).map((chainId) => (
+                                <span key={chainId} className="rounded bg-white/[0.05] px-1.5 py-0.5 text-[9px] text-white/35">
+                                  {getChainName(chainId)}
+                                </span>
+                              ))}
+                              {row.chains.length > 3 && <span className="text-[9px] text-white/30">+{row.chains.length - 3}</span>}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-right font-medium text-white/85">{formatMoney(marketRow?.price ?? null)}</td>
+                      <td className="px-4 py-4 text-right"><Percent value={marketRow?.change1h ?? null} /></td>
+                      <td className="px-4 py-4 text-right"><Percent value={marketRow?.change24h ?? null} /></td>
+                      <td className="px-4 py-4 text-right"><Percent value={marketRow?.change30d ?? null} /></td>
+                      <td className="px-4 py-4 text-right text-white/65">{formatMoney(marketRow?.volume24h ?? null, true)}</td>
+                      <td className="px-4 py-4 text-right text-white/65">{formatMoney(marketRow?.fdv ?? null, true)}</td>
+                      <td className="px-5 py-2 text-right">
+                        <Sparkline
+                          values={marketRow?.sparkline ?? []}
+                          positive={(marketRow?.change7d ?? marketRow?.change24h ?? 0) >= 0}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {!loading && rows.length === 0 && (
+            <div className="px-6 py-20 text-center text-sm text-white/40">
+              No supported tokens match this view.
+            </div>
+          )}
+          {loading && market.length === 0 && (
+            <div className="px-6 py-20 text-center text-sm text-white/40">Loading supported token markets…</div>
+          )}
+        </section>
       </div>
     </div>
   );
