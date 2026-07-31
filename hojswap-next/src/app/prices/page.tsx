@@ -177,7 +177,7 @@ export default function PricesPage() {
     }
     if (view === "watchlist") result = result.filter((row) => watchlist.includes(row.key));
     if (view === "new") result = result.filter((row) =>
-      ["SPX", "SYRUP", "FLUID", "COW", "EUL", "ZRO", "W", "AXL", "SUSHI", "NPC", "TIBBIR", "WCT"].includes(row.key)
+      ["1INCH", "YFI", "BAL", "CVX", "GNO", "SPX", "SYRUP", "FLUID", "COW", "EUL", "ZRO", "W", "AXL", "SUSHI", "NPC", "TIBBIR", "WCT"].includes(row.key)
     );
 
     const getValue = (row: (typeof result)[number]) => row.market?.[sort.key] ?? Number.NEGATIVE_INFINITY;

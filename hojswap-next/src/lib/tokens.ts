@@ -8,6 +8,7 @@ export type Token = {
   address?: `0x${string}`;
   decimals?: number;
   chainId: number;
+  logo?: string;
 };
 
 export const HOUSE_WALLET: `0x${string}` = getAddress(
@@ -220,6 +221,46 @@ export const TOKENS: Token[] = [
     address: getAddress("0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9"),
     chainId: mainnet.id,
     decimals: 18,
+  },
+  {
+    symbol: "1INCH",
+    name: "1inch",
+    address: getAddress("0x111111111117dc0aa78b770fa6a738034120c302"),
+    chainId: mainnet.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/13469/large/1inch-logo.jpeg",
+  },
+  {
+    symbol: "YFI",
+    name: "yearn.finance",
+    address: getAddress("0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e"),
+    chainId: mainnet.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/11849/large/yearn.jpg",
+  },
+  {
+    symbol: "BAL",
+    name: "Balancer",
+    address: getAddress("0xba100000625a3754423978a60c9317c58a424e3d"),
+    chainId: mainnet.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/11683/large/Balancer.png",
+  },
+  {
+    symbol: "CVX",
+    name: "Convex Finance",
+    address: getAddress("0x4e3fbd56cd56c3e72c1403e103b45db9da5b9d2b"),
+    chainId: mainnet.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/15585/large/convex.png",
+  },
+  {
+    symbol: "GNO",
+    name: "Gnosis",
+    address: getAddress("0x6810e776880c02933d47db1b9fc05908e5386b96"),
+    chainId: mainnet.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/662/large/logo_square_simple_300px.png",
   },
   {
     symbol: "PEPE",
