@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { TokenLogo } from "@/components/TokenLogo";
+import { CHAIN_OPTIONS } from "@/lib/chains";
+import { TOKENS } from "@/lib/tokens";
 
 type Token = {
   symbol: string;
@@ -9,7 +11,7 @@ type Token = {
 
 const HOUSE_LOGO = "/logo.png";
 
-const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = [
+const curatedTokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = [
   {
     title: "Base Community",
     eyebrow: "Base",
@@ -162,6 +164,28 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
     ],
   },
 ];
+
+const curatedLogos = new Map(
+  curatedTokenGroups.flatMap((group) =>
+    group.tokens
+      .filter((token) => token.logo)
+      .map((token) => [token.symbol.toUpperCase(), token.logo] as const),
+  ),
+);
+
+// Keep this page in sync with the swap registry instead of maintaining a
+// second, incomplete token list by hand.
+const tokenGroups = CHAIN_OPTIONS.map((chain) => ({
+  title: `${chain.label} Tokens`,
+  eyebrow: chain.label,
+  tokens: TOKENS
+    .filter((token) => token.chainId === chain.id)
+    .map((token) => ({
+      symbol: token.symbol,
+      name: token.name,
+      logo: curatedLogos.get(token.symbol.toUpperCase()),
+    })),
+})).filter((group) => group.tokens.length > 0);
 
 const networks = [
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity for SHIB, BONE, TREAT, OSCAR, BNB, MAME, WETH, DAI, LINK, UNI, AAVE, PEPE, FLOKI, USDC, USDT, and ETH." },
