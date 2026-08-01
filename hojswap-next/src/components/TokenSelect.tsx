@@ -53,6 +53,7 @@ const TOKEN_LOGOS: Record<string, string> = {
   CASHDOG: "https://cdn.dexscreener.com/cms/images/ZCcTasJqsozOQ5zI?width=800&height=800&quality=95&format=auto",
   BOW: "https://cdn.dexscreener.com/cms/images/4Xon0TNmgTw8pn76?width=800&height=800&quality=95&format=auto",
   BABYDOGE: "https://assets.coingecko.com/coins/images/16125/standard/babydoge.jpg",
+  MR_LIGHTSPEED: "https://scontent-iad4-1.choicecdn.com/-/rs:fit:600:600/f:best/aHR0cHM6Ly9tYWdpYy5kZWNlbnRyYWxpemVkLWNvbnRlbnQuY29tL2lwZnMvYmFmeWJlaWEzZXVpN29tamNmaG41enIyNDIzdGdtbG9kYm5kcm03bWQ0aWJ2bTVueGticnlpZmlzNjQ=",
   QUEENJOSHI: "/logo.png",
   KINGJOSHI: "/logo.png",
   KIND: "/logo.png",
@@ -60,6 +61,7 @@ const TOKEN_LOGOS: Record<string, string> = {
 };
 
 function tokenLogo(token: Token) {
+  if (token.logo) return token.logo;
   if (token.chainId === base.id && token.symbol.toUpperCase() === "SHIB") {
     return "/tokens/shib-base.png";
   }
@@ -76,6 +78,7 @@ export function TokenSelect({
   onChange: (t: Token) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
 
   const options = useMemo(
@@ -89,6 +92,15 @@ export function TokenSelect({
       })),
     [tokens],
   );
+  const filteredOptions = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return options;
+    return options.filter(({ symbol, name, token }) =>
+      symbol.toLowerCase().includes(normalized)
+      || name.toLowerCase().includes(normalized)
+      || token.address?.toLowerCase().includes(normalized),
+    );
+  }, [options, query]);
 
   useEffect(() => {
     if (!open) return;
@@ -130,7 +142,19 @@ export function TokenSelect({
           role="listbox"
           className="absolute right-0 top-full z-40 mt-2 max-h-72 min-w-[15rem] overflow-y-auto rounded-2xl border border-white/10 bg-[#151517] p-1.5 shadow-[0_22px_55px_rgba(0,0,0,0.55)]"
         >
-          {options.map((option) => {
+          <div className="sticky top-0 z-10 bg-[#151517] p-1">
+            <input
+              autoFocus
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search name, symbol, or address"
+              className="w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-[rgba(212,175,55,0.45)]"
+            />
+            <p className="px-1 pt-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-white/35">
+              {filteredOptions.length} of {options.length} tokens
+            </p>
+          </div>
+          {filteredOptions.map((option) => {
             const selected = option.id === tokenId(value);
             return (
               <button
@@ -140,6 +164,7 @@ export function TokenSelect({
                 aria-selected={selected}
                 onClick={() => {
                   onChange(option.token);
+                  setQuery("");
                   setOpen(false);
                 }}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
@@ -156,6 +181,9 @@ export function TokenSelect({
               </button>
             );
           })}
+          {filteredOptions.length === 0 && (
+            <p className="px-3 py-5 text-center text-xs text-white/40">No matching token</p>
+          )}
         </div>
       )}
     </div>

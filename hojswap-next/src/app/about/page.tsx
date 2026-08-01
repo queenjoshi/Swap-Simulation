@@ -183,7 +183,7 @@ const tokenGroups = CHAIN_OPTIONS.map((chain) => ({
     .map((token) => ({
       symbol: token.symbol,
       name: token.name,
-      logo: curatedLogos.get(token.symbol.toUpperCase()),
+      logo: token.logo ?? curatedLogos.get(token.symbol.toUpperCase()),
     })),
 })).filter((group) => group.tokens.length > 0);
 

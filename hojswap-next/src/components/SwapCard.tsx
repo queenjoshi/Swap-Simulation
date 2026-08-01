@@ -138,8 +138,27 @@ function SwapCardInner() {
     const [activeTab, setActiveTab] = useState<ActiveTab>("swap");
     const [apiKeyError, setApiKeyError] = useState<ApiKeyError>(null);
     const [chainMenuOpen, setChainMenuOpen] = useState(false);
+    const [zoraProfileTokens, setZoraProfileTokens] = useState<Token[]>([]);
 
-    const availableTokens = useMemo(() => tokensForChain(selectedChainId), [selectedChainId]);
+    const availableTokens = useMemo(() => {
+        const staticTokens = tokensForChain(selectedChainId);
+        if (selectedChainId !== base.id) return staticTokens;
+
+        const byAddress = new Map(
+            staticTokens
+                .filter((token) => token.address)
+                .map((token) => [token.address!.toLowerCase(), token]),
+        );
+        for (const token of zoraProfileTokens.filter((token) => token.chainId === base.id)) {
+            if (token.address && !byAddress.has(token.address.toLowerCase())) {
+                byAddress.set(token.address.toLowerCase(), token);
+            }
+        }
+        return [
+            ...staticTokens.filter((token) => !token.address),
+            ...byAddress.values(),
+        ];
+    }, [selectedChainId, zoraProfileTokens]);
 
     const [sellToken, setSellToken] = useState<Token>(() => {
         const sellSymbol = searchParams.get("sell");
@@ -196,6 +215,36 @@ function SwapCardInner() {
     }
 
     const isSwapSupported = SWAP_SUPPORTED_CHAIN_IDS.includes(selectedChainId);
+
+    useEffect(() => {
+        const controller = new AbortController();
+        const loadProfileTokens = async () => {
+            for (let attempt = 1; attempt <= 4; attempt += 1) {
+                try {
+                    const response = await fetch("/api/zora-profile-tokens", {
+                        cache: "no-store",
+                        signal: controller.signal,
+                    });
+                    if (!response.ok) throw new Error(`Profile token API ${response.status}`);
+                    const tokens = await response.json() as Token[];
+                    if (!Array.isArray(tokens) || tokens.length === 0) {
+                        throw new Error("Profile token API returned no tokens");
+                    }
+                    setZoraProfileTokens(tokens);
+                    return;
+                } catch (error) {
+                    if (controller.signal.aborted) return;
+                    if (attempt === 4) {
+                        console.error("Error loading Zora profile tokens:", error);
+                        return;
+                    }
+                    await new Promise((resolve) => setTimeout(resolve, attempt * 1_000));
+                }
+            }
+        };
+        void loadProfileTokens();
+        return () => controller.abort();
+    }, []);
 
     // Auto-switch to bridge tab if swap is not supported on the selected chain
     useEffect(() => {
