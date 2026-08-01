@@ -208,12 +208,6 @@ const networks = [
   { name: "XRP Ledger EVM", badge: "Coming Soon", desc: "Listed for network continuity while swap and bridge routes mature." },
 ];
 
-const highlights = [
-  { value: "11", label: "Supported chains" },
-  { value: "85", label: "Shown assets" },
-  { value: "1%", label: "House fee" },
-];
-
 export default function About() {
   const [lightspeedTokens, setLightspeedTokens] = useState<Token[]>([]);
 
@@ -258,6 +252,15 @@ export default function About() {
     }
     return { ...group, tokens: Array.from(tokensById.values()) };
   }), [lightspeedTokens]);
+
+  const highlights = useMemo(() => [
+    { value: String(CHAIN_OPTIONS.length), label: "Supported chains" },
+    {
+      value: String(displayedTokenGroups.reduce((total, group) => total + group.tokens.length, 0)),
+      label: "Shown assets",
+    },
+    { value: "1%", label: "House fee" },
+  ], [displayedTokenGroups]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
