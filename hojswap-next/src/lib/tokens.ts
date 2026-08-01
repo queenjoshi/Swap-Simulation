@@ -81,6 +81,13 @@ export const TOKENS: Token[] = [
     decimals: 18,
   },
   {
+    symbol: "TOTEM",
+    name: "Totem",
+    address: getAddress("0x0f8ac22b85076f9bfe0b93cc49fb6426cb150f88"),
+    chainId: base.id,
+    decimals: 18,
+  },
+  {
     symbol: "SHIB",
     name: "SchismaticShib",
     address: getAddress("0xFCa95aeb5bF44aE355806A5ad14659c940dC6BF7"),
