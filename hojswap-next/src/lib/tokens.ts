@@ -171,6 +171,21 @@ export const TOKENS: Token[] = [
     chainId: base.id,
     decimals: 18,
   },
+  { symbol: "1INCH", name: "1inch", address: getAddress("0xc5fecc3a29fb57b5024eec8a2239d4621e111cbe"), chainId: base.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/13469/standard/1inch-token.png" },
+  { symbol: "UNI", name: "Uniswap", address: getAddress("0xc3de830ea07524a0761646a6a4e4be0e114a3c83"), chainId: base.id, decimals: 18, logo: "https://ethereum-optimism.github.io/data/UNI/logo.png" },
+  { symbol: "COMP", name: "Compound", address: getAddress("0x9e1028f5f1d5ede59748ffcee5532509976840e0"), chainId: base.id, decimals: 18, logo: "https://ethereum-optimism.github.io/data/COMP/logo.svg" },
+  { symbol: "SEAM", name: "Seamless", address: getAddress("0x1c7a460413dd4e964f96d8dfc56e7223ce88cd85"), chainId: base.id, decimals: 18, logo: "https://basescan.org/token/images/seamless_32.png" },
+  { symbol: "SNX", name: "Synthetix Network Token", address: getAddress("0x22e6966b799c4d5b13be962e1d117b56327fda66"), chainId: base.id, decimals: 18, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F/logo.png" },
+  { symbol: "WCT", name: "WalletConnect Token", address: getAddress("0xef4461891dfb3ac8572ccf7c794664a8dd927945"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/50390/large/wc-token1.png" },
+  { symbol: "ZRX", name: "0x Protocol Token", address: getAddress("0x3bb4445d30ac020a84c1b5a8a2c6248ebc9779d0"), chainId: base.id, decimals: 18, logo: "https://ethereum-optimism.github.io/data/ZRX/logo.png" },
+  { symbol: "RPL", name: "Rocket Pool Protocol", address: getAddress("0x1f73eaf55d696bffa9b0ea16fa987b93b0f4d302"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/2090/large/rocket_pool_%28RPL%29.png" },
+  { symbol: "ODOS", name: "Odos Token", address: getAddress("0xca73ed1815e5915489570014e024b7ebe65de679"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/52914/large/odos.jpg" },
+  { symbol: "KEYCAT", name: "Keyboard Cat", address: getAddress("0x9a26f5433671751c3276a065f57e5a02d2817973"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/36608/large/keyboard_cat.jpeg" },
+  { symbol: "doginme", name: "doginme", address: getAddress("0x6921b130d297cc43754afba22e5eac0fbf8db75b"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/35123/large/doginme-logo1-transparent200.png" },
+  { symbol: "B3", name: "B3", address: getAddress("0xb3b32f9f8827d4634fe7d973fa1034ec9fddb3b3"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/54287/large/B3.png" },
+  { symbol: "BNKR", name: "BankrCoin", address: getAddress("0x22af33fe49fd1fa80c7149773dde5890d3c76f3b"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/52626/large/bankr-static.png" },
+  { symbol: "AVNT", name: "Avantis", address: getAddress("0x696f9436b67233384889472cd7cd58a6fb5df4f1"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/68972/large/avnt-token.png" },
+  { symbol: "VVV", name: "Venice Token", address: getAddress("0xacfe6019ed1a7dc6f7b508c02d1b04ec88cc21bf"), chainId: base.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/54023/standard/Venice_Token_(1).png" },
 
   // ─── Ethereum mainnet ────────────────────────────────────
   {
