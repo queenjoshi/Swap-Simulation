@@ -36,6 +36,7 @@ import { hojswapRouterAbi, tokenToRouterAddress } from "@/lib/hojswap-router";
 import { HOUSE_WALLET } from "@/lib/swap-fee";
 
 const DEBOUNCE_MS = 750;
+const BALANCE_PERCENTAGES = [25, 50, 75, 100] as const;
 const CHAIN_LOGOS: Record<number, string> = {
     1: "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
     10: "https://assets.coingecko.com/coins/images/25244/standard/Optimism.png",
@@ -360,13 +361,27 @@ function SwapCardInner() {
         query: { enabled: isConnected && !!address && walletOnSelectedChain, refetchInterval: 12_000 },
     });
 
-    function setMaxAmount() {
+    function amountForBalancePercentage(percent: number) {
         if (!sellBalanceData) return;
-        const maxRaw = sellBalanceData.value;
-        if (maxRaw === 0n) return;
+        const balance = sellBalanceData.value;
+        if (balance === 0n) return;
         const dec = sellBalanceData.decimals;
-        const str = (Number(maxRaw) / 10 ** dec).toFixed(dec > 8 ? 8 : dec);
-        setSellAmountInput(str);
+        let amount = (balance * BigInt(percent)) / 100n;
+
+        // A native-token max must leave enough value to submit the swap. Keep
+        // 1% of small balances or up to 0.0005 native tokens as a gas reserve.
+        if (percent === 100 && isNative(sellToken)) {
+            const gasReserveCap = parseUnits("0.0005", dec);
+            const gasReserve = balance / 100n < gasReserveCap ? balance / 100n : gasReserveCap;
+            amount = balance > gasReserve ? balance - gasReserve : 0n;
+        }
+
+        if (amount === 0n) return;
+        setSellAmountInput(formatUnits(amount, dec));
+    }
+
+    function setMaxAmount() {
+        amountForBalancePercentage(100);
     }
 
     const insufficientBalance = useMemo(() => {
@@ -1238,6 +1253,20 @@ function SwapCardInner() {
                                         }}
                                         className="hoj-input w-full min-w-0 bg-transparent text-5xl font-semibold leading-none text-white outline-none placeholder:text-white/25 sm:text-6xl"
                                     />
+                                </div>
+                                <div className="mt-4 grid grid-cols-4 gap-2" aria-label="Choose percentage of balance to swap">
+                                    {BALANCE_PERCENTAGES.map((percent) => (
+                                        <button
+                                            key={percent}
+                                            type="button"
+                                            onClick={() => amountForBalancePercentage(percent)}
+                                            disabled={!sellBalanceData || sellBalanceData.value === 0n || !walletOnSelectedChain}
+                                            className="rounded-xl border border-white/10 bg-white/[0.04] px-2 py-2 text-xs font-semibold tabular-nums text-white/60 transition hover:border-[rgba(212,175,55,0.45)] hover:bg-[rgba(212,175,55,0.1)] hover:text-[rgba(255,222,85,0.95)] disabled:cursor-not-allowed disabled:opacity-30"
+                                            aria-label={`Swap ${percent}% of ${sellToken.symbol} balance`}
+                                        >
+                                            {percent}%
+                                        </button>
+                                    ))}
                                 </div>
                                 <TokenBalance token={sellToken} chainId={selectedChainId} isConnected={isConnected} walletChainId={chainId} onMax={walletOnSelectedChain ? setMaxAmount : undefined} />
                             </div>
