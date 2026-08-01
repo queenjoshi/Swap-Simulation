@@ -1,9 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { TokenLogo } from "@/components/TokenLogo";
 import { CHAIN_OPTIONS } from "@/lib/chains";
 import { TOKENS } from "@/lib/tokens";
 
 type Token = {
+  address?: `0x${string}`;
+  chainId?: number;
   symbol: string;
   name: string;
   logo?: string;
@@ -184,6 +189,8 @@ const tokenGroups = CHAIN_OPTIONS.map((chain) => ({
       symbol: token.symbol,
       name: token.name,
       logo: token.logo ?? curatedLogos.get(token.symbol.toUpperCase()),
+      address: token.address,
+      chainId: token.chainId,
     })),
 })).filter((group) => group.tokens.length > 0);
 
@@ -208,6 +215,50 @@ const highlights = [
 ];
 
 export default function About() {
+  const [lightspeedTokens, setLightspeedTokens] = useState<Token[]>([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const loadLightspeedTokens = async () => {
+      for (let attempt = 1; attempt <= 4; attempt += 1) {
+        try {
+          const response = await fetch("/api/zora-profile-tokens", {
+            cache: "no-store",
+            signal: controller.signal,
+          });
+          if (!response.ok) throw new Error(`Profile token API ${response.status}`);
+          const tokens = await response.json() as Token[];
+          if (!Array.isArray(tokens) || tokens.length === 0) {
+            throw new Error("Profile token API returned no tokens");
+          }
+          setLightspeedTokens(tokens);
+          return;
+        } catch (error) {
+          if (controller.signal.aborted) return;
+          if (attempt === 4) {
+            console.error("Error loading Lightspeed tokens on About:", error);
+            return;
+          }
+          await new Promise((resolve) => setTimeout(resolve, attempt * 1_000));
+        }
+      }
+    };
+    void loadLightspeedTokens();
+    return () => controller.abort();
+  }, []);
+
+  const displayedTokenGroups = useMemo(() => tokenGroups.map((group) => {
+    if (group.eyebrow !== "Base" || lightspeedTokens.length === 0) return group;
+    const tokensById = new Map<string, Token>(
+      group.tokens.map((token) => [token.address?.toLowerCase() ?? token.symbol.toLowerCase(), token]),
+    );
+    for (const token of lightspeedTokens.filter((token) => token.chainId === 8453)) {
+      const id = token.address?.toLowerCase() ?? token.symbol.toLowerCase();
+      if (!tokensById.has(id)) tokensById.set(id, token);
+    }
+    return { ...group, tokens: Array.from(tokensById.values()) };
+  }), [lightspeedTokens]);
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
       <section className="mb-10 grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -275,7 +326,7 @@ export default function About() {
           title="Logo-first token coverage"
         />
         <div className="grid gap-4 lg:grid-cols-2">
-          {tokenGroups.map((group) => (
+          {displayedTokenGroups.map((group) => (
             <div key={group.title} className="hoj-panel rounded-2xl p-5">
               <div className="mb-4 flex items-end justify-between gap-3">
                 <div>
@@ -286,7 +337,7 @@ export default function About() {
               </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {group.tokens.map((token) => (
-                  <TokenTile key={`${group.title}-${token.symbol}`} {...token} />
+                  <TokenTile key={`${group.title}-${token.address ?? token.symbol}`} {...token} />
                 ))}
               </div>
             </div>
