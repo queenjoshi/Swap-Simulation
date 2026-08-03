@@ -135,6 +135,7 @@ export const TOKENS: Token[] = [
     address: getAddress("0xFCa95aeb5bF44aE355806A5ad14659c940dC6BF7"),
     chainId: base.id,
     decimals: 9,
+    logo: "https://s2.coinmarketcap.com/static/img/coins/200x200/37553.png",
   },
   {
     symbol: "AERO",

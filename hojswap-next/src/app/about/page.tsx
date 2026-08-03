@@ -27,7 +27,11 @@ const curatedTokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[
       { symbol: "cbBTC", name: "Coinbase Wrapped BTC", logo: "https://assets.coingecko.com/coins/images/40143/standard/cbbtc.webp" },
       { symbol: "AERO", name: "Aerodrome Finance", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x940181a94A35A4569E4529A3CDfB74e38FD98631/logo.png" },
       { symbol: "BRETT", name: "Brett", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x532f27101965dd16442E59d40670FaF5eBB142E4/logo.png" },
-      { symbol: "SHIB", name: "SchismaticShib", logo: "/tokens/shib-base.png" },
+      {
+        symbol: "SHIB",
+        name: "SchismaticShib",
+        logo: "https://s2.coinmarketcap.com/static/img/coins/200x200/37553.png",
+      },
       { symbol: "MOG", name: "Mog Coin", logo: "/tokens/mog.png" },
       { symbol: "TOSHI", name: "Toshi", logo: "/tokens/toshi.png" },
       { symbol: "VIRTUAL", name: "Virtuals Protocol", logo: "https://assets.coingecko.com/coins/images/34057/standard/LOGOMARK.png" },

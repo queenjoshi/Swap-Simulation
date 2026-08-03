@@ -63,7 +63,7 @@ const TOKEN_LOGOS: Record<string, string> = {
 function tokenLogo(token: Token) {
   if (token.logo) return token.logo;
   if (token.chainId === base.id && token.symbol.toUpperCase() === "SHIB") {
-    return "/tokens/shib-base.png";
+    return "https://s2.coinmarketcap.com/static/img/coins/200x200/37553.png";
   }
   return TOKEN_LOGOS[token.symbol.toUpperCase()];
 }
