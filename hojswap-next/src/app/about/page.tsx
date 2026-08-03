@@ -1,7 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { TokenLogo } from "@/components/TokenLogo";
+import { CHAIN_OPTIONS } from "@/lib/chains";
+import { TOKENS } from "@/lib/tokens";
 
 type Token = {
+  address?: `0x${string}`;
+  chainId?: number;
   symbol: string;
   name: string;
   logo?: string;
@@ -9,7 +16,7 @@ type Token = {
 
 const HOUSE_LOGO = "/logo.png";
 
-const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = [
+const curatedTokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = [
   {
     title: "Base Community",
     eyebrow: "Base",
@@ -20,7 +27,11 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "cbBTC", name: "Coinbase Wrapped BTC", logo: "https://assets.coingecko.com/coins/images/40143/standard/cbbtc.webp" },
       { symbol: "AERO", name: "Aerodrome Finance", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x940181a94A35A4569E4529A3CDfB74e38FD98631/logo.png" },
       { symbol: "BRETT", name: "Brett", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x532f27101965dd16442E59d40670FaF5eBB142E4/logo.png" },
-      { symbol: "SHIB", name: "SchismaticShib", logo: "/tokens/shib-base.png" },
+      {
+        symbol: "SHIB",
+        name: "SchismaticShib",
+        logo: "https://s2.coinmarketcap.com/static/img/coins/200x200/37553.png",
+      },
       { symbol: "MOG", name: "Mog Coin", logo: "/tokens/mog.png" },
       { symbol: "TOSHI", name: "Toshi", logo: "/tokens/toshi.png" },
       { symbol: "VIRTUAL", name: "Virtuals Protocol", logo: "https://assets.coingecko.com/coins/images/34057/standard/LOGOMARK.png" },
@@ -163,6 +174,30 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
   },
 ];
 
+const curatedLogos = new Map(
+  curatedTokenGroups.flatMap((group) =>
+    group.tokens
+      .filter((token) => token.logo)
+      .map((token) => [token.symbol.toUpperCase(), token.logo] as const),
+  ),
+);
+
+// Keep this page in sync with the swap registry instead of maintaining a
+// second, incomplete token list by hand.
+const tokenGroups = CHAIN_OPTIONS.map((chain) => ({
+  title: `${chain.label} Tokens`,
+  eyebrow: chain.label,
+  tokens: TOKENS
+    .filter((token) => token.chainId === chain.id)
+    .map((token) => ({
+      symbol: token.symbol,
+      name: token.name,
+      logo: token.logo ?? curatedLogos.get(token.symbol.toUpperCase()),
+      address: token.address,
+      chainId: token.chainId,
+    })),
+})).filter((group) => group.tokens.length > 0);
+
 const networks = [
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity for SHIB, BONE, TREAT, OSCAR, BNB, MAME, WETH, DAI, LINK, UNI, AAVE, PEPE, FLOKI, USDC, USDT, and ETH." },
   { name: "Base", badge: "Swap + Bridge", desc: "Home for QUEENJOSHI, KINGJOSHI, SHIB, WETH, cbBTC, AERO, BRETT, MOG, TOSHI, and VIRTUAL with faster, lower-cost trading." },
@@ -177,13 +212,60 @@ const networks = [
   { name: "XRP Ledger EVM", badge: "Coming Soon", desc: "Listed for network continuity while swap and bridge routes mature." },
 ];
 
-const highlights = [
-  { value: "11", label: "Supported chains" },
-  { value: "85", label: "Shown assets" },
-  { value: "1%", label: "House fee" },
-];
-
 export default function About() {
+  const [lightspeedTokens, setLightspeedTokens] = useState<Token[]>([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const loadLightspeedTokens = async () => {
+      for (let attempt = 1; attempt <= 4; attempt += 1) {
+        try {
+          const response = await fetch("/api/zora-profile-tokens", {
+            cache: "no-store",
+            signal: controller.signal,
+          });
+          if (!response.ok) throw new Error(`Profile token API ${response.status}`);
+          const tokens = await response.json() as Token[];
+          if (!Array.isArray(tokens) || tokens.length === 0) {
+            throw new Error("Profile token API returned no tokens");
+          }
+          setLightspeedTokens(tokens);
+          return;
+        } catch (error) {
+          if (controller.signal.aborted) return;
+          if (attempt === 4) {
+            console.error("Error loading Lightspeed tokens on About:", error);
+            return;
+          }
+          await new Promise((resolve) => setTimeout(resolve, attempt * 1_000));
+        }
+      }
+    };
+    void loadLightspeedTokens();
+    return () => controller.abort();
+  }, []);
+
+  const displayedTokenGroups = useMemo(() => tokenGroups.map((group) => {
+    if (group.eyebrow !== "Base" || lightspeedTokens.length === 0) return group;
+    const tokensById = new Map<string, Token>(
+      group.tokens.map((token) => [token.address?.toLowerCase() ?? token.symbol.toLowerCase(), token]),
+    );
+    for (const token of lightspeedTokens.filter((token) => token.chainId === 8453)) {
+      const id = token.address?.toLowerCase() ?? token.symbol.toLowerCase();
+      if (!tokensById.has(id)) tokensById.set(id, token);
+    }
+    return { ...group, tokens: Array.from(tokensById.values()) };
+  }), [lightspeedTokens]);
+
+  const highlights = useMemo(() => [
+    { value: String(CHAIN_OPTIONS.length), label: "Supported chains" },
+    {
+      value: String(displayedTokenGroups.reduce((total, group) => total + group.tokens.length, 0)),
+      label: "Shown assets",
+    },
+    { value: "1%", label: "House fee" },
+  ], [displayedTokenGroups]);
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
       <section className="mb-10 grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -251,7 +333,7 @@ export default function About() {
           title="Logo-first token coverage"
         />
         <div className="grid gap-4 lg:grid-cols-2">
-          {tokenGroups.map((group) => (
+          {displayedTokenGroups.map((group) => (
             <div key={group.title} className="hoj-panel rounded-2xl p-5">
               <div className="mb-4 flex items-end justify-between gap-3">
                 <div>
@@ -262,7 +344,7 @@ export default function About() {
               </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {group.tokens.map((token) => (
-                  <TokenTile key={`${group.title}-${token.symbol}`} {...token} />
+                  <TokenTile key={`${group.title}-${token.address ?? token.symbol}`} {...token} />
                 ))}
               </div>
             </div>
