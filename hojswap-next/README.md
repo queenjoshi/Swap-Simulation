@@ -16,6 +16,15 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+Copy `.env.example` to `.env.local` and set the public wallet-connection IDs before starting the app:
+
+```bash
+NEXT_PUBLIC_XAMAN_API_KEY=your-xaman-public-api-key
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your-walletconnect-project-id
+```
+
+Native XRP Ledger connections are provided through XRPL Connect. The wallet picker supports Xaman, Crossmark, GemWallet, Xyra, Otsu, Ledger, and XRPL-capable WalletConnect wallets. The Xaman API secret must never be added to a `NEXT_PUBLIC_` variable or committed to the repository.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
