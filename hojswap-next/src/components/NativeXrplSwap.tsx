@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import type { Transaction } from "xrpl";
 import type { WalletManager } from "xrpl-connect";
+import { QRCodeSVG } from "qrcode.react";
 import { TokenLogo } from "@/components/TokenLogo";
 import { RLUSD_CURRENCY, RLUSD_ISSUER, XRPL_ASSETS, XRPL_HOUSE_WALLET, type XrplAsset } from "@/lib/xrpl-native";
 import { getXrplWalletManager } from "@/lib/xrpl-wallet";
@@ -36,6 +37,7 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
   const [showWallets, setShowWallets] = useState(false);
   const [walletName, setWalletName] = useState<string | null>(null);
   const [manager, setManager] = useState<WalletManager | null>(null);
+  const [walletConnectUri, setWalletConnectUri] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -58,8 +60,14 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
     if (!manager) return;
     setBusy(true);
     setError(null);
+    setWalletConnectUri(null);
     try {
-      const result = await manager.connect(walletId, { network: "mainnet" });
+      const result = await manager.connect(walletId, {
+        network: "mainnet",
+        onQRCode: walletId === "walletconnect" ? (uri: unknown) => {
+          if (typeof uri === "string") setWalletConnectUri(uri);
+        } : undefined,
+      });
       setAddress(result.address);
       setWalletName(manager.wallet?.name ?? null);
       setShowWallets(false);
@@ -67,6 +75,7 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to connect XRP Ledger wallet");
     } finally {
+      setWalletConnectUri(null);
       setBusy(false);
     }
   }
@@ -242,6 +251,20 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
                 <span>{wallet.name}</span>
               </button>
             ))}
+          </div>
+        )}
+
+        {walletConnectUri && !address && (
+          <div className="rounded-2xl border border-[rgba(212,175,55,0.3)] bg-white p-4 text-center text-black">
+            <QRCodeSVG value={walletConnectUri} size={220} level="M" className="mx-auto h-auto w-full max-w-[220px]" />
+            <p className="mt-3 text-sm font-semibold">Scan with an XRPL WalletConnect wallet</p>
+            <p className="mt-1 text-xs text-black/60">On mobile, tap below to open a compatible wallet.</p>
+            <a
+              href={walletConnectUri}
+              className="mt-3 inline-flex rounded-xl bg-black px-4 py-2 text-sm font-semibold text-white"
+            >
+              Open wallet
+            </a>
           </div>
         )}
 
