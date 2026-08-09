@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { RLUSD_CURRENCY, RLUSD_ISSUER, XRPL_MAINNET_RPC } from "@/lib/xrpl-native";
+import { XRPL_ASSETS, XRPL_MAINNET_RPC } from "@/lib/xrpl-native";
 
 async function rpc(command: string, params: Record<string, unknown>) {
   const response = await fetch(XRPL_MAINNET_RPC, {
@@ -20,15 +20,23 @@ export async function GET(request: Request) {
   try {
     const [info, lines] = await Promise.all([
       rpc("account_info", { account, strict: true }),
-      rpc("account_lines", { account, peer: RLUSD_ISSUER }),
+      rpc("account_lines", { account, limit: 400 }),
     ]);
     const accountData = info.result?.account_data as { Balance?: string } | undefined;
     const trustLines = (lines.result?.lines ?? []) as Array<{ account?: string; balance?: string; currency?: string }>;
-    const rlusd = trustLines.find((line) => line.account === RLUSD_ISSUER && line.currency === RLUSD_CURRENCY);
+    const issuedAssets = XRPL_ASSETS.filter((asset) => asset.issuer);
+    const balances = Object.fromEntries(issuedAssets.map((asset) => {
+      const line = trustLines.find((candidate) => candidate.account === asset.issuer && candidate.currency === asset.currency);
+      return [asset.symbol, Number(line?.balance ?? 0)];
+    }));
+    const trustlines = Object.fromEntries(issuedAssets.map((asset) => [
+      asset.symbol,
+      trustLines.some((line) => line.account === asset.issuer && line.currency === asset.currency),
+    ]));
     return NextResponse.json({
       xrpBalance: Number(accountData?.Balance ?? 0) / 1_000_000,
-      rlusdBalance: Number(rlusd?.balance ?? 0),
-      hasRlusdTrustline: Boolean(rlusd),
+      balances,
+      trustlines,
     });
   } catch (error) {
     console.error("[XRPL ACCOUNT]", error);

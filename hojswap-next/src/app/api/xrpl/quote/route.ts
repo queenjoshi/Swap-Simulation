@@ -22,6 +22,9 @@ export async function POST(request: Request) {
     if (!sell || !buy || sell.symbol === buy.symbol || !Number.isFinite(sellAmount) || sellAmount <= 0) {
       return NextResponse.json({ error: "Invalid native XRPL quote request" }, { status: 400 });
     }
+    if (sell.symbol !== "XRP" && buy.symbol !== "XRP") {
+      return NextResponse.json({ error: "Native swaps currently require XRP on one side" }, { status: 400 });
+    }
 
     const rpcResponse = await fetch(XRPL_MAINNET_RPC, {
       method: "POST",
