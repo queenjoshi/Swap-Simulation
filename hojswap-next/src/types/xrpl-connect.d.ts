@@ -26,7 +26,13 @@ declare module "xrpl-connect" {
   export class OtsuAdapter implements WalletAdapter { id: string; name: string; icon?: string; url?: string; isAvailable(): Promise<boolean>; }
   export class LedgerAdapter implements WalletAdapter { id: string; name: string; icon?: string; url?: string; isAvailable(): Promise<boolean>; }
   export class WalletConnectAdapter implements WalletAdapter {
-    constructor(options?: { projectId?: string; themeMode?: "light" | "dark"; metadata?: { name: string; description: string; url: string; icons: string[] } });
+    constructor(options?: {
+      projectId?: string;
+      themeMode?: "light" | "dark";
+      useModal?: boolean;
+      modalMode?: "always" | "mobile-only";
+      metadata?: { name: string; description: string; url: string; icons: string[] };
+    });
     id: string; name: string; icon?: string; url?: string; isAvailable(): Promise<boolean>;
   }
 }
