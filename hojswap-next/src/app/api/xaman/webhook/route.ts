@@ -3,6 +3,16 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
+export function GET() {
+  return NextResponse.json({
+    ok: true,
+    endpoint: "Xaman webhook",
+    accepts: "POST",
+    signatureVerification: "required",
+    configured: Boolean(process.env.XAMAN_API_SECRET),
+  });
+}
+
 function signaturesMatch(received: string, expected: string) {
   if (!/^[a-f0-9]+$/i.test(received) || received.length !== expected.length) return false;
   return timingSafeEqual(Buffer.from(received, "hex"), Buffer.from(expected, "hex"));
