@@ -20,10 +20,19 @@ Copy `.env.example` to `.env.local` and set the public wallet-connection IDs bef
 
 ```bash
 NEXT_PUBLIC_XAMAN_API_KEY=your-xaman-public-api-key
+XAMAN_API_SECRET=your-xaman-private-api-secret
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your-walletconnect-project-id
 ```
 
 Native XRP Ledger connections are provided through XRPL Connect. The wallet picker supports Xaman, Crossmark, GemWallet, Xyra, Otsu, Ledger, and XRPL-capable WalletConnect wallets. The Xaman API secret must never be added to a `NEXT_PUBLIC_` variable or committed to the repository.
+
+Configure the Xaman Developer Console with:
+
+- Webhook URL: `https://swap.thehouseofjoshi.com/api/xaman/webhook`
+- Origin/Redirect URI: `https://swap.thehouseofjoshi.com`
+- Local development Origin/Redirect URI: `http://localhost:3000`
+
+The webhook verifies Xaman's `x-xumm-request-signature` HMAC header with the server-only `XAMAN_API_SECRET` before acknowledging a callback.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
