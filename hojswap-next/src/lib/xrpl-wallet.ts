@@ -33,8 +33,10 @@ export function getXrplWalletManager() {
     adapters.push(new WalletConnectAdapter({
       projectId: walletConnectProjectId,
       themeMode: "dark",
-      useModal: true,
-      modalMode: "always",
+      // The app renders the URI itself so WalletConnect remains usable in
+      // embedded browsers (including Xaman xApps) where the vendor modal may
+      // not mount or may be blocked by the host webview.
+      useModal: false,
       metadata: {
         name: "House of Joshi Swap",
         description: "Non-custodial swaps on the XRP Ledger and EVM networks",
