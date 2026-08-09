@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 const ETHERSCAN_KEY = process.env.ETHERSCAN_API_KEY ?? "";
 const HOUSE_WALLET = "0x6736d2eA9807297F0e56967361B9410854B86a5f";
-const XRP_EVM_CHAIN_ID = 1440002;
+const XRP_EVM_CHAIN_ID = 1440000;
 const AVALANCHE_CHAIN_ID = 43114;
 const UNICHAIN_CHAIN_ID = 130;
 const ROBINHOOD_CHAIN_ID = 4663;

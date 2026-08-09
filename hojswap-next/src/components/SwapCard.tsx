@@ -14,7 +14,7 @@ import {
 } from "wagmi";
 import { concat, decodeEventLog, encodeFunctionData, formatUnits, numberToHex, parseUnits, size, type Hex } from "viem";
 import { base } from "wagmi/chains";
-import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, getChainName } from "@/lib/chains";
+import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, getChainName, xrp } from "@/lib/chains";
 import { clampToDecimals, formatSwapAmountDisplay, isValidNumberInput } from "@/lib/format";
 import { calculateHouseFeeAmount, tokenTo0xParam, type QuoteResponse, type PriceResponse } from "@/lib/quote";
 import { erc20Abi } from "@/lib/erc20";
@@ -47,7 +47,7 @@ const CHAIN_LOGOS: Record<number, string> = {
     8453: "https://assets.coingecko.com/asset_platforms/images/131/small/base.jpeg",
     43114: "https://assets.coingecko.com/coins/images/12559/standard/Avalanche_Circle_RedWhite_Trans.png",
     42161: "https://assets.coingecko.com/coins/images/16547/standard/arb.jpg",
-    1440002: "/tokens/xrp.png",
+    1440000: "/tokens/xrp.png",
 };
 
 type ActiveTab = "swap" | "bridge";
@@ -138,8 +138,38 @@ function SwapCardInner() {
     const [activeTab, setActiveTab] = useState<ActiveTab>("swap");
     const [apiKeyError, setApiKeyError] = useState<ApiKeyError>(null);
     const [chainMenuOpen, setChainMenuOpen] = useState(false);
+    const [importedXrpTokens, setImportedXrpTokens] = useState<Token[]>([]);
 
-    const availableTokens = useMemo(() => tokensForChain(selectedChainId), [selectedChainId]);
+    useEffect(() => {
+        queueMicrotask(() => {
+            try {
+                const saved = JSON.parse(localStorage.getItem("hojswap-xrp-imported-tokens") ?? "[]") as Token[];
+                setImportedXrpTokens(saved.filter((token) => token.chainId === xrp.id && token.address));
+            } catch {
+                setImportedXrpTokens([]);
+            }
+        });
+    }, []);
+
+    const rememberImportedXrpToken = useCallback((token: Token) => {
+        setImportedXrpTokens((current) => {
+            const next = [...current.filter((item) => item.address?.toLowerCase() !== token.address?.toLowerCase()), token];
+            localStorage.setItem("hojswap-xrp-imported-tokens", JSON.stringify(next));
+            return next;
+        });
+    }, []);
+
+    const availableTokens = useMemo(() => {
+        const staticTokens = tokensForChain(selectedChainId);
+        if (selectedChainId !== xrp.id) return staticTokens;
+        const byAddress = new Map(
+            staticTokens.filter((token) => token.address).map((token) => [token.address!.toLowerCase(), token]),
+        );
+        for (const token of importedXrpTokens) {
+            if (token.address) byAddress.set(token.address.toLowerCase(), token);
+        }
+        return [...staticTokens.filter((token) => !token.address), ...byAddress.values()];
+    }, [selectedChainId, importedXrpTokens]);
 
     const [sellToken, setSellToken] = useState<Token>(() => {
         const sellSymbol = searchParams.get("sell");
@@ -1173,7 +1203,13 @@ function SwapCardInner() {
                                 <div className="mb-3 flex items-start justify-between gap-3">
                                     <div className="text-[15px] font-semibold text-white/55">Sell</div>
                                     <div className="w-[8.5rem] shrink-0 sm:w-[9.25rem]">
-                                        <TokenSelect tokens={availableTokens} value={sellToken} onChange={onSellTokenChange} />
+                                        <TokenSelect
+                                            tokens={availableTokens}
+                                            value={sellToken}
+                                            onChange={onSellTokenChange}
+                                            allowAddressImport={selectedChainId === xrp.id}
+                                            onTokenImported={rememberImportedXrpToken}
+                                        />
                                     </div>
                                 </div>
                                 <div className="min-w-0 overflow-hidden">
@@ -1206,7 +1242,13 @@ function SwapCardInner() {
                                 <div className="mb-3 flex items-start justify-between gap-3">
                                     <div className="text-[15px] font-semibold text-white/55">Buy</div>
                                     <div className="w-[8.5rem] shrink-0 sm:w-[9.25rem]">
-                                        <TokenSelect tokens={availableTokens} value={buyToken} onChange={onBuyTokenChange} />
+                                        <TokenSelect
+                                            tokens={availableTokens}
+                                            value={buyToken}
+                                            onChange={onBuyTokenChange}
+                                            allowAddressImport={selectedChainId === xrp.id}
+                                            onTokenImported={rememberImportedXrpToken}
+                                        />
                                     </div>
                                 </div>
                                 <div className="min-w-0 overflow-hidden">

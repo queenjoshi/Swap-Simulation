@@ -19,8 +19,7 @@ export const RPC_URLS: Record<number, readonly string[]> = {
     "https://cronos-rpc.publicnode.com",
   ],
   [xrp.id]: [
-    "https://xrpl.ws",
-    "https://xrplcluster.com",
+    "https://rpc.xrplevm.org",
   ],
   [polygon.id]: [
     "https://polygon-rpc.com",

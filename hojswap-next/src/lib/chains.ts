@@ -14,15 +14,15 @@ export const cronos = {
 } as const;
 
 export const xrp = {
-  id: 1440002,
-  name: "XRP EVM",
+  id: 1440000,
+  name: "XRPL EVM",
   network: "xrp-evm",
   nativeCurrency: { name: "XRP", symbol: "XRP", decimals: 18 },
   rpcUrls: {
-    default: { http: ["https://evm-sidechain.xrpl.org/"] },
-    public: { http: ["https://evm-sidechain.xrpl.org/"] },
+    default: { http: ["https://rpc.xrplevm.org"] },
+    public: { http: ["https://rpc.xrplevm.org"] },
   },
-  blockExplorers: { default: { name: "XRP Explorer", url: "https://evm-sidechain.xrpl.org/" } },
+  blockExplorers: { default: { name: "XRPL EVM Explorer", url: "https://explorer.xrplevm.org" } },
   testnet: false,
 } as const;
 
@@ -133,7 +133,7 @@ export const CHAIN_OPTIONS = [
   { id: polygon.id, label: "Polygon", shortLabel: "Polygon", swap: true },
   { id: robinhood.id, label: "Robinhood Chain", shortLabel: "Robinhood", swap: true },
   { id: unichain.id, label: "Unichain", shortLabel: "Unichain", swap: true },
-  { id: xrp.id, label: "XRP EVM", shortLabel: "XRP", swap: false },
+  { id: xrp.id, label: "XRPL EVM", shortLabel: "XRP", swap: true },
 ] as const;
 
 export const SWAP_SUPPORTED_CHAIN_IDS: readonly number[] = CHAIN_OPTIONS
@@ -144,7 +144,7 @@ export function getChainName(chainId: number) {
   if (chainId === mainnet.id) return "Ethereum";
   if (chainId === base.id) return "Base";
   if (chainId === cronos.id) return "Cronos";
-  if (chainId === xrp.id) return "XRP Ledger";
+  if (chainId === xrp.id) return "XRPL EVM";
   if (chainId === polygon.id) return "Polygon";
   if (chainId === bsc.id) return "BNB Chain";
   if (chainId === arbitrum.id) return "Arbitrum";
@@ -159,7 +159,7 @@ export function explorerName(chainId: number) {
   if (chainId === mainnet.id) return "Etherscan";
   if (chainId === base.id) return "Basescan";
   if (chainId === cronos.id) return "Cronoscan";
-  if (chainId === xrp.id) return "XRPScan";
+  if (chainId === xrp.id) return "XRPL EVM Explorer";
   if (chainId === polygon.id) return "Polygonscan";
   if (chainId === bsc.id) return "BscScan";
   if (chainId === arbitrum.id) return "Arbiscan";
@@ -174,7 +174,7 @@ export function explorerTxUrl(chainId: number, hash: string) {
   if (chainId === mainnet.id) return `https://etherscan.io/tx/${hash}`;
   if (chainId === base.id) return `https://basescan.org/tx/${hash}`;
   if (chainId === cronos.id) return `https://cronoscan.com/tx/${hash}`;
-  if (chainId === xrp.id) return `https://xrpscan.com/tx/${hash}`;
+  if (chainId === xrp.id) return `https://explorer.xrplevm.org/tx/${hash}`;
   if (chainId === polygon.id) return `https://polygonscan.com/tx/${hash}`;
   if (chainId === bsc.id) return `https://bscscan.com/tx/${hash}`;
   if (chainId === arbitrum.id) return `https://arbiscan.io/tx/${hash}`;
@@ -189,7 +189,7 @@ export function explorerAddressUrl(chainId: number, address: string) {
   if (chainId === mainnet.id) return `https://etherscan.io/address/${address}`;
   if (chainId === base.id) return `https://basescan.org/address/${address}`;
   if (chainId === cronos.id) return `https://cronoscan.com/address/${address}`;
-  if (chainId === xrp.id) return `https://xrpscan.com/account/${address}`;
+  if (chainId === xrp.id) return `https://explorer.xrplevm.org/address/${address}`;
   if (chainId === polygon.id) return `https://polygonscan.com/address/${address}`;
   if (chainId === bsc.id) return `https://bscscan.com/address/${address}`;
   if (chainId === arbitrum.id) return `https://arbiscan.io/address/${address}`;
