@@ -1,16 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { getAddress, getNetwork, isInstalled, submitTransaction, type SubmitTransactionRequest } from "@gemwallet/api";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import type { Transaction } from "xrpl";
 import { TokenLogo } from "@/components/TokenLogo";
 import { RLUSD_CURRENCY, RLUSD_ISSUER, XRPL_ASSETS, XRPL_HOUSE_WALLET, type XrplAsset } from "@/lib/xrpl-native";
+import { getXrplWalletManager } from "@/lib/xrpl-wallet";
 
 type Quote = {
   receiveAmount: string;
   minimumReceive: string;
   houseFeeXrp: string;
   price: number;
-  transaction: SubmitTransactionRequest["transaction"];
+  transaction: Transaction;
 };
 
 type AccountState = {
@@ -30,6 +32,9 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [hash, setHash] = useState<string | null>(null);
+  const [showWallets, setShowWallets] = useState(false);
+  const [walletName, setWalletName] = useState<string | null>(null);
+  const manager = useMemo(() => getXrplWalletManager(), []);
 
   const refreshAccount = useCallback(async (walletAddress: string) => {
     const response = await fetch(`/api/xrpl/account?account=${encodeURIComponent(walletAddress)}`, { cache: "no-store" });
@@ -38,27 +43,17 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
     setAccount(payload);
   }, []);
 
-  async function requireMainnet() {
-    const network = await getNetwork();
-    if (network.result?.network !== "Mainnet") throw new Error("Switch GemWallet to XRPL Mainnet");
-  }
-
-  async function connect() {
+  async function connect(walletId: string) {
     setBusy(true);
     setError(null);
     try {
-      const installed = await isInstalled();
-      if (!installed.result?.isInstalled) {
-        window.open("https://gemwallet.app/", "_blank", "noopener,noreferrer");
-        throw new Error("Install GemWallet, then connect again");
-      }
-      await requireMainnet();
-      const result = await getAddress();
-      if (!result.result?.address) throw new Error("GemWallet connection was rejected");
-      setAddress(result.result.address);
-      await refreshAccount(result.result.address);
+      const result = await manager.connect(walletId, { network: "mainnet" });
+      setAddress(result.address);
+      setWalletName(manager.wallet?.name ?? null);
+      setShowWallets(false);
+      await refreshAccount(result.address);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Unable to connect GemWallet");
+      setError(cause instanceof Error ? cause.message : "Unable to connect XRP Ledger wallet");
     } finally {
       setBusy(false);
     }
@@ -102,7 +97,7 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
     : needsTrustline
       ? "Enable RLUSD trust line"
       : busy
-        ? status || "Waiting for GemWallet…"
+        ? status || `Waiting for ${walletName ?? "wallet"}…`
         : "Swap on XRP Ledger";
 
   async function enableTrustline() {
@@ -110,14 +105,13 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
     setBusy(true);
     setError(null);
     try {
-      await requireMainnet();
-      const response = await submitTransaction({ transaction: {
+      const response = await manager.signAndSubmit({
         TransactionType: "TrustSet",
         Account: address,
         LimitAmount: { currency: RLUSD_CURRENCY, issuer: RLUSD_ISSUER, value: "1000000000" },
-      } });
-      if (!response.result?.hash) throw new Error("Trust-line transaction was rejected");
-      setHash(response.result.hash);
+      });
+      if (!response.hash) throw new Error("Trust-line transaction was rejected");
+      setHash(response.hash);
       await refreshAccount(address);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to create trust line");
@@ -130,27 +124,26 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
     if (!address || !quote) return;
     setBusy(true);
     setError(null);
-    setStatus("Confirm the native XRPL offer in GemWallet…");
+    setStatus(`Confirm the native XRPL offer in ${walletName ?? "your wallet"}…`);
     try {
-      await requireMainnet();
-      const response = await submitTransaction({ transaction: quote.transaction });
-      if (!response.result?.hash) throw new Error("Swap transaction was rejected");
-      const swapHash = response.result.hash;
+      const response = await manager.signAndSubmit(quote.transaction);
+      if (!response.hash) throw new Error("Swap transaction was rejected");
+      const swapHash = response.hash;
       setHash(swapHash);
       setStatus("Waiting for the native swap to validate…");
       await waitForValidatedSwap(swapHash);
-      setStatus("Confirm the 1% House fee in GemWallet…");
+      setStatus(`Confirm the 1% House fee in ${walletName ?? "your wallet"}…`);
       const feeDrops = String(Math.floor(Number(quote.houseFeeXrp) * 1_000_000));
       if (feeDrops === "0") throw new Error("Trade amount is too small for the 1% XRP fee");
-      const feeResponse = await submitTransaction({ transaction: {
+      const feeResponse = await manager.signAndSubmit({
         TransactionType: "Payment",
         Account: address,
         Destination: XRPL_HOUSE_WALLET,
         Amount: feeDrops,
         Memos: [{ Memo: { MemoData: "484F4A205377617020486F75736520466565", MemoType: "486F757365466565" } }],
-      } });
-      if (!feeResponse.result?.hash) throw new Error("Swap succeeded, but the House fee was not approved");
-      setHash(feeResponse.result.hash);
+      });
+      if (!feeResponse.hash) throw new Error("Swap succeeded, but the House fee was not approved");
+      setHash(feeResponse.hash);
       setAmount("");
       setQuote(null);
       await refreshAccount(address);
@@ -223,9 +216,26 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
         {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div>}
         {hash && <a href={`https://livenet.xrpl.org/transactions/${hash}`} target="_blank" rel="noopener noreferrer" className="block truncate text-center text-xs text-[rgba(212,175,55,0.9)] underline">View XRPL transaction</a>}
 
+        {showWallets && !address && (
+          <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-black/30 p-2">
+            {manager.wallets.map((wallet) => (
+              <button
+                key={wallet.id}
+                type="button"
+                onClick={() => void connect(wallet.id)}
+                disabled={busy}
+                className="flex items-center gap-2 rounded-xl border border-white/10 px-3 py-3 text-left text-sm text-white/80 hover:border-amber-300/40 hover:bg-white/5 disabled:opacity-50"
+              >
+                {wallet.icon ? <Image src={wallet.icon} alt="" width={28} height={28} unoptimized className="h-7 w-7 rounded-lg" /> : <span className="h-7 w-7 rounded-lg bg-white/10" />}
+                <span>{wallet.name}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         <button
           type="button"
-          onClick={!address ? connect : needsTrustline ? enableTrustline : swap}
+          onClick={!address ? () => setShowWallets((visible) => !visible) : needsTrustline ? enableTrustline : swap}
           disabled={busy || Boolean(address && !needsTrustline && (!quote || insufficient))}
           className="w-full rounded-[22px] bg-[rgba(255,222,85,0.98)] px-4 py-4 text-base font-bold text-black disabled:opacity-50"
         >

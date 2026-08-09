@@ -64,6 +64,8 @@
     "vaul": "^1.1.2",
     "viem": "^2.52.2",
     "wagmi": "^2.19.5",
+    "xrpl": "^5.0.0",
+    "xrpl-connect": "^0.8.2",
     "zod": "catalog:"
   },
   "devDependencies": {
