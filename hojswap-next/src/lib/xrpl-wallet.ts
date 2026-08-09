@@ -33,6 +33,8 @@ export function getXrplWalletManager() {
     adapters.push(new WalletConnectAdapter({
       projectId: walletConnectProjectId,
       themeMode: "dark",
+      useModal: true,
+      modalMode: "always",
       metadata: {
         name: "House of Joshi Swap",
         description: "Non-custodial swaps on the XRP Ledger and EVM networks",
