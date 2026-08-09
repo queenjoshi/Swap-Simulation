@@ -1,7 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { TokenLogo } from "@/components/TokenLogo";
+import { CHAIN_OPTIONS } from "@/lib/chains";
+import { TOKENS } from "@/lib/tokens";
 
 type Token = {
+  address?: `0x${string}`;
+  chainId?: number;
   symbol: string;
   name: string;
   logo?: string;
@@ -9,7 +16,7 @@ type Token = {
 
 const HOUSE_LOGO = "/logo.png";
 
-const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = [
+const curatedTokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = [
   {
     title: "Base Community",
     eyebrow: "Base",
@@ -163,9 +170,25 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
   },
 ];
 
+const curatedLogos = new Map(
+  curatedTokenGroups.flatMap((group) => group.tokens
+    .filter((token) => token.logo)
+    .map((token) => [token.symbol.toUpperCase(), token.logo] as const)),
+);
+
+const registryTokenGroups = CHAIN_OPTIONS.map((chain) => ({
+  title: `${chain.label} Tokens`,
+  eyebrow: chain.label,
+  tokens: TOKENS.filter((token) => token.chainId === chain.id).map((token) => ({
+    ...token,
+    logo: token.logo ?? curatedLogos.get(token.symbol.toUpperCase()),
+  })),
+})).filter((group) => group.tokens.length > 0);
+
 const networks = [
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity for SHIB, BONE, TREAT, OSCAR, BNB, MAME, WETH, DAI, LINK, UNI, AAVE, PEPE, FLOKI, USDC, USDT, and ETH." },
-  { name: "Base", badge: "Swap + Bridge", desc: "Home for QUEENJOSHI, KINGJOSHI, SHIB, WETH, cbBTC, AERO, BRETT, MOG, TOSHI, and VIRTUAL with faster, lower-cost trading." },
+  { name: "Base", badge: "Swap + Bridge", desc: "Core assets, community tokens, and Base creator coins—including the live mr_lightspeed catalog." },
+  { name: "Zora", badge: "Token Catalog", desc: "Creator coins deployed on Zora Network; creator coins deployed on Base remain available under Base." },
   { name: "Polygon", badge: "Swap", desc: "POL, WETH, WBTC, USDC, USDT, AAVE, LINK, and DAI routed through 0x liquidity." },
   { name: "BNB Chain", badge: "Swap", desc: "BNB, USDT, USDC, DOGE, FDUSD, CAKE, and BabyDoge through 0x liquidity." },
   { name: "Arbitrum", badge: "Swap", desc: "ARB, ETH, USDC, WETH, USDT, WBTC, GMX, and MAGIC across Ethereum L2 liquidity." },
@@ -174,16 +197,44 @@ const networks = [
   { name: "Unichain", badge: "Swap", desc: "ETH, WETH, and USDC on Unichain for new Uniswap-native liquidity." },
   { name: "Robinhood Chain", badge: "Swap", desc: "ETH, WETH, USDG, CASHCAT, VEX, HOODRAT, JUGGERNAUT, MYSTERY, ARROW, VIBE CAT, ROBIN, CashDog, and BOW through 0x liquidity." },
   { name: "Cronos", badge: "Bridge", desc: "USDC, USDT, and ETH routes via Li.Fi between Ethereum, Base, and Cronos." },
-  { name: "XRP Ledger EVM", badge: "Coming Soon", desc: "Listed for network continuity while swap and bridge routes mature." },
+  { name: "XRPL EVM", badge: "Swap", desc: "XRP, Hammy USDC, Hammy WETH, and verified imported contracts routed through Hammy Swap." },
 ];
 
 const highlights = [
-  { value: "11", label: "Supported chains" },
-  { value: "85", label: "Shown assets" },
+  { value: "Multi-chain", label: "Token discovery" },
+  { value: "Live", label: "Creator catalog" },
   { value: "1%", label: "House fee" },
 ];
 
 export default function About() {
+  const [profileTokens, setProfileTokens] = useState<Token[]>([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetch("/api/zora-profile-tokens", { cache: "no-store", signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`Zora token API ${response.status}`);
+        return response.json() as Promise<Token[]>;
+      })
+      .then((tokens) => setProfileTokens(Array.isArray(tokens) ? tokens : []))
+      .catch((error) => {
+        if (!controller.signal.aborted) console.error("Unable to load About token catalog", error);
+      });
+    return () => controller.abort();
+  }, []);
+
+  const tokenGroups = useMemo(() => registryTokenGroups.map((group) => {
+    const chain = CHAIN_OPTIONS.find((option) => option.label === group.eyebrow);
+    if (!chain || (chain.id !== 8453 && chain.id !== 7777777)) return group;
+    const merged = new Map<string, Token>(
+      group.tokens.map((token) => [token.address?.toLowerCase() ?? token.symbol, token]),
+    );
+    for (const token of profileTokens.filter((item) => item.chainId === chain.id)) {
+      merged.set(token.address?.toLowerCase() ?? token.symbol, token);
+    }
+    return { ...group, tokens: [...merged.values()] };
+  }), [profileTokens]);
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
       <section className="mb-10 grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -195,7 +246,7 @@ export default function About() {
             House of Joshi across every chain that matters.
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-white/66 sm:text-base">
-            Trade community tokens, blue-chip assets, stablecoins, and chain-native coins across 10 supported networks from one non-custodial interface.
+            Trade and discover community tokens, blue-chip assets, stablecoins, and chain-native coins across supported networks from one non-custodial interface.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
@@ -258,11 +309,11 @@ export default function About() {
                   <div className="text-[10px] font-semibold uppercase tracking-widest text-[rgba(212,175,55,0.65)]">{group.eyebrow}</div>
                   <h3 className="mt-1 text-base font-semibold text-white/90">{group.title}</h3>
                 </div>
-                <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] text-white/45">{group.tokens.length} assets</span>
+                <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] text-white/45">Live catalog</span>
               </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {group.tokens.map((token) => (
-                  <TokenTile key={`${group.title}-${token.symbol}`} {...token} />
+                  <TokenTile key={`${group.title}-${token.address ?? token.symbol}`} {...token} />
                 ))}
               </div>
             </div>
