@@ -225,7 +225,7 @@ const tokenGroups = CHAIN_OPTIONS.map((chain) => ({
 })).filter((group) => group.tokens.length > 0);
 
 const networks = [
-  { name: "XRP Ledger", badge: "Native Swap", desc: "Native XRP and verified issued assets through XRPL order-book and AMM liquidity using r-address wallets." },
+  { name: "XRP Ledger", badge: "Native Swap", desc: "XRP pairs for RLUSD, native USDC, SOLO (legacy/migrating), CasinoCoin, and XRdoge through XRPL order-book and AMM liquidity using r-address wallets." },
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity including ONDO, ENA, USDe, PENDLE, LDO, EIGEN, PYUSD, blue chips, community tokens, and stablecoins." },
   { name: "Base", badge: "Swap + Bridge", desc: "Home for mr_lightspeed and its live Zora post-coin catalog, MORPHO, DEGEN, VIRTUAL, AERO, House of Joshi tokens, and core assets." },
   { name: "Zora", badge: "Token Catalog", desc: "Chain-aware discovery for creator and content coins deployed on Zora Network. Modern Zora coins deployed on Base remain listed under Base." },

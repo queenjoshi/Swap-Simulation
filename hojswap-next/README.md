@@ -26,6 +26,8 @@ NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your-walletconnect-project-id
 
 Native XRP Ledger connections are provided through XRPL Connect. The wallet picker supports Xaman, Crossmark, GemWallet, Xyra, Otsu, Ledger, and XRPL-capable WalletConnect wallets. The Xaman API secret must never be added to a `NEXT_PUBLIC_` variable or committed to the repository.
 
+Native XRP pairs currently include RLUSD, Circle-issued USDC, legacy/migrating SOLO, CasinoCoin (CSC), and XRdoge. Issued assets are matched by both currency code and issuer address; the swap creates the selected token's trust line when the receiving account does not already have one.
+
 Configure the Xaman Developer Console with:
 
 - Webhook URL: `https://swap.thehouseofjoshi.com/api/xaman/webhook`

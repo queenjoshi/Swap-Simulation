@@ -6,7 +6,7 @@ import type { Transaction } from "xrpl";
 import type { WalletManager } from "xrpl-connect";
 import { QRCodeSVG } from "qrcode.react";
 import { TokenLogo } from "@/components/TokenLogo";
-import { RLUSD_CURRENCY, RLUSD_ISSUER, XRPL_ASSETS, XRPL_HOUSE_WALLET, type XrplAsset } from "@/lib/xrpl-native";
+import { XRPL_ASSETS, XRPL_HOUSE_WALLET, type XrplAsset } from "@/lib/xrpl-native";
 import { getXrplWalletManager } from "@/lib/xrpl-wallet";
 
 type Quote = {
@@ -19,8 +19,8 @@ type Quote = {
 
 type AccountState = {
   xrpBalance: number;
-  rlusdBalance: number;
-  hasRlusdTrustline: boolean;
+  balances: Record<string, number>;
+  trustlines: Record<string, boolean>;
 };
 
 export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
@@ -38,6 +38,7 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
   const [walletName, setWalletName] = useState<string | null>(null);
   const [manager, setManager] = useState<WalletManager | null>(null);
   const [walletConnectUri, setWalletConnectUri] = useState<string | null>(null);
+  const [selecting, setSelecting] = useState<"sell" | "buy" | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -110,26 +111,27 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
     };
   }, [address, amount, buy.symbol, sell.symbol]);
 
-  const needsTrustline = buy.symbol === "RLUSD" && account && !account.hasRlusdTrustline;
-  const sellBalance = sell.symbol === "XRP" ? account?.xrpBalance : account?.rlusdBalance;
+  const needsTrustline = Boolean(buy.issuer && account && !account.trustlines[buy.symbol]);
+  const sellBalance = sell.symbol === "XRP" ? account?.xrpBalance : account?.balances[sell.symbol];
+  const selectedIssuedAsset = buy.issuer ? buy : sell.issuer ? sell : XRPL_ASSETS[1]!;
   const insufficient = sellBalance != null && Number(amount) > sellBalance;
   const primaryLabel = !address
     ? "Connect native XRP wallet"
     : needsTrustline
-      ? "Enable RLUSD trust line"
+      ? `Enable ${buy.symbol} trust line`
       : busy
         ? status || `Waiting for ${walletName ?? "wallet"}…`
         : "Swap on XRP Ledger";
 
   async function enableTrustline() {
-    if (!address || !manager) return;
+    if (!address || !manager || !buy.issuer) return;
     setBusy(true);
     setError(null);
     try {
       const response = await manager.signAndSubmit({
         TransactionType: "TrustSet",
         Account: address,
-        LimitAmount: { currency: RLUSD_CURRENCY, issuer: RLUSD_ISSUER, value: "1000000000" },
+        LimitAmount: { currency: buy.currency, issuer: buy.issuer, value: "100000000000000" },
       });
       if (!response.hash) throw new Error("Trust-line transaction was rejected");
       setHash(response.hash);
@@ -182,6 +184,21 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
     setQuote(null);
   }
 
+  function chooseAsset(side: "sell" | "buy", asset: XrplAsset) {
+    if (side === "sell") {
+      setSell(asset);
+      if (asset.symbol !== "XRP") setBuy(XRPL_ASSETS[0]!);
+      else if (buy.symbol === "XRP") setBuy(XRPL_ASSETS[1]!);
+    } else {
+      setBuy(asset);
+      if (asset.symbol !== "XRP") setSell(XRPL_ASSETS[0]!);
+      else if (sell.symbol === "XRP") setSell(XRPL_ASSETS[1]!);
+    }
+    setSelecting(null);
+    setQuote(null);
+    setError(null);
+  }
+
   return (
     <div className="w-full max-w-[480px]">
       <div className="hoj-card space-y-3 rounded-[28px] p-3">
@@ -198,7 +215,7 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
         {address && (
           <div className="rounded-xl border border-white/8 bg-black/20 px-3 py-2 text-xs text-white/50">
             <span className="block truncate font-mono">{address}</span>
-            <span>{account ? `${account.xrpBalance.toFixed(6)} XRP · ${account.rlusdBalance.toFixed(2)} RLUSD` : "Loading balances…"}</span>
+            <span>{account ? `${account.xrpBalance.toFixed(6)} XRP · ${(account.balances[selectedIssuedAsset.symbol] ?? 0).toLocaleString()} ${selectedIssuedAsset.symbol}` : "Loading balances…"}</span>
           </div>
         )}
 
@@ -214,21 +231,25 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
               placeholder="0"
               className="min-w-0 flex-1 bg-transparent text-4xl font-semibold text-white outline-none placeholder:text-white/20"
             />
-            <AssetButton asset={sell} />
+            <AssetButton asset={sell} onClick={() => setSelecting(selecting === "sell" ? null : "sell")} />
           </div>
           {sellBalance != null && <p className="mt-2 text-xs text-white/40">Balance: {sellBalance.toLocaleString()} {sell.symbol}</p>}
         </div>
+
+        {selecting === "sell" && <AssetSelector selected={sell} onChoose={(asset) => chooseAsset("sell", asset)} />}
 
         <button type="button" onClick={flip} className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-[#19191b] text-[rgba(212,175,55,0.95)]">↓</button>
 
         <div className="hoj-panel rounded-[24px] p-4">
           <div className="flex items-center justify-between gap-3">
             <span className="truncate text-3xl font-semibold text-white/85">{quote?.receiveAmount ?? "—"}</span>
-            <AssetButton asset={buy} />
+            <AssetButton asset={buy} onClick={() => setSelecting(selecting === "buy" ? null : "buy")} />
           </div>
           {quote && <p className="mt-2 text-xs text-white/40">Minimum received: {quote.minimumReceive} {buy.symbol} · 0.5% slippage</p>}
           {quote && <p className="mt-1 text-xs text-white/40">House fee: {quote.houseFeeXrp} XRP (1%, requested after swap validation)</p>}
         </div>
+
+        {selecting === "buy" && <AssetSelector selected={buy} onChoose={(asset) => chooseAsset("buy", asset)} />}
 
         <div className="rounded-xl border border-amber-400/15 bg-amber-400/[0.06] px-3 py-2 text-xs leading-5 text-amber-100/65">
           Uses native XRPL DEX and AMM liquidity. Token identity includes its issuer address. This route does not use Hammy or an EVM contract.
@@ -296,11 +317,34 @@ async function waitForValidatedSwap(hash: string) {
   throw new Error("Swap validation timed out; no House fee was charged")
 }
 
-function AssetButton({ asset }: { asset: XrplAsset }) {
+function AssetButton({ asset, onClick }: { asset: XrplAsset; onClick: () => void }) {
   return (
-    <div className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-black/35 px-3 py-2">
+    <button type="button" onClick={onClick} className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-black/35 px-3 py-2 hover:border-amber-300/40">
       <TokenLogo symbol={asset.symbol} logo={asset.logo} size="xs" />
       <span className="text-sm font-semibold text-white">{asset.symbol}</span>
+      <span className="text-[10px] text-white/45">▼</span>
+    </button>
+  );
+}
+
+function AssetSelector({ selected, onChoose }: { selected: XrplAsset; onChoose: (asset: XrplAsset) => void }) {
+  return (
+    <div className="grid grid-cols-1 gap-1 rounded-2xl border border-white/10 bg-black/40 p-2 sm:grid-cols-2">
+      {XRPL_ASSETS.map((asset) => (
+        <button
+          key={asset.symbol}
+          type="button"
+          onClick={() => onChoose(asset)}
+          className={`flex items-center gap-3 rounded-xl px-3 py-2 text-left hover:bg-white/8 ${selected.symbol === asset.symbol ? "bg-amber-300/10" : ""}`}
+        >
+          <TokenLogo symbol={asset.symbol} logo={asset.logo} size="sm" />
+          <span className="min-w-0">
+            <span className="block text-sm font-semibold text-white">{asset.symbol}</span>
+            <span className="block truncate text-[11px] text-white/45">{asset.name}</span>
+          </span>
+        </button>
+      ))}
+      <p className="col-span-full px-2 py-1 text-[10px] leading-4 text-white/35">Issued-token routes use the exact verified XRPL issuer shown in the app configuration. XRP remains one side of every pair.</p>
     </div>
   );
 }
