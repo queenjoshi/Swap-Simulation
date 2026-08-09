@@ -130,6 +130,7 @@ export const TOKENS: Token[] = [
     address: getAddress("0xf0cb96a4011a0a6f73d100c7080bf8020d10f87a"),
     chainId: base.id,
     decimals: 18,
+    logo: "/tokens/mr-lightspeed.jpg",
   },
 
   // Zora creator coins are loaded dynamically from the profile endpoint.

@@ -32,6 +32,7 @@ const TOKEN_LOGOS: Record<string, string> = {
   MAGIC: "https://assets.coingecko.com/coins/images/18623/standard/magic.png",
   VELO: "https://assets.coingecko.com/coins/images/12538/standard/Logo_200x_200.png",
   XRP: "/tokens/xrp.png",
+  MR_LIGHTSPEED: "/tokens/mr-lightspeed.jpg",
   FLOKI: "/tokens/floki.png",
   MAME: "/tokens/mame-inu.png",
   TREAT: "/tokens/treat146b.png",

@@ -54,7 +54,7 @@ export async function GET() {
           address: coin.address as `0x${string}`,
           chainId: coin.chainId,
           decimals: 18,
-          logo: coin.mediaContent?.previewImage?.small,
+          logo: coin.mediaContent?.previewImage?.small ?? "/tokens/mr-lightspeed.jpg",
           name: coin.name,
           symbol: coin.symbol,
         });
