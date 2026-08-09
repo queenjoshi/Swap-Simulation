@@ -1,6 +1,7 @@
 export const XRPL_MAINNET_RPC = process.env.XRPL_RPC_URL ?? "https://s1.ripple.com:51234/";
 export const RLUSD_ISSUER = "rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De";
 export const RLUSD_CURRENCY = "524C555344000000000000000000000000000000";
+export const XRPL_HOUSE_WALLET = "rUG7tHZ5sGCVxuhkAiL9fUqVFhki2Z6bVU";
 
 export type XrplAsset = {
   symbol: "XRP" | "RLUSD";

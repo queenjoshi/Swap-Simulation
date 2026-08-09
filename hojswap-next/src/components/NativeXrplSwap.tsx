@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { getAddress, getNetwork, isInstalled, submitTransaction, type SubmitTransactionRequest } from "@gemwallet/api";
 import { TokenLogo } from "@/components/TokenLogo";
-import { RLUSD_CURRENCY, RLUSD_ISSUER, XRPL_ASSETS, type XrplAsset } from "@/lib/xrpl-native";
+import { RLUSD_CURRENCY, RLUSD_ISSUER, XRPL_ASSETS, XRPL_HOUSE_WALLET, type XrplAsset } from "@/lib/xrpl-native";
 
 type Quote = {
   receiveAmount: string;
   minimumReceive: string;
+  houseFeeXrp: string;
   price: number;
   transaction: SubmitTransactionRequest["transaction"];
 };
@@ -134,7 +135,22 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
       await requireMainnet();
       const response = await submitTransaction({ transaction: quote.transaction });
       if (!response.result?.hash) throw new Error("Swap transaction was rejected");
-      setHash(response.result.hash);
+      const swapHash = response.result.hash;
+      setHash(swapHash);
+      setStatus("Waiting for the native swap to validate…");
+      await waitForValidatedSwap(swapHash);
+      setStatus("Confirm the 1% House fee in GemWallet…");
+      const feeDrops = String(Math.floor(Number(quote.houseFeeXrp) * 1_000_000));
+      if (feeDrops === "0") throw new Error("Trade amount is too small for the 1% XRP fee");
+      const feeResponse = await submitTransaction({ transaction: {
+        TransactionType: "Payment",
+        Account: address,
+        Destination: XRPL_HOUSE_WALLET,
+        Amount: feeDrops,
+        Memos: [{ Memo: { MemoData: "484F4A205377617020486F75736520466565", MemoType: "486F757365466565" } }],
+      } });
+      if (!feeResponse.result?.hash) throw new Error("Swap succeeded, but the House fee was not approved");
+      setHash(feeResponse.result.hash);
       setAmount("");
       setQuote(null);
       await refreshAccount(address);
@@ -197,6 +213,7 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
             <AssetButton asset={buy} />
           </div>
           {quote && <p className="mt-2 text-xs text-white/40">Minimum received: {quote.minimumReceive} {buy.symbol} · 0.5% slippage</p>}
+          {quote && <p className="mt-1 text-xs text-white/40">House fee: {quote.houseFeeXrp} XRP (1%, requested after swap validation)</p>}
         </div>
 
         <div className="rounded-xl border border-amber-400/15 bg-amber-400/[0.06] px-3 py-2 text-xs leading-5 text-amber-100/65">
@@ -217,6 +234,21 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
       </div>
     </div>
   );
+}
+
+async function waitForValidatedSwap(hash: string) {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const response = await fetch(`/api/xrpl/transaction?hash=${encodeURIComponent(hash)}`, { cache: "no-store" });
+    if (response.ok) {
+      const payload = await response.json() as { validated?: boolean; result?: string };
+      if (payload.validated) {
+        if (payload.result !== "tesSUCCESS") throw new Error(`Native XRPL swap failed: ${payload.result ?? "unknown result"}`);
+        return;
+      }
+    }
+    await new Promise((resolve) => window.setTimeout(resolve, 2_000));
+  }
+  throw new Error("Swap validation timed out; no House fee was charged")
 }
 
 function AssetButton({ asset }: { asset: XrplAsset }) {
