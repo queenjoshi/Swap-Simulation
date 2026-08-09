@@ -42,7 +42,8 @@ export async function POST(request: Request) {
     const rpc = await rpcResponse.json() as { result?: { offers?: BookOffer[]; error_message?: string } };
     if (rpc.result?.error_message) throw new Error(rpc.result.error_message);
 
-    let remaining = sellAmount;
+    const effectiveSellAmount = sell.symbol === "XRP" ? sellAmount * 0.99 : sellAmount;
+    let remaining = effectiveSellAmount;
     let receiveAmount = 0;
     for (const offer of rpc.result?.offers ?? []) {
       if (remaining <= 0) break;
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
       receiveAmount += consumed * (gets / pays);
       remaining -= consumed;
     }
-    if (remaining > Math.max(0.000001, sellAmount * 0.000001) || receiveAmount <= 0) {
+    if (remaining > Math.max(0.000001, effectiveSellAmount * 0.000001) || receiveAmount <= 0) {
       return NextResponse.json({ error: "Insufficient native XRPL liquidity for this amount" }, { status: 422 });
     }
 
@@ -62,14 +63,16 @@ export async function POST(request: Request) {
     const format = (value: number) => value.toFixed(15).replace(/\.?0+$/, "");
     return NextResponse.json({
       sellAmount: format(sellAmount),
+      effectiveSellAmount: format(effectiveSellAmount),
       receiveAmount: format(receiveAmount),
       minimumReceive: format(minimumReceive),
-      price: receiveAmount / sellAmount,
+      price: receiveAmount / effectiveSellAmount,
+      houseFeeXrp: format(sell.symbol === "XRP" ? sellAmount * 0.01 : receiveAmount * 0.01),
       transaction: {
         TransactionType: "OfferCreate",
         Account: body.account,
         Flags: 655360,
-        TakerGets: xrplTransactionAmount(sell, format(sellAmount)),
+        TakerGets: xrplTransactionAmount(sell, format(effectiveSellAmount)),
         TakerPays: xrplTransactionAmount(buy, format(minimumReceive)),
       },
     });
