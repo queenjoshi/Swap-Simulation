@@ -51,6 +51,8 @@ const PROTOCOL_LINKS = [
 
 const PRODUCT_LINKS = [
   { label: "Dreamweaver", href: "https://dreamweaver.thehouseofjoshi.com/" },
+  { label: "Kingdom Within", href: "https://kingdomwithin.thehouseofjoshi.com/" },
+  { label: "NFT Marketplace", href: "https://nftmarketplace.thehouseofjoshi.com/" },
 ];
 
 const HOUSE_LINKS = [
