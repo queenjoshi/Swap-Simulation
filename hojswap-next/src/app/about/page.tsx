@@ -225,6 +225,7 @@ const tokenGroups = CHAIN_OPTIONS.map((chain) => ({
 })).filter((group) => group.tokens.length > 0);
 
 const networks = [
+  { name: "XRP Ledger", badge: "Native Swap", desc: "Native XRP and verified issued assets through XRPL order-book and AMM liquidity using r-address wallets." },
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity including ONDO, ENA, USDe, PENDLE, LDO, EIGEN, PYUSD, blue chips, community tokens, and stablecoins." },
   { name: "Base", badge: "Swap + Bridge", desc: "Home for mr_lightspeed and its live Zora post-coin catalog, MORPHO, DEGEN, VIRTUAL, AERO, House of Joshi tokens, and core assets." },
   { name: "Zora", badge: "Token Catalog", desc: "Chain-aware discovery for creator and content coins deployed on Zora Network. Modern Zora coins deployed on Base remain listed under Base." },
@@ -236,7 +237,7 @@ const networks = [
   { name: "Unichain", badge: "Swap", desc: "ETH, WETH, and USDC on Unichain for new Uniswap-native liquidity." },
   { name: "Robinhood Chain", badge: "Swap", desc: "ETH, WETH, USDG, CASHCAT, VEX, HOODRAT, JUGGERNAUT, MYSTERY, ARROW, VIBE CAT, ROBIN, CashDog, and BOW through 0x liquidity." },
   { name: "Cronos", badge: "Bridge", desc: "USDC, USDT, and ETH routes via Li.Fi between Ethereum, Base, and Cronos." },
-  { name: "XRP Ledger EVM", badge: "Coming Soon", desc: "Listed for network continuity while swap and bridge routes mature." },
+  { name: "XRPL EVM", badge: "Token Catalog", desc: "XRP, Hammy USDC, Hammy WETH, and verified imported contracts remain available for discovery while atomic EVM routing is configured." },
 ];
 
 export default function About() {
