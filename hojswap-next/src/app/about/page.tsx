@@ -186,6 +186,7 @@ const registryTokenGroups = CHAIN_OPTIONS.map((chain) => ({
 })).filter((group) => group.tokens.length > 0);
 
 const networks = [
+  { name: "XRP Ledger", badge: "Native Swap", desc: "Native XRP and verified issued assets through XRPL order-book and AMM liquidity using r-address wallets." },
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity for SHIB, BONE, TREAT, OSCAR, BNB, MAME, WETH, DAI, LINK, UNI, AAVE, PEPE, FLOKI, USDC, USDT, and ETH." },
   { name: "Base", badge: "Swap + Bridge", desc: "Core assets, community tokens, and Base creator coins—including the live mr_lightspeed catalog." },
   { name: "Zora", badge: "Token Catalog", desc: "Creator coins deployed on Zora Network; creator coins deployed on Base remain available under Base." },
@@ -197,7 +198,7 @@ const networks = [
   { name: "Unichain", badge: "Swap", desc: "ETH, WETH, and USDC on Unichain for new Uniswap-native liquidity." },
   { name: "Robinhood Chain", badge: "Swap", desc: "ETH, WETH, USDG, CASHCAT, VEX, HOODRAT, JUGGERNAUT, MYSTERY, ARROW, VIBE CAT, ROBIN, CashDog, and BOW through 0x liquidity." },
   { name: "Cronos", badge: "Bridge", desc: "USDC, USDT, and ETH routes via Li.Fi between Ethereum, Base, and Cronos." },
-  { name: "XRPL EVM", badge: "Swap", desc: "XRP, Hammy USDC, Hammy WETH, and verified imported contracts routed through Hammy Swap." },
+  { name: "XRPL EVM", badge: "EVM Swap", desc: "XRP, Hammy USDC, Hammy WETH, and verified imported contracts routed through Hammy Swap using 0x wallets." },
 ];
 
 const highlights = [

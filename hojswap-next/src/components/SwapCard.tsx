@@ -34,8 +34,10 @@ import { saveTransaction } from "@/lib/transactions";
 import { useNativeTokenPrice, getNativeSymbol, formatNetworkFee } from "@/lib/gas";
 import { hojswapRouterAbi, tokenToRouterAddress } from "@/lib/hojswap-router";
 import { HOUSE_WALLET } from "@/lib/swap-fee";
+import { NativeXrplSwap } from "@/components/NativeXrplSwap";
 
 const DEBOUNCE_MS = 750;
+const XRPL_NATIVE_ID = -1;
 const CHAIN_LOGOS: Record<number, string> = {
     1: "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
     10: "https://assets.coingecko.com/coins/images/25244/standard/Optimism.png",
@@ -139,6 +141,7 @@ function SwapCardInner() {
     const [activeTab, setActiveTab] = useState<ActiveTab>("swap");
     const [apiKeyError, setApiKeyError] = useState<ApiKeyError>(null);
     const [chainMenuOpen, setChainMenuOpen] = useState(false);
+    const [nativeXrplMode, setNativeXrplMode] = useState(false);
     const [zoraProfileTokens, setZoraProfileTokens] = useState<Token[]>([]);
     const [importedXrpTokens, setImportedXrpTokens] = useState<Token[]>([]);
 
@@ -235,6 +238,11 @@ function SwapCardInner() {
     function pickChain(newChainId: number) {
         setChainMenuOpen(false);
         setChainMenuRect(null);
+        if (newChainId === XRPL_NATIVE_ID) {
+            setNativeXrplMode(true);
+            return;
+        }
+        setNativeXrplMode(false);
         setSelectedChainId(newChainId);
         setSellToken(defaultSellForChain(newChainId));
         setBuyToken(defaultBuyForChain(newChainId));
@@ -1078,19 +1086,32 @@ function SwapCardInner() {
     ), [quote, price, nativeUsdPrice, nativeSymbol]);
     const hasNativeGas = !isConnected ? null : nativeBalanceData ? nativeBalanceData.value > 0n : null;
 
-    const CHAINS = CHAIN_OPTIONS.map(({ id, label, shortLabel, swap }) => ({
+    const CHAINS = [
+        {
+            id: XRPL_NATIVE_ID,
+            name: "XRP Ledger",
+            ticker: "XRP",
+            mode: "Native DEX",
+            logo: "/tokens/xrp.png",
+        },
+        ...CHAIN_OPTIONS.map(({ id, label, shortLabel, swap }) => ({
         id,
         name: label,
         ticker: shortLabel,
         mode: swap ? "Swap" : "Bridge",
         logo: CHAIN_LOGOS[id],
-    }));
-    const selectedChainOption = CHAINS.find((chain) => chain.id === selectedChainId) ?? CHAINS[0];
+        })),
+    ];
+    const selectedChainOption = CHAINS.find((chain) => chain.id === (nativeXrplMode ? XRPL_NATIVE_ID : selectedChainId)) ?? CHAINS[0];
 
     const TABS: { id: ActiveTab; label: string }[] = [
         { id: "swap", label: "Swap" },
         { id: "bridge", label: "Bridge" },
     ];
+
+    if (nativeXrplMode) {
+        return <NativeXrplSwap onBack={() => setNativeXrplMode(false)} />;
+    }
 
     return (
         <div className="w-full max-w-[480px]">
