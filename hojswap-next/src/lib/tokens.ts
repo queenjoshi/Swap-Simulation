@@ -1,6 +1,6 @@
 import { getAddress } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp } from "@/lib/chains";
+import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp, zora } from "@/lib/chains";
 
 export type Token = {
   symbol: string;
@@ -122,6 +122,21 @@ export const TOKENS: Token[] = [
     name: "Virtuals Protocol",
     address: getAddress("0x0b3e328455c4059eeb9e3f84b5543f74e24e7e1b"),
     chainId: base.id,
+    decimals: 18,
+  },
+  {
+    symbol: "mr_lightspeed",
+    name: "Mr. Lightspeed Creator Coin",
+    address: getAddress("0xf0cb96a4011a0a6f73d100c7080bf8020d10f87a"),
+    chainId: base.id,
+    decimals: 18,
+  },
+
+  // Zora creator coins are loaded dynamically from the profile endpoint.
+  {
+    symbol: "ETH",
+    name: "Ether",
+    chainId: zora.id,
     decimals: 18,
   },
 

@@ -119,7 +119,20 @@ export const robinhood = {
   testnet: false,
 } as const;
 
-export const SUPPORTED_CHAIN_IDS = [base.id, mainnet.id, cronos.id, xrp.id, polygon.id, bsc.id, arbitrum.id, optimism.id, avalanche.id, unichain.id, robinhood.id] as const;
+export const zora = {
+  id: 7777777,
+  name: "Zora",
+  network: "zora",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://rpc.zora.energy"] },
+    public: { http: ["https://rpc.zora.energy"] },
+  },
+  blockExplorers: { default: { name: "Zora Explorer", url: "https://explorer.zora.energy" } },
+  testnet: false,
+} as const;
+
+export const SUPPORTED_CHAIN_IDS = [base.id, mainnet.id, cronos.id, xrp.id, polygon.id, bsc.id, arbitrum.id, optimism.id, avalanche.id, unichain.id, robinhood.id, zora.id] as const;
 export type SupportedChainId = (typeof SUPPORTED_CHAIN_IDS)[number];
 
 export const CHAIN_OPTIONS = [
@@ -134,6 +147,7 @@ export const CHAIN_OPTIONS = [
   { id: robinhood.id, label: "Robinhood Chain", shortLabel: "Robinhood", swap: true },
   { id: unichain.id, label: "Unichain", shortLabel: "Unichain", swap: true },
   { id: xrp.id, label: "XRPL EVM", shortLabel: "XRP", swap: true },
+  { id: zora.id, label: "Zora", shortLabel: "Zora", swap: false, catalog: true },
 ] as const;
 
 export const SWAP_SUPPORTED_CHAIN_IDS: readonly number[] = CHAIN_OPTIONS
@@ -152,6 +166,7 @@ export function getChainName(chainId: number) {
   if (chainId === avalanche.id) return "Avalanche";
   if (chainId === robinhood.id) return "Robinhood Chain";
   if (chainId === unichain.id) return "Unichain";
+  if (chainId === zora.id) return "Zora";
   return "Unknown";
 }
 
@@ -167,6 +182,7 @@ export function explorerName(chainId: number) {
   if (chainId === avalanche.id) return "Snowtrace";
   if (chainId === robinhood.id) return "Robinhood Chain Explorer";
   if (chainId === unichain.id) return "Uniscan";
+  if (chainId === zora.id) return "Zora Explorer";
   return "Explorer";
 }
 
@@ -182,6 +198,7 @@ export function explorerTxUrl(chainId: number, hash: string) {
   if (chainId === avalanche.id) return `https://snowtrace.io/tx/${hash}`;
   if (chainId === robinhood.id) return `https://robinhoodchain.blockscout.com/tx/${hash}`;
   if (chainId === unichain.id) return `https://uniscan.xyz/tx/${hash}`;
+  if (chainId === zora.id) return `https://explorer.zora.energy/tx/${hash}`;
   return `https://basescan.org/tx/${hash}`;
 }
 
@@ -197,5 +214,6 @@ export function explorerAddressUrl(chainId: number, address: string) {
   if (chainId === avalanche.id) return `https://snowtrace.io/address/${address}`;
   if (chainId === robinhood.id) return `https://robinhoodchain.blockscout.com/address/${address}`;
   if (chainId === unichain.id) return `https://uniscan.xyz/address/${address}`;
+  if (chainId === zora.id) return `https://explorer.zora.energy/address/${address}`;
   return `https://basescan.org/address/${address}`;
 }
