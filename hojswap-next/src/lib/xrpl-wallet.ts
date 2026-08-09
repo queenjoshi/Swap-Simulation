@@ -18,7 +18,9 @@ export function getXrplWalletManager() {
     XyraAdapter,
   }) => {
     const xamanApiKey = process.env.NEXT_PUBLIC_XAMAN_API_KEY;
-    const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+    const walletConnectProjectId =
+      process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ??
+      "804fd92cee82146454ccc0a3c75a55f4";
     const adapters = [
       new XamanAdapter({ apiKey: xamanApiKey }),
       new CrossmarkAdapter(),
@@ -28,18 +30,16 @@ export function getXrplWalletManager() {
       new LedgerAdapter(),
     ];
 
-    if (walletConnectProjectId) {
-      adapters.push(new WalletConnectAdapter({
-        projectId: walletConnectProjectId,
-        themeMode: "dark",
-        metadata: {
-          name: "House of Joshi Swap",
-          description: "Non-custodial swaps on the XRP Ledger and EVM networks",
-          url: window.location.origin,
-          icons: ["https://swap.thehouseofjoshi.com/icon.png"],
-        },
-      }));
-    }
+    adapters.push(new WalletConnectAdapter({
+      projectId: walletConnectProjectId,
+      themeMode: "dark",
+      metadata: {
+        name: "House of Joshi Swap",
+        description: "Non-custodial swaps on the XRP Ledger and EVM networks",
+        url: window.location.origin,
+        icons: ["https://swap.thehouseofjoshi.com/icon.png"],
+      },
+    }));
 
     return new WalletManager({ adapters, network: "mainnet", autoConnect: true });
   }).catch((error) => {
