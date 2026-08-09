@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import type { Transaction } from "xrpl";
+import type { WalletManager } from "xrpl-connect";
 import { TokenLogo } from "@/components/TokenLogo";
 import { RLUSD_CURRENCY, RLUSD_ISSUER, XRPL_ASSETS, XRPL_HOUSE_WALLET, type XrplAsset } from "@/lib/xrpl-native";
 import { getXrplWalletManager } from "@/lib/xrpl-wallet";
@@ -34,7 +35,17 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
   const [hash, setHash] = useState<string | null>(null);
   const [showWallets, setShowWallets] = useState(false);
   const [walletName, setWalletName] = useState<string | null>(null);
-  const manager = useMemo(() => getXrplWalletManager(), []);
+  const [manager, setManager] = useState<WalletManager | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void getXrplWalletManager().then((walletManager) => {
+      if (active) setManager(walletManager);
+    }).catch((cause) => {
+      if (active) setError(cause instanceof Error ? cause.message : "Unable to initialize XRP Ledger wallets");
+    });
+    return () => { active = false; };
+  }, []);
 
   const refreshAccount = useCallback(async (walletAddress: string) => {
     const response = await fetch(`/api/xrpl/account?account=${encodeURIComponent(walletAddress)}`, { cache: "no-store" });
@@ -44,6 +55,7 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
   }, []);
 
   async function connect(walletId: string) {
+    if (!manager) return;
     setBusy(true);
     setError(null);
     try {
@@ -101,7 +113,7 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
         : "Swap on XRP Ledger";
 
   async function enableTrustline() {
-    if (!address) return;
+    if (!address || !manager) return;
     setBusy(true);
     setError(null);
     try {
@@ -121,7 +133,7 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
   }
 
   async function swap() {
-    if (!address || !quote) return;
+    if (!address || !quote || !manager) return;
     setBusy(true);
     setError(null);
     setStatus(`Confirm the native XRPL offer in ${walletName ?? "your wallet"}…`);
@@ -218,7 +230,7 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
 
         {showWallets && !address && (
           <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-black/30 p-2">
-            {manager.wallets.map((wallet) => (
+            {manager?.wallets.map((wallet) => (
               <button
                 key={wallet.id}
                 type="button"
@@ -236,10 +248,10 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
         <button
           type="button"
           onClick={!address ? () => setShowWallets((visible) => !visible) : needsTrustline ? enableTrustline : swap}
-          disabled={busy || Boolean(address && !needsTrustline && (!quote || insufficient))}
+          disabled={!manager || busy || Boolean(address && !needsTrustline && (!quote || insufficient))}
           className="w-full rounded-[22px] bg-[rgba(255,222,85,0.98)] px-4 py-4 text-base font-bold text-black disabled:opacity-50"
         >
-          {insufficient ? `Insufficient ${sell.symbol}` : primaryLabel}
+          {!manager ? "Loading XRP wallets…" : insufficient ? `Insufficient ${sell.symbol}` : primaryLabel}
         </button>
       </div>
     </div>
