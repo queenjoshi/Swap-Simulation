@@ -1,6 +1,12 @@
 {
-  "name": "workspace",
+  "name": "house-of-joshi-swap",
   "version": "0.0.0",
+  "description": "Non-custodial multichain token-swap interface with on-chain fee and minimum-output enforcement.",
+  "homepage": "https://swap.thehouseofjoshi.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/queenjoshi/Swap-Simulation.git"
+  },
   "packageManager": "pnpm@11.7.0",
   "license": "MIT",
   "scripts": {
