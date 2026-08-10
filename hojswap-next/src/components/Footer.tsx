@@ -60,6 +60,7 @@ const HOUSE_LINKS = [
   { label: "About", href: "/about" },
   { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },
+  { label: "Whitepaper", href: "/whitepaper" },
   { label: "Terms", href: "/terms" },
   { label: "Privacy", href: "/privacy" },
 ];

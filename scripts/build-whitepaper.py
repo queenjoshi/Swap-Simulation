@@ -1,4 +1,5 @@
 from pathlib import Path
+from shutil import copyfile
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import A4
@@ -21,6 +22,7 @@ import re
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "docs" / "WHITEPAPER.md"
 OUTPUT = ROOT / "output" / "pdf" / "house-of-joshi-swap-whitepaper.pdf"
+PUBLIC_OUTPUT = ROOT / "hojswap-next" / "public" / "house-of-joshi-swap-whitepaper.pdf"
 LOGO = Path("/Users/anshujoshi/Downloads/HOJ Logo.PNG")
 
 GOLD = colors.HexColor("#D6A928")
@@ -243,6 +245,8 @@ def main():
         subject="Technical architecture, BNB Chain deployment, native XRP Ledger integration, fees, and security",
     )
     doc.build(build_story(SOURCE.read_text(encoding="utf-8")))
+    PUBLIC_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    copyfile(OUTPUT, PUBLIC_OUTPUT)
     print(OUTPUT)
 
 
