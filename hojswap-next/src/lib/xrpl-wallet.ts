@@ -36,6 +36,7 @@ export function getXrplWalletManager() {
       // WalletConnect's modal presents compatible wallet choices and handles
       // app/deep links without exposing a QR inside the XRP wallet picker.
       useModal: true,
+      modalMode: "always",
       metadata: {
         name: "House of Joshi Swap",
         description: "Non-custodial swaps on the XRP Ledger and EVM networks",
