@@ -145,7 +145,14 @@ def parse_table(lines):
         if all(re.fullmatch(r"[-: ]+", c or "-") for c in cells):
             continue
         rows.append([Paragraph(inline(c), small) for c in cells])
-    table = Table(rows, colWidths=[43 * mm, 112 * mm], repeatRows=1, hAlign="LEFT")
+    column_count = max(len(row) for row in rows)
+    if column_count == 2:
+        widths = [43 * mm, 112 * mm]
+    elif column_count == 4:
+        widths = [43 * mm, 24 * mm, 27 * mm, 61 * mm]
+    else:
+        widths = [155 * mm / column_count] * column_count
+    table = Table(rows, colWidths=widths, repeatRows=1, hAlign="LEFT")
     table.setStyle(
         TableStyle(
             [

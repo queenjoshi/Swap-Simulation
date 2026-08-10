@@ -52,23 +52,25 @@ Public transaction identifiers are used to show transaction status. The applicat
 
 ## 3. Supported networks
 
-House of Joshi Swap is designed for a multichain environment. Current application configuration includes:
+House of Joshi Swap is designed for a multichain environment. The complete current application configuration is listed below.
 
-- BNB Smart Chain mainnet (chain ID 56);
-- Ethereum mainnet;
-- Base;
-- Polygon;
-- Arbitrum;
-- Optimism;
-- Avalanche;
-- Unichain;
-- Robinhood Chain;
-- Cronos integrations;
-- XRP EVM integrations;
-- Zora token discovery; and
-- native XRP Ledger.
+| Network | Chain ID | Native asset | Current role |
+| --- | --- | --- | --- |
+| Ethereum mainnet | 1 | ETH | Swap network |
+| Optimism | 10 | ETH | Swap network |
+| Cronos | 25 | CRO | Integration and token catalog |
+| BNB Smart Chain | 56 | BNB | Swap network and deployed House router |
+| Unichain | 130 | ETH | Swap network |
+| Polygon | 137 | POL | Swap network |
+| Robinhood Chain | 4663 | ETH | Swap network |
+| Base | 8453 | ETH | Swap network and deployed House router |
+| Arbitrum | 42161 | ETH | Swap network |
+| Avalanche C-Chain | 43114 | AVAX | Swap network |
+| XRP EVM | 1440000 | XRP | Configured EVM network; execution depends on routing availability |
+| Zora | 7777777 | ETH | Token discovery and catalog |
+| XRP Ledger | Native ledger - no EVM chain ID | XRP | Native XRPL swap experience |
 
-Execution depends on live provider support, liquidity, deployed router configuration, and operational RPC endpoints. A network appearing in the interface does not guarantee that every asset pair is executable.
+"Swap network" means the application exposes that network for route requests. Execution still depends on live provider support, liquidity, deployed router configuration, token compatibility, and operational RPC endpoints. A network appearing in the interface does not guarantee that every asset pair is executable. Catalog and discovery networks provide token information but do not imply an executable route.
 
 ## 4. BNB Chain deployment
 
@@ -188,4 +190,3 @@ The project prioritizes clear network identity, user-controlled signatures, and 
 ## Legal notice
 
 This whitepaper is provided for technical and informational purposes only. It is not financial, investment, legal, tax, or accounting advice; an offer or solicitation; or a promise of availability, performance, profit, or future development. Digital assets and blockchain transactions involve substantial risk, including total loss. Use of House of Joshi Swap is subject to the published Terms of Service and Privacy Policy.
-
