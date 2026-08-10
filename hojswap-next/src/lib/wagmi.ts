@@ -21,7 +21,7 @@ const walletConnectProjectId =
 
 const appUrl =
   (process.env.NEXT_PUBLIC_APP_URL as string | undefined) ??
-  (typeof window !== "undefined" ? window.location.origin : "https://hojswap.com");
+  (typeof window !== "undefined" ? window.location.origin : "https://swap.thehouseofjoshi.com");
 
 export const wagmiConfig = getDefaultConfig({
   appName: "House of Joshi — Swap & Bridge",
