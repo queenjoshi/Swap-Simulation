@@ -14,7 +14,7 @@ import {
 } from "wagmi";
 import { concat, decodeEventLog, encodeFunctionData, formatUnits, numberToHex, parseUnits, size, type Hex } from "viem";
 import { base } from "wagmi/chains";
-import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, getChainName } from "@/lib/chains";
+import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, explorerAddressUrl, getChainName, xrp, zora } from "@/lib/chains";
 import { clampToDecimals, formatSwapAmountDisplay, isValidNumberInput } from "@/lib/format";
 import { calculateHouseFeeAmount, tokenTo0xParam, type QuoteResponse, type PriceResponse } from "@/lib/quote";
 import { erc20Abi } from "@/lib/erc20";
@@ -36,6 +36,7 @@ import { hojswapRouterAbi, tokenToRouterAddress } from "@/lib/hojswap-router";
 import { HOUSE_WALLET } from "@/lib/swap-fee";
 
 const DEBOUNCE_MS = 750;
+const BALANCE_PERCENTAGES = [25, 50, 75, 100] as const;
 const CHAIN_LOGOS: Record<number, string> = {
     1: "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
     10: "https://assets.coingecko.com/coins/images/25244/standard/Optimism.png",
@@ -45,9 +46,10 @@ const CHAIN_LOGOS: Record<number, string> = {
     137: "https://assets.coingecko.com/coins/images/32440/standard/polygon.png",
     4663: "https://robinhood.com/favicon.ico",
     8453: "https://assets.coingecko.com/asset_platforms/images/131/small/base.jpeg",
+    7777777: "https://zora.co/favicon.ico",
     43114: "https://assets.coingecko.com/coins/images/12559/standard/Avalanche_Circle_RedWhite_Trans.png",
     42161: "https://assets.coingecko.com/coins/images/16547/standard/arb.jpg",
-    1440002: "/tokens/xrp.png",
+    1440000: "/tokens/xrp.png",
 };
 
 type ActiveTab = "swap" | "bridge";
@@ -138,8 +140,52 @@ function SwapCardInner() {
     const [activeTab, setActiveTab] = useState<ActiveTab>("swap");
     const [apiKeyError, setApiKeyError] = useState<ApiKeyError>(null);
     const [chainMenuOpen, setChainMenuOpen] = useState(false);
+    const [zoraProfileTokens, setZoraProfileTokens] = useState<Token[]>([]);
+    const [importedXrpTokens, setImportedXrpTokens] = useState<Token[]>([]);
 
-    const availableTokens = useMemo(() => tokensForChain(selectedChainId), [selectedChainId]);
+    useEffect(() => {
+        queueMicrotask(() => {
+            try {
+                const parsed = JSON.parse(localStorage.getItem("hojswap-xrp-imported-tokens") ?? "[]") as Token[];
+                setImportedXrpTokens(parsed.filter((token) => token.chainId === xrp.id && !!token.address));
+            } catch {
+                setImportedXrpTokens([]);
+            }
+        });
+    }, []);
+
+    const rememberImportedXrpToken = useCallback((token: Token) => {
+        setImportedXrpTokens((current) => {
+            const next = [...current.filter((item) => item.address?.toLowerCase() !== token.address?.toLowerCase()), token];
+            localStorage.setItem("hojswap-xrp-imported-tokens", JSON.stringify(next));
+            return next;
+        });
+    }, []);
+
+    const availableTokens = useMemo(() => {
+        const staticTokens = tokensForChain(selectedChainId);
+        if (selectedChainId !== base.id && selectedChainId !== zora.id) return staticTokens;
+
+        const byAddress = new Map(
+            staticTokens
+                .filter((token) => token.address)
+                .map((token) => [token.address!.toLowerCase(), token]),
+        );
+        for (const token of zoraProfileTokens.filter((token) => token.chainId === selectedChainId)) {
+            if (token.address && !byAddress.has(token.address.toLowerCase())) {
+                byAddress.set(token.address.toLowerCase(), token);
+            }
+        }
+        for (const token of importedXrpTokens.filter((token) => token.chainId === selectedChainId)) {
+            if (token.address && !byAddress.has(token.address.toLowerCase())) {
+                byAddress.set(token.address.toLowerCase(), token);
+            }
+        }
+        return [
+            ...staticTokens.filter((token) => !token.address),
+            ...byAddress.values(),
+        ];
+    }, [selectedChainId, zoraProfileTokens, importedXrpTokens]);
 
     const [sellToken, setSellToken] = useState<Token>(() => {
         const sellSymbol = searchParams.get("sell");
@@ -196,13 +242,47 @@ function SwapCardInner() {
     }
 
     const isSwapSupported = SWAP_SUPPORTED_CHAIN_IDS.includes(selectedChainId);
+    // Unsupported quote networks still expose their complete token registry in
+    // the swap card. This keeps every configured listing discoverable without
+    // presenting a swap button that cannot produce a valid route.
+    const isTokenCatalog = !isSwapSupported;
+
+    useEffect(() => {
+        const controller = new AbortController();
+        const loadProfileTokens = async () => {
+            for (let attempt = 1; attempt <= 4; attempt += 1) {
+                try {
+                    const response = await fetch("/api/zora-profile-tokens", {
+                        cache: "no-store",
+                        signal: controller.signal,
+                    });
+                    if (!response.ok) throw new Error(`Profile token API ${response.status}`);
+                    const tokens = await response.json() as Token[];
+                    if (!Array.isArray(tokens) || tokens.length === 0) {
+                        throw new Error("Profile token API returned no tokens");
+                    }
+                    setZoraProfileTokens(tokens);
+                    return;
+                } catch (error) {
+                    if (controller.signal.aborted) return;
+                    if (attempt === 4) {
+                        console.error("Error loading Zora profile tokens:", error);
+                        return;
+                    }
+                    await new Promise((resolve) => setTimeout(resolve, attempt * 1_000));
+                }
+            }
+        };
+        void loadProfileTokens();
+        return () => controller.abort();
+    }, []);
 
     // Auto-switch to bridge tab if swap is not supported on the selected chain
     useEffect(() => {
-        if (!isSwapSupported && activeTab === "swap") {
+        if (!isSwapSupported && !isTokenCatalog && activeTab === "swap") {
             setActiveTab("bridge");
         }
-    }, [selectedChainId, isSwapSupported, activeTab]);
+    }, [selectedChainId, isSwapSupported, isTokenCatalog, activeTab]);
 
     const updateChainMenuRect = useCallback(() => {
         const rect = chainButtonRef.current?.getBoundingClientRect();
@@ -311,13 +391,27 @@ function SwapCardInner() {
         query: { enabled: isConnected && !!address && walletOnSelectedChain, refetchInterval: 12_000 },
     });
 
-    function setMaxAmount() {
+    function amountForBalancePercentage(percent: number) {
         if (!sellBalanceData) return;
-        const maxRaw = sellBalanceData.value;
-        if (maxRaw === 0n) return;
+        const balance = sellBalanceData.value;
+        if (balance === 0n) return;
         const dec = sellBalanceData.decimals;
-        const str = (Number(maxRaw) / 10 ** dec).toFixed(dec > 8 ? 8 : dec);
-        setSellAmountInput(str);
+        let amount = (balance * BigInt(percent)) / 100n;
+
+        // A native-token max must leave enough value to submit the swap. Keep
+        // 1% of small balances or up to 0.0005 native tokens as a gas reserve.
+        if (percent === 100 && isNative(sellToken)) {
+            const gasReserveCap = parseUnits("0.0005", dec);
+            const gasReserve = balance / 100n < gasReserveCap ? balance / 100n : gasReserveCap;
+            amount = balance > gasReserve ? balance - gasReserve : 0n;
+        }
+
+        if (amount === 0n) return;
+        setSellAmountInput(formatUnits(amount, dec));
+    }
+
+    function setMaxAmount() {
+        amountForBalancePercentage(100);
     }
 
     const insufficientBalance = useMemo(() => {
@@ -1028,12 +1122,12 @@ function SwapCardInner() {
     ), [quote, price, nativeUsdPrice, nativeSymbol]);
     const hasNativeGas = !isConnected ? null : nativeBalanceData ? nativeBalanceData.value > 0n : null;
 
-    const CHAINS = CHAIN_OPTIONS.map(({ id, label, shortLabel, swap }) => ({
-        id,
-        name: label,
-        ticker: shortLabel,
-        mode: swap ? "Swap" : "Bridge",
-        logo: CHAIN_LOGOS[id],
+    const CHAINS = CHAIN_OPTIONS.map((chain) => ({
+        id: chain.id,
+        name: chain.label,
+        ticker: chain.shortLabel,
+        mode: chain.swap ? "Swap" : "Catalog",
+        logo: CHAIN_LOGOS[chain.id],
     }));
     const selectedChainOption = CHAINS.find((chain) => chain.id === selectedChainId) ?? CHAINS[0];
 
@@ -1150,7 +1244,7 @@ function SwapCardInner() {
                     document.body,
                 )}
 
-                <div className="flex gap-1 rounded-full border border-white/8 bg-black/25 p-1">
+                {!isTokenCatalog && <div className="flex gap-1 rounded-full border border-white/8 bg-black/25 p-1">
                     {TABS.filter(tab => tab.id !== "swap" || isSwapSupported).map(({ id, label }) => (
                         <button
                             key={id}
@@ -1164,16 +1258,68 @@ function SwapCardInner() {
                             {label}
                         </button>
                     ))}
-                </div>
+                </div>}
 
-                {isSwapSupported && activeTab === "swap" ? (
+                {isTokenCatalog ? (
+                    <div className="space-y-3">
+                        <div className="hoj-panel rounded-[26px] p-4 sm:p-5">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[rgba(212,175,55,0.72)]">
+                                {selectedChainName} token catalog
+                            </p>
+                            <h2 className="mt-2 text-lg font-semibold text-white/90">
+                                Tokens available on {selectedChainName}
+                            </h2>
+                            <p className="mt-2 text-xs leading-6 text-white/50">
+                                {selectedChainId === zora.id
+                                    ? "Profile tokens reported on Zora Network appear here. Newer Zora creator coins deployed on Base remain in the Base catalog."
+                                    : `All ${availableTokens.length} configured ${selectedChainName} tokens are listed here.`}
+                            </p>
+                        </div>
+                        <div className="hoj-panel rounded-[26px] p-4 sm:p-5">
+                            <div className="mb-3 flex items-center justify-between gap-3">
+                                <div>
+                                    <div className="text-[15px] font-semibold text-white/70">Browse token</div>
+                                    <div className="mt-1 text-xs text-white/40">{availableTokens.length} available</div>
+                                </div>
+                                <div className="w-[9.5rem] shrink-0">
+                                    <TokenSelect
+                                        tokens={availableTokens}
+                                        value={buyToken}
+                                        onChange={setBuyToken}
+                                        allowAddressImport={selectedChainId === xrp.id}
+                                        onTokenImported={rememberImportedXrpToken}
+                                    />
+                                </div>
+                            </div>
+                            {buyToken.address && (
+                                <a
+                                    href={explorerAddressUrl(selectedChainId, buyToken.address)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block truncate rounded-xl border border-white/8 bg-black/20 px-3 py-2 font-mono text-[11px] text-white/45 transition hover:text-[rgba(212,175,55,0.9)]"
+                                >
+                                    {buyToken.address}
+                                </a>
+                            )}
+                        </div>
+                        <div className="rounded-2xl border border-amber-400/20 bg-amber-400/[0.07] px-4 py-3 text-xs leading-5 text-amber-100/70">
+                            {selectedChainName} is catalog-only for now because the current swap integration does not support this chain. Token listings remain available for discovery and verification.
+                        </div>
+                    </div>
+                ) : isSwapSupported && activeTab === "swap" ? (
                     <>
                         <div className="relative !z-30 space-y-1">
                             <div className="hoj-panel rounded-[26px] p-4 sm:p-5">
                                 <div className="mb-3 flex items-start justify-between gap-3">
                                     <div className="text-[15px] font-semibold text-white/55">Sell</div>
                                     <div className="w-[8.5rem] shrink-0 sm:w-[9.25rem]">
-                                        <TokenSelect tokens={availableTokens} value={sellToken} onChange={onSellTokenChange} />
+                                        <TokenSelect
+                                            tokens={availableTokens}
+                                            value={sellToken}
+                                            onChange={onSellTokenChange}
+                                            allowAddressImport={selectedChainId === xrp.id}
+                                            onTokenImported={rememberImportedXrpToken}
+                                        />
                                     </div>
                                 </div>
                                 <div className="min-w-0 overflow-hidden">
@@ -1189,6 +1335,20 @@ function SwapCardInner() {
                                         }}
                                         className="hoj-input w-full min-w-0 bg-transparent text-5xl font-semibold leading-none text-white outline-none placeholder:text-white/25 sm:text-6xl"
                                     />
+                                </div>
+                                <div className="mt-4 grid grid-cols-4 gap-2" aria-label="Choose percentage of balance to swap">
+                                    {BALANCE_PERCENTAGES.map((percent) => (
+                                        <button
+                                            key={percent}
+                                            type="button"
+                                            onClick={() => amountForBalancePercentage(percent)}
+                                            disabled={!sellBalanceData || sellBalanceData.value === 0n || !walletOnSelectedChain}
+                                            className="rounded-xl border border-white/10 bg-white/[0.04] px-2 py-2 text-xs font-semibold tabular-nums text-white/60 transition hover:border-[rgba(212,175,55,0.45)] hover:bg-[rgba(212,175,55,0.1)] hover:text-[rgba(255,222,85,0.95)] disabled:cursor-not-allowed disabled:opacity-30"
+                                            aria-label={`Swap ${percent}% of ${sellToken.symbol} balance`}
+                                        >
+                                            {percent}%
+                                        </button>
+                                    ))}
                                 </div>
                                 <TokenBalance token={sellToken} chainId={selectedChainId} isConnected={isConnected} walletChainId={chainId} onMax={walletOnSelectedChain ? setMaxAmount : undefined} />
                             </div>
@@ -1206,7 +1366,13 @@ function SwapCardInner() {
                                 <div className="mb-3 flex items-start justify-between gap-3">
                                     <div className="text-[15px] font-semibold text-white/55">Buy</div>
                                     <div className="w-[8.5rem] shrink-0 sm:w-[9.25rem]">
-                                        <TokenSelect tokens={availableTokens} value={buyToken} onChange={onBuyTokenChange} />
+                                        <TokenSelect
+                                            tokens={availableTokens}
+                                            value={buyToken}
+                                            onChange={onBuyTokenChange}
+                                            allowAddressImport={selectedChainId === xrp.id}
+                                            onTokenImported={rememberImportedXrpToken}
+                                        />
                                     </div>
                                 </div>
                                 <div className="min-w-0 overflow-hidden">

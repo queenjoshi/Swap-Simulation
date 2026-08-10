@@ -12,17 +12,30 @@ contract HojswapFeeRouter {
     uint256 public constant BPS_DENOMINATOR = 10_000;
     uint256 public constant HOUSE_FEE_BPS = 100;
 
+    struct TokenSwapParams {
+        address sellToken;
+        uint256 sellAmount;
+        address spender;
+        address swapTarget;
+        bytes swapCallData;
+        address buyToken;
+        uint256 minBuyAmount;
+        address recipient;
+    }
+
     address public owner;
     address public houseWallet;
     bool private locked;
 
     mapping(address => bool) public approvedSwapTargets;
     mapping(address => bool) public approvedSpenders;
+    mapping(address => mapping(address => bool)) public approvedRouterSpenders;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed nextOwner);
     event HouseWalletUpdated(address indexed previousWallet, address indexed nextWallet);
     event SwapTargetApprovalUpdated(address indexed target, bool approved);
     event SpenderApprovalUpdated(address indexed spender, bool approved);
+    event RouterSpenderApprovalUpdated(address indexed router, address indexed spender, bool approved);
     event HouseFeeCollected(address indexed token, address indexed payer, uint256 amount);
     event SwapExecuted(
         address indexed sender,
@@ -38,6 +51,7 @@ contract HojswapFeeRouter {
     error ReentrantCall();
     error ZeroAddress();
     error ZeroAmount();
+    error ArrayLengthMismatch();
     error TargetNotApproved();
     error SpenderNotApproved();
     error SameTokenUnsupported();
@@ -60,6 +74,7 @@ contract HojswapFeeRouter {
 
     constructor(address initialHouseWallet, address[] memory initialSwapTargets, address[] memory initialSpenders) {
         if (initialHouseWallet == address(0)) revert ZeroAddress();
+        if (initialSwapTargets.length != initialSpenders.length) revert ArrayLengthMismatch();
         owner = msg.sender;
         houseWallet = initialHouseWallet;
         emit OwnershipTransferred(address(0), msg.sender);
@@ -67,12 +82,11 @@ contract HojswapFeeRouter {
 
         for (uint256 i = 0; i < initialSwapTargets.length; i++) {
             approvedSwapTargets[initialSwapTargets[i]] = true;
-            emit SwapTargetApprovalUpdated(initialSwapTargets[i], true);
-        }
-
-        for (uint256 i = 0; i < initialSpenders.length; i++) {
             approvedSpenders[initialSpenders[i]] = true;
+            approvedRouterSpenders[initialSwapTargets[i]][initialSpenders[i]] = true;
+            emit SwapTargetApprovalUpdated(initialSwapTargets[i], true);
             emit SpenderApprovalUpdated(initialSpenders[i], true);
+            emit RouterSpenderApprovalUpdated(initialSwapTargets[i], initialSpenders[i], true);
         }
     }
 
@@ -102,6 +116,12 @@ contract HojswapFeeRouter {
         emit SpenderApprovalUpdated(spender, approved);
     }
 
+    function setRouterSpenderApproval(address router, address spender, bool approved) external onlyOwner {
+        if (router == address(0)) revert ZeroAddress();
+        approvedRouterSpenders[router][spender] = approved;
+        emit RouterSpenderApprovalUpdated(router, spender, approved);
+    }
+
     function swapExactNative(
         address swapTarget,
         bytes calldata swapCallData,
@@ -111,7 +131,9 @@ contract HojswapFeeRouter {
     ) external payable nonReentrant returns (uint256 buyAmount) {
         if (recipient == address(0) || buyToken == address(0)) revert ZeroAddress();
         if (msg.value == 0) revert ZeroAmount();
-        _requireApprovedTarget(swapTarget);
+        _requireApprovedPair(swapTarget, address(0));
+
+        uint256 nativeBalanceBefore = address(this).balance - msg.value;
 
         uint256 feeAmount = _feeAmount(msg.value);
         uint256 swapAmount = msg.value - feeAmount;
@@ -127,60 +149,61 @@ contract HojswapFeeRouter {
         if (buyAmount < minBuyAmount) revert InsufficientBuyAmount(buyAmount, minBuyAmount);
         _safeTransfer(buyToken, recipient, buyAmount);
 
-        _refundNative(recipient);
+        _refundNativeDelta(recipient, nativeBalanceBefore);
         emit SwapExecuted(msg.sender, recipient, address(0), buyToken, msg.value, feeAmount, buyAmount);
     }
 
-    function swapExactToken(
-        address sellToken,
-        uint256 sellAmount,
-        address spender,
-        address swapTarget,
-        bytes calldata swapCallData,
-        address buyToken,
-        uint256 minBuyAmount,
-        address recipient
-    ) external nonReentrant returns (uint256 buyAmount) {
-        if (sellToken == address(0) || spender == address(0) || recipient == address(0)) revert ZeroAddress();
-        if (sellAmount == 0) revert ZeroAmount();
-        if (sellToken == buyToken) revert SameTokenUnsupported();
-        _requireApprovedTarget(swapTarget);
-        if (!approvedSpenders[spender]) revert SpenderNotApproved();
+    function swapExactToken(TokenSwapParams calldata params) external nonReentrant returns (uint256 buyAmount) {
+        if (params.sellToken == address(0) || params.spender == address(0) || params.recipient == address(0)) {
+            revert ZeroAddress();
+        }
+        if (params.sellAmount == 0) revert ZeroAmount();
+        if (params.sellToken == params.buyToken) revert SameTokenUnsupported();
+        _requireApprovedPair(params.swapTarget, params.spender);
 
-        uint256 sellBalanceBefore = _tokenBalance(sellToken);
-        uint256 buyBalanceBefore = buyToken == address(0) ? address(this).balance : _tokenBalance(buyToken);
+        uint256 sellBalanceBefore = _tokenBalance(params.sellToken);
+        uint256 buyBalanceBefore = params.buyToken == address(0)
+            ? address(this).balance
+            : _tokenBalance(params.buyToken);
 
-        _safeTransferFrom(sellToken, msg.sender, address(this), sellAmount);
-        uint256 actualSellAmount = _tokenBalance(sellToken) - sellBalanceBefore;
+        _safeTransferFrom(params.sellToken, msg.sender, address(this), params.sellAmount);
+        uint256 actualSellAmount = _tokenBalance(params.sellToken) - sellBalanceBefore;
         if (actualSellAmount == 0) revert ZeroAmount();
 
         uint256 feeAmount = _feeAmount(actualSellAmount);
         uint256 swapAmount = actualSellAmount - feeAmount;
         if (swapAmount == 0) revert ZeroAmount();
 
-        _safeTransfer(sellToken, houseWallet, feeAmount);
-        emit HouseFeeCollected(sellToken, msg.sender, feeAmount);
+        _safeTransfer(params.sellToken, houseWallet, feeAmount);
+        emit HouseFeeCollected(params.sellToken, msg.sender, feeAmount);
 
-        _forceApprove(sellToken, spender, swapAmount);
-        _callSwapTarget(swapTarget, 0, swapCallData);
-        _forceApprove(sellToken, spender, 0);
+        _forceApprove(params.sellToken, params.spender, swapAmount);
+        _callSwapTarget(params.swapTarget, 0, params.swapCallData);
+        _forceApprove(params.sellToken, params.spender, 0);
 
-        uint256 buyBalanceAfter = buyToken == address(0) ? address(this).balance : _tokenBalance(buyToken);
+        uint256 buyBalanceAfter = params.buyToken == address(0)
+            ? address(this).balance
+            : _tokenBalance(params.buyToken);
         buyAmount = buyBalanceAfter - buyBalanceBefore;
-        if (buyAmount < minBuyAmount) revert InsufficientBuyAmount(buyAmount, minBuyAmount);
+        if (buyAmount < params.minBuyAmount) revert InsufficientBuyAmount(buyAmount, params.minBuyAmount);
 
-        if (buyToken == address(0)) {
-            _sendNative(recipient, buyAmount);
+        if (params.buyToken == address(0)) {
+            _sendNative(params.recipient, buyAmount);
         } else {
-            _safeTransfer(buyToken, recipient, buyAmount);
+            _safeTransfer(params.buyToken, params.recipient, buyAmount);
         }
 
-        uint256 sellBalanceAfter = _tokenBalance(sellToken);
-        if (sellBalanceAfter > sellBalanceBefore) {
-            _safeTransfer(sellToken, recipient, sellBalanceAfter - sellBalanceBefore);
-        }
+        _refundSellTokenDelta(params.sellToken, params.recipient, sellBalanceBefore);
 
-        emit SwapExecuted(msg.sender, recipient, sellToken, buyToken, actualSellAmount, feeAmount, buyAmount);
+        emit SwapExecuted(
+            msg.sender,
+            params.recipient,
+            params.sellToken,
+            params.buyToken,
+            actualSellAmount,
+            feeAmount,
+            buyAmount
+        );
     }
 
     function rescueToken(address token, address to, uint256 amount) external onlyOwner {
@@ -198,6 +221,11 @@ contract HojswapFeeRouter {
         if (!approvedSwapTargets[target]) revert TargetNotApproved();
     }
 
+    function _requireApprovedPair(address target, address spender) private view {
+        _requireApprovedTarget(target);
+        if (!approvedRouterSpenders[target][spender]) revert SpenderNotApproved();
+    }
+
     function _callSwapTarget(address target, uint256 value, bytes calldata data) private {
         (bool success, bytes memory result) = target.call{ value: value }(data);
         if (!success) revert SwapCallFailed(result);
@@ -212,9 +240,16 @@ contract HojswapFeeRouter {
         if (!success) revert NativeTransferFailed();
     }
 
-    function _refundNative(address recipient) private {
+    function _refundNativeDelta(address recipient, uint256 nativeBalanceBefore) private {
         uint256 balance = address(this).balance;
-        if (balance > 0) _sendNative(recipient, balance);
+        if (balance > nativeBalanceBefore) _sendNative(recipient, balance - nativeBalanceBefore);
+    }
+
+    function _refundSellTokenDelta(address sellToken, address recipient, uint256 sellBalanceBefore) private {
+        uint256 sellBalanceAfter = _tokenBalance(sellToken);
+        if (sellBalanceAfter > sellBalanceBefore) {
+            _safeTransfer(sellToken, recipient, sellBalanceAfter - sellBalanceBefore);
+        }
     }
 
     function _safeTransfer(address token, address to, uint256 amount) private {

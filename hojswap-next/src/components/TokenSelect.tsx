@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { isAddress } from "viem";
 import { base } from "wagmi/chains";
 import { Token, tokenId } from "@/lib/tokens";
 import { TokenLogo } from "@/components/TokenLogo";
@@ -31,6 +32,7 @@ const TOKEN_LOGOS: Record<string, string> = {
   MAGIC: "https://assets.coingecko.com/coins/images/18623/standard/magic.png",
   VELO: "https://assets.coingecko.com/coins/images/12538/standard/Logo_200x_200.png",
   XRP: "/tokens/xrp.png",
+  RLUSD: "https://coin-images.coingecko.com/coins/images/39651/large/RLUSD_200x200_%281%29.png",
   FLOKI: "/tokens/floki.png",
   MAME: "/tokens/mame-inu.png",
   TREAT: "/tokens/treat146b.png",
@@ -40,6 +42,17 @@ const TOKEN_LOGOS: Record<string, string> = {
   AERO: "https://assets.coingecko.com/coins/images/31745/standard/token.png",
   BRETT: "https://assets.coingecko.com/coins/images/35529/standard/1000050750.png",
   VIRTUAL: "https://assets.coingecko.com/coins/images/34057/standard/LOGOMARK.png",
+  ONDO: "https://assets.coingecko.com/coins/images/26580/standard/ONDO.png",
+  ENA: "https://assets.coingecko.com/coins/images/36530/standard/ethena.png",
+  USDE: "https://assets.coingecko.com/coins/images/33613/standard/usde.png",
+  MORPHO: "https://assets.coingecko.com/coins/images/29837/standard/Morpho-token-icon.png",
+  PENDLE: "https://assets.coingecko.com/coins/images/15069/standard/Pendle_Logo_Normal-03.png",
+  DEGEN: "https://assets.coingecko.com/coins/images/34515/standard/android-chrome-512x512.png",
+  WLD: "https://assets.coingecko.com/coins/images/31069/standard/worldcoin.jpeg",
+  JOE: "https://assets.coingecko.com/coins/images/17569/standard/traderjoe.png",
+  LDO: "https://assets.coingecko.com/coins/images/13573/standard/Lido_DAO.png",
+  EIGEN: "https://assets.coingecko.com/coins/images/37441/standard/eigenlayer.png",
+  PYUSD: "https://assets.coingecko.com/coins/images/31212/standard/PYUSD_Logo_%282%29.png",
   FDUSD: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409/logo.png",
   USDG: "https://assets.coingecko.com/coins/images/38917/standard/USDG.png",
   CASHCAT: "https://cdn.dexscreener.com/cms/images/g1-yMcP4iMdm1Yr2?width=800&height=800&quality=95&format=auto",
@@ -53,15 +66,88 @@ const TOKEN_LOGOS: Record<string, string> = {
   CASHDOG: "https://cdn.dexscreener.com/cms/images/ZCcTasJqsozOQ5zI?width=800&height=800&quality=95&format=auto",
   BOW: "https://cdn.dexscreener.com/cms/images/4Xon0TNmgTw8pn76?width=800&height=800&quality=95&format=auto",
   BABYDOGE: "https://assets.coingecko.com/coins/images/16125/standard/babydoge.jpg",
+  ZORA: "https://coin-images.coingecko.com/coins/images/54693/large/zora.jpg",
+  CBETH: "https://assets.coingecko.com/coins/images/27008/large/cbeth.png",
+  EURC: "https://assets.coingecko.com/coins/images/26045/standard/euro.png",
+  WELL: "https://assets.coingecko.com/coins/images/26133/large/WELL.png",
+  AIXBT: "https://coin-images.coingecko.com/coins/images/51784/large/3.png",
+  KAITO: "https://coin-images.coingecko.com/coins/images/54411/large/Qm4DW488_400x400.jpg",
+  CLANKER: "https://coin-images.coingecko.com/coins/images/51440/large/CLANKER.png",
+  SPX: "https://coin-images.coingecko.com/coins/images/31401/large/centeredcoin_%281%29.png",
+  SYRUP: "https://coin-images.coingecko.com/coins/images/51232/large/_syrup_token_logo.png",
+  FLUID: "https://coin-images.coingecko.com/coins/images/14688/large/Frame_1686566116_%281%29_%281%29.png",
+  COW: "https://coin-images.coingecko.com/coins/images/24384/large/CoW-token_logo.png",
+  EUL: "https://coin-images.coingecko.com/coins/images/26149/large/Coingecko_logo_%281%29.png",
+  ZRO: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x6985884C4392D348587B19cb9eAAf157F13271cd/logo.png",
+  W: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0xb0ffa8000886e57f86dd5264b9582b2ad87b2b91/logo.png",
+  AXL: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x23ee2343b892b1bb63503a4fabc840e0e2c6810f/logo.png",
+  SUSHI: "https://assets.coingecko.com/coins/images/12271/standard/512x512_Logo_no_chop.png",
+  NPC: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0xb166e8b140d35d9d8226e40c09f757bac5a4d87d/logo.png",
+  TIBBIR: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0xa4a2e2ca3fbfe21aed83471d28b6f65a233c6e00/logo.png",
+  WCT: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/assets/0xef4461891dfb3ac8572ccf7c794664a8dd927945/logo.png",
+  CRV: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xD533a949740bb3306d119CC777fa900bA034cd52/logo.png",
+  COMP: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xc00e94Cb662C3520282E6f5717214004A7f26888/logo.png",
+  ENS: "https://assets.coingecko.com/coins/images/19785/standard/acatxTm8_400x400.jpg",
+  GRT: "https://assets.coingecko.com/coins/images/13397/standard/Graph_Token.png",
+  RPL: "https://coin-images.coingecko.com/coins/images/2090/large/rocket_pool_%28RPL%29.png",
+  SKY: "https://assets.coingecko.com/coins/images/39925/large/sky.jpg",
+  GRAIL: "https://assets.coingecko.com/coins/images/28416/standard/v2.png",
+  RDNT: "https://assets.coingecko.com/coins/images/26536/standard/Radiant-Logo-200x200.png",
+  LUSD: "https://assets.coingecko.com/coins/images/14666/standard/Group_3.png",
+  PNG: "https://assets.coingecko.com/coins/images/13423/standard/pangolin.jpg",
+  QI: "https://assets.coingecko.com/coins/images/16362/standard/GergDDN3_400x400.jpg",
+  COQ: "https://assets.coingecko.com/coins/images/34656/standard/coq200x200.png",
+  SAVAX: "https://assets.coingecko.com/coins/images/23657/standard/savax_blue.png",
+  XVS: "https://assets.coingecko.com/coins/images/12677/standard/XVS_Token.jpg",
+  TWT: "https://assets.coingecko.com/coins/images/11085/standard/Trust.png",
+  QUICK: "https://assets.coingecko.com/coins/images/13970/standard/1_pOU6pBMEmiL-ZJVb0CYRjQ.png",
+  SAND: "https://assets.coingecko.com/coins/images/12129/standard/sandbox_logo.jpg",
+  GHST: "https://assets.coingecko.com/coins/images/12467/standard/ghst_200.png",
+  GHO: "https://assets.coingecko.com/coins/images/30663/standard/gho-token-logo.png",
+  USDS: "https://assets.coingecko.com/coins/images/39926/large/usds.webp",
+  USDBC: "https://assets.coingecko.com/coins/images/35220/standard/USDbC.png",
+  PRIME: "https://assets.coingecko.com/coins/images/29053/large/PRIMELOGOOO.png",
+  WSTETH: "https://assets.coingecko.com/coins/images/18834/standard/wstETH.png",
+  STETH: "https://assets.coingecko.com/coins/images/13442/standard/steth_logo.png",
+  RETH: "https://assets.coingecko.com/coins/images/20764/standard/reth.png",
+  MKR: "https://assets.coingecko.com/coins/images/1364/standard/Mark_Maker.png",
+  FRAX: "https://assets.coingecko.com/coins/images/13422/standard/frax_logo.png",
+  WAVAX: "https://assets.coingecko.com/coins/images/15075/standard/wrapped-avax.png",
+  "BTC.B": "https://assets.coingecko.com/coins/images/26115/standard/btcb.png",
+  XAVA: "https://assets.coingecko.com/coins/images/14826/standard/logo_-_2021-03-31T123525.615.png",
+  BTCB: "https://assets.coingecko.com/coins/images/14108/standard/Binance-bitcoin.png",
+  LISTA: "https://assets.coingecko.com/coins/images/38023/standard/lista.png",
+  THE: "https://assets.coingecko.com/coins/images/28864/standard/thena.jpeg",
+  ALPACA: "https://assets.coingecko.com/coins/images/14165/standard/Logo200.png",
+  USDT0: "https://coin-images.coingecko.com/coins/images/53705/large/usdt0.jpg",
+  "QUICK OLD": "https://assets.coingecko.com/coins/images/13970/standard/1_pOU6pBMEmiL-ZJVb0CYRjQ.png",
   QUEENJOSHI: "/logo.png",
   KINGJOSHI: "/logo.png",
   KIND: "/logo.png",
   NBAA: "/logo.png",
 };
 
+// Keep House and creator listings visible at the top of the compact swap menu.
+// The remaining assets retain their registry order below these featured tokens.
+const FEATURED_TOKEN_ORDER = [
+  "MR_LIGHTSPEED",
+  "QUEENJOSHI",
+  "KINGJOSHI",
+  "KIND",
+  "NBAA",
+  "MAME",
+  "TREAT",
+  "OSCAR",
+] as const;
+
+const FEATURED_TOKEN_RANK = new Map<string, number>(
+  FEATURED_TOKEN_ORDER.map((symbol, index) => [symbol, index]),
+);
+
 function tokenLogo(token: Token) {
+  if (token.logo) return token.logo;
   if (token.chainId === base.id && token.symbol.toUpperCase() === "SHIB") {
-    return "/tokens/shib-base.png";
+    return "https://s2.coinmarketcap.com/static/img/coins/200x200/37553.png";
   }
   return TOKEN_LOGOS[token.symbol.toUpperCase()];
 }
@@ -70,25 +156,81 @@ export function TokenSelect({
   tokens,
   value,
   onChange,
+  allowAddressImport = false,
+  onTokenImported,
 }: {
   tokens: Token[];
   value: Token;
   onChange: (t: Token) => void;
+  allowAddressImport?: boolean;
+  onTokenImported?: (token: Token) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [isImporting, setIsImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
   const options = useMemo(
     () =>
-      tokens.map((t) => ({
-        id: tokenId(t),
-        symbol: t.symbol,
-        name: t.name,
-        token: t,
-        logo: tokenLogo(t),
-      })),
+      tokens
+        .map((t, registryIndex) => ({
+          id: tokenId(t),
+          symbol: t.symbol,
+          name: t.name,
+          token: t,
+          logo: tokenLogo(t),
+          registryIndex,
+        }))
+        .sort((a, b) => {
+          const aRank = FEATURED_TOKEN_RANK.get(a.symbol.toUpperCase());
+          const bRank = FEATURED_TOKEN_RANK.get(b.symbol.toUpperCase());
+          if (aRank !== undefined || bRank !== undefined) {
+            return (aRank ?? Number.MAX_SAFE_INTEGER) - (bRank ?? Number.MAX_SAFE_INTEGER);
+          }
+          return a.registryIndex - b.registryIndex;
+        }),
     [tokens],
   );
+  const filteredOptions = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return options;
+    return options.filter(({ symbol, name, token }) =>
+      symbol.toLowerCase().includes(normalized)
+      || name.toLowerCase().includes(normalized)
+      || token.address?.toLowerCase().includes(normalized),
+    );
+  }, [options, query]);
+
+  const importableAddress = allowAddressImport && isAddress(query.trim())
+    && !tokens.some((token) => token.address?.toLowerCase() === query.trim().toLowerCase());
+
+  async function importAddress() {
+    if (!importableAddress || isImporting) return;
+    setIsImporting(true);
+    setImportError(null);
+    try {
+      const response = await fetch("/api/xrp-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: query.trim() }),
+      });
+      const payload = await response.json() as { token?: Token; warning?: string; error?: string };
+      if (!response.ok || !payload.token) throw new Error(payload.error ?? "Unable to import token");
+      const confirmed = window.confirm(
+        `${payload.warning}\n\n${payload.token.symbol} — ${payload.token.name}\n${payload.token.address}`,
+      );
+      if (!confirmed) return;
+      onTokenImported?.(payload.token);
+      onChange(payload.token);
+      setQuery("");
+      setOpen(false);
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : "Unable to import token");
+    } finally {
+      setIsImporting(false);
+    }
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -130,7 +272,33 @@ export function TokenSelect({
           role="listbox"
           className="absolute right-0 top-full z-40 mt-2 max-h-72 min-w-[15rem] overflow-y-auto rounded-2xl border border-white/10 bg-[#151517] p-1.5 shadow-[0_22px_55px_rgba(0,0,0,0.55)]"
         >
-          {options.map((option) => {
+          <div className="sticky top-0 z-10 bg-[#151517] p-1">
+            <input
+              autoFocus
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setImportError(null);
+              }}
+              placeholder="Search name, symbol, or address"
+              className="w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-[rgba(212,175,55,0.45)]"
+            />
+            {importableAddress && (
+              <button
+                type="button"
+                onClick={importAddress}
+                disabled={isImporting}
+                className="mt-1.5 w-full rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-left text-xs font-semibold text-amber-200 hover:bg-amber-400/15 disabled:opacity-50"
+              >
+                {isImporting ? "Checking contract and liquidity…" : "Import unverified XRPL EVM token"}
+              </button>
+            )}
+            {importError && <p className="px-1 pt-1.5 text-xs text-red-300">{importError}</p>}
+            <p className="px-1 pt-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-white/35">
+              {filteredOptions.length} of {options.length} tokens
+            </p>
+          </div>
+          {filteredOptions.map((option) => {
             const selected = option.id === tokenId(value);
             return (
               <button
@@ -140,6 +308,7 @@ export function TokenSelect({
                 aria-selected={selected}
                 onClick={() => {
                   onChange(option.token);
+                  setQuery("");
                   setOpen(false);
                 }}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
@@ -152,10 +321,16 @@ export function TokenSelect({
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-semibold leading-tight">{option.symbol}</span>
                   <span className="block truncate text-xs leading-tight text-white/40">{option.name}</span>
+                  {option.token.imported && (
+                    <span className="block text-[10px] font-semibold uppercase tracking-wide text-amber-300/80">Unverified import</span>
+                  )}
                 </span>
               </button>
             );
           })}
+          {filteredOptions.length === 0 && (
+            <p className="px-3 py-5 text-center text-xs text-white/40">No matching token</p>
+          )}
         </div>
       )}
     </div>
