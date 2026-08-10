@@ -262,9 +262,12 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
                 className="flex items-center gap-2 rounded-xl border border-white/10 px-3 py-3 text-left text-sm text-white/80 hover:border-amber-300/40 hover:bg-white/5 disabled:opacity-50"
               >
                 {wallet.icon ? <Image src={wallet.icon} alt="" width={28} height={28} unoptimized className="h-7 w-7 rounded-lg" /> : <span className="h-7 w-7 rounded-lg bg-white/10" />}
-                <span>{wallet.name}</span>
+                <span>{wallet.id === "walletconnect" ? "WalletConnect (XRPL only)" : wallet.name}</span>
               </button>
             ))}
+            <p className="col-span-2 px-2 py-1 text-[10px] leading-4 text-white/40">
+              Trust Wallet can hold XRP, but does not currently expose the XRPL transaction-signing methods this swap requires through WalletConnect. Use Xaman or another wallet with XRPL dApp signing.
+            </p>
           </div>
         )}
 
