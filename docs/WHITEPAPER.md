@@ -88,6 +88,141 @@ BNB Smart Chain is an explicit production network in the House of Joshi Swap con
 
 The repository includes BNB RPC configuration, BscScan transaction and address links, BNB-specific router configuration, BNB token metadata, and Solidity contract source. The router address contains deployed bytecode on BNB Smart Chain mainnet.
 
+### 4.1 Ethereum mainnet profile
+
+| Property | Value |
+| --- | --- |
+| Network | Ethereum mainnet |
+| Chain ID | 1 |
+| Native asset | ETH |
+| Explorer | https://etherscan.io |
+| House router | `0x2C5F372746330465C3f4084CE6C6aBce22a48B4d` application fallback |
+| Current role | Swap network; execution depends on live provider and router availability |
+
+### 4.2 Optimism profile
+
+| Property | Value |
+| --- | --- |
+| Network | Optimism mainnet |
+| Chain ID | 10 |
+| Native asset | ETH |
+| Explorer | https://optimistic.etherscan.io |
+| House router | `0x2C5F372746330465C3f4084CE6C6aBce22a48B4d` configured |
+| Current role | Swap network |
+
+### 4.3 Cronos profile
+
+| Property | Value |
+| --- | --- |
+| Network | Cronos mainnet |
+| Chain ID | 25 |
+| Native asset | CRO |
+| Explorer | https://cronoscan.com |
+| House router | `0x2C5F372746330465C3f4084CE6C6aBce22a48B4d` configured |
+| Current role | Integration and token catalog; swap UI currently disabled |
+
+### 4.4 Unichain profile
+
+| Property | Value |
+| --- | --- |
+| Network | Unichain mainnet |
+| Chain ID | 130 |
+| Native asset | ETH |
+| Explorer | https://uniscan.xyz |
+| House router | `0x2C5F372746330465C3f4084CE6C6aBce22a48B4d` configured |
+| Current role | Swap network |
+
+### 4.5 Polygon profile
+
+| Property | Value |
+| --- | --- |
+| Network | Polygon mainnet |
+| Chain ID | 137 |
+| Native asset | POL |
+| Explorer | https://polygonscan.com |
+| House router | `0x2C5F372746330465C3f4084CE6C6aBce22a48B4d` configured |
+| Current role | Swap network |
+
+### 4.6 Robinhood Chain profile
+
+| Property | Value |
+| --- | --- |
+| Network | Robinhood Chain mainnet |
+| Chain ID | 4663 |
+| Native asset | ETH |
+| Explorer | https://robinhoodchain.blockscout.com |
+| House router | `0x2C5F372746330465C3f4084CE6C6aBce22a48B4d` configured |
+| Current role | Swap network |
+
+### 4.7 Base profile
+
+| Property | Value |
+| --- | --- |
+| Network | Base mainnet |
+| Chain ID | 8453 |
+| Native asset | ETH |
+| Explorer | https://basescan.org |
+| House router | `0x6aCaf964bCf4551CC55Afaf12d6e6a8ef7138875` configured |
+| Current role | Swap network and deployed House router |
+
+### 4.8 Arbitrum profile
+
+| Property | Value |
+| --- | --- |
+| Network | Arbitrum One |
+| Chain ID | 42161 |
+| Native asset | ETH |
+| Explorer | https://arbiscan.io |
+| House router | `0x2C5F372746330465C3f4084CE6C6aBce22a48B4d` configured |
+| Current role | Swap network |
+
+### 4.9 Avalanche profile
+
+| Property | Value |
+| --- | --- |
+| Network | Avalanche C-Chain mainnet |
+| Chain ID | 43114 |
+| Native asset | AVAX |
+| Explorer | https://snowtrace.io |
+| House router | `0x2C5F372746330465C3f4084CE6C6aBce22a48B4d` configured |
+| Current role | Swap network |
+
+### 4.10 XRP EVM profile
+
+| Property | Value |
+| --- | --- |
+| Network | XRP EVM mainnet |
+| Chain ID | 1440000 |
+| Native asset | XRP |
+| Explorer | https://explorer.xrplevm.org |
+| House router | No EVM House router currently configured |
+| Current role | Configured EVM network; execution depends on routing availability |
+
+### 4.11 Zora profile
+
+| Property | Value |
+| --- | --- |
+| Network | Zora mainnet |
+| Chain ID | 7777777 |
+| Native asset | ETH |
+| Explorer | https://explorer.zora.energy |
+| House router | No House router configured |
+| Current role | Token discovery and catalog; swap execution disabled |
+
+### 4.12 Native XRP Ledger profile
+
+| Property | Value |
+| --- | --- |
+| Network | XRP Ledger mainnet |
+| Chain ID | Native ledger; no EVM chain ID |
+| Native asset | XRP |
+| Explorer | https://livenet.xrpl.org |
+| House contract | Not applicable; XRPL uses native transactions rather than an EVM router |
+| House fee destination | `rUG7tHZ5sGCVxuhkAiL9fUqVFhki2Z6bVU` |
+| Current role | Native XRPL swap experience |
+
+The word "configured" identifies the address selected by the application configuration. It does not by itself guarantee that a contract remains available, verified, approved for every liquidity provider, or executable for every asset pair. Users and directory reviewers should confirm current bytecode and verification independently on the relevant explorer.
+
 ## 5. System architecture
 
 ### 5.1 Client application

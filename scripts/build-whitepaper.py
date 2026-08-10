@@ -207,7 +207,10 @@ def build_story(markdown):
             while i < len(lines) and lines[i].strip().startswith("|"):
                 block.append(lines[i].strip())
                 i += 1
-            story.extend([Spacer(1, 2 * mm), KeepTogether([parse_table(block)]), Spacer(1, 4 * mm)])
+            table_block = [parse_table(block)]
+            if story and isinstance(story[-1], Paragraph) and story[-1].style.name == "H2":
+                table_block = [story.pop(), Spacer(1, 1 * mm), table_block[0]]
+            story.extend([KeepTogether(table_block), Spacer(1, 4 * mm)])
             continue
         if line.startswith("## "):
             title = line[3:]
