@@ -38,6 +38,7 @@ contract HojswapRouterV2 {
     }
 
     address public owner;
+    address public pendingOwner;
     address public houseWallet;
     bool public paused;
     bool private locked;
@@ -48,6 +49,7 @@ contract HojswapRouterV2 {
     uint256[] private destinationChainIds;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed nextOwner);
+    event OwnershipTransferStarted(address indexed currentOwner, address indexed pendingOwner);
     event HouseWalletUpdated(address indexed previousWallet, address indexed nextWallet);
     event PauseStatusUpdated(bool paused);
     event RouterSpenderApprovalUpdated(address indexed router, address indexed spender, bool approved);
@@ -73,6 +75,7 @@ contract HojswapRouterV2 {
     event AssetsRescued(address indexed token, address indexed to, uint256 amount);
 
     error NotOwner();
+    error NotPendingOwner();
     error ReentrantCall();
     error ContractPaused();
     error ZeroAddress();
@@ -129,15 +132,24 @@ contract HojswapRouterV2 {
         _setDestinationChainSupport(8453, true); // Base
         _setDestinationChainSupport(42161, true); // Arbitrum
         _setDestinationChainSupport(43114, true); // Avalanche
-        _setDestinationChainSupport(1440002, true); // XRP EVM
+        _setDestinationChainSupport(1440000, true); // XRP EVM
+        _setDestinationChainSupport(7777777, true); // Zora
     }
 
     receive() external payable {}
 
     function transferOwnership(address nextOwner) external onlyOwner {
         if (nextOwner == address(0)) revert ZeroAddress();
-        emit OwnershipTransferred(owner, nextOwner);
-        owner = nextOwner;
+        pendingOwner = nextOwner;
+        emit OwnershipTransferStarted(owner, nextOwner);
+    }
+
+    function acceptOwnership() external {
+        if (msg.sender != pendingOwner) revert NotPendingOwner();
+        address previousOwner = owner;
+        owner = msg.sender;
+        pendingOwner = address(0);
+        emit OwnershipTransferred(previousOwner, msg.sender);
     }
 
     function setHouseWallet(address nextHouseWallet) external onlyOwner {

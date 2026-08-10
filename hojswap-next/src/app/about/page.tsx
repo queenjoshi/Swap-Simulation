@@ -1,7 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { TokenLogo } from "@/components/TokenLogo";
+import { CHAIN_OPTIONS } from "@/lib/chains";
+import { TOKENS } from "@/lib/tokens";
 
 type Token = {
+  address?: `0x${string}`;
+  chainId?: number;
   symbol: string;
   name: string;
   logo?: string;
@@ -9,7 +16,7 @@ type Token = {
 
 const HOUSE_LOGO = "/logo.png";
 
-const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = [
+const curatedTokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = [
   {
     title: "Base Community",
     eyebrow: "Base",
@@ -20,10 +27,28 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "cbBTC", name: "Coinbase Wrapped BTC", logo: "https://assets.coingecko.com/coins/images/40143/standard/cbbtc.webp" },
       { symbol: "AERO", name: "Aerodrome Finance", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x940181a94A35A4569E4529A3CDfB74e38FD98631/logo.png" },
       { symbol: "BRETT", name: "Brett", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x532f27101965dd16442E59d40670FaF5eBB142E4/logo.png" },
-      { symbol: "SHIB", name: "SchismaticShib", logo: "/tokens/shib-base.png" },
+      {
+        symbol: "SHIB",
+        name: "SchismaticShib",
+        logo: "https://s2.coinmarketcap.com/static/img/coins/200x200/37553.png",
+      },
       { symbol: "MOG", name: "Mog Coin", logo: "/tokens/mog.png" },
       { symbol: "TOSHI", name: "Toshi", logo: "/tokens/toshi.png" },
       { symbol: "VIRTUAL", name: "Virtuals Protocol", logo: "https://assets.coingecko.com/coins/images/34057/standard/LOGOMARK.png" },
+      { symbol: "MORPHO", name: "Morpho", logo: "https://assets.coingecko.com/coins/images/29837/standard/Morpho-token-icon.png" },
+      { symbol: "DEGEN", name: "Degen", logo: "https://assets.coingecko.com/coins/images/34515/standard/android-chrome-512x512.png" },
+      { symbol: "mr_lightspeed", name: "Mr. Lightspeed Creator Coin", logo: "https://scontent-iad4-1.choicecdn.com/-/rs:fit:600:600/f:best/aHR0cHM6Ly9tYWdpYy5kZWNlbnRyYWxpemVkLWNvbnRlbnQuY29tL2lwZnMvYmFmeWJlaWEzZXVpN29tamNmaG41enIyNDIzdGdtbG9kYm5kcm03bWQ0aWJ2bTVueGticnlpZmlzNjQ=" },
+      { symbol: "SPX", name: "SPX6900", logo: "https://coin-images.coingecko.com/coins/images/31401/large/centeredcoin_%281%29.png" },
+      { symbol: "SYRUP", name: "Maple Finance", logo: "https://coin-images.coingecko.com/coins/images/51232/large/_syrup_token_logo.png" },
+      { symbol: "FLUID", name: "Fluid", logo: "https://coin-images.coingecko.com/coins/images/14688/large/Frame_1686566116_%281%29_%281%29.png" },
+      { symbol: "COW", name: "CoW Protocol", logo: "https://coin-images.coingecko.com/coins/images/24384/large/CoW-token_logo.png" },
+      { symbol: "EUL", name: "Euler", logo: "https://coin-images.coingecko.com/coins/images/26149/large/Coingecko_logo_%281%29.png" },
+      { symbol: "ZRO", name: "LayerZero", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x6985884C4392D348587B19cb9eAAf157F13271cd/logo.png" },
+      { symbol: "W", name: "Wormhole", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0xb0ffa8000886e57f86dd5264b9582b2ad87b2b91/logo.png" },
+      { symbol: "AXL", name: "Axelar", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x23ee2343b892b1bb63503a4fabc840e0e2c6810f/logo.png" },
+      { symbol: "SUSHI", name: "Sushi", logo: "https://assets.coingecko.com/coins/images/12271/standard/512x512_Logo_no_chop.png" },
+      { symbol: "NPC", name: "Non-Playable Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0xb166e8b140d35d9d8226e40c09f757bac5a4d87d/logo.png" },
+      { symbol: "TIBBIR", name: "Ribbita by Virtuals", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0xa4a2e2ca3fbfe21aed83471d28b6f65a233c6e00/logo.png" },
     ],
   },
   {
@@ -43,6 +68,13 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "AAVE", name: "Aave", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9/logo.png" },
       { symbol: "PEPE", name: "Pepe", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6982508145454Ce325dDbE47a25d4ec3d2311933/logo.png" },
       { symbol: "FLOKI", name: "FLOKI", logo: "/tokens/floki.png" },
+      { symbol: "ONDO", name: "Ondo", logo: "https://assets.coingecko.com/coins/images/26580/standard/ONDO.png" },
+      { symbol: "ENA", name: "Ethena", logo: "https://assets.coingecko.com/coins/images/36530/standard/ethena.png" },
+      { symbol: "USDe", name: "Ethena USDe", logo: "https://assets.coingecko.com/coins/images/33613/standard/usde.png" },
+      { symbol: "PENDLE", name: "Pendle", logo: "https://assets.coingecko.com/coins/images/15069/standard/Pendle_Logo_Normal-03.png" },
+      { symbol: "LDO", name: "Lido DAO", logo: "https://assets.coingecko.com/coins/images/13573/standard/Lido_DAO.png" },
+      { symbol: "EIGEN", name: "EigenLayer", logo: "https://assets.coingecko.com/coins/images/37441/standard/eigenlayer.png" },
+      { symbol: "PYUSD", name: "PayPal USD", logo: "https://assets.coingecko.com/coins/images/31212/standard/PYUSD_Logo_%282%29.png" },
     ],
   },
   {
@@ -93,6 +125,7 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "WBTC", name: "Wrapped BTC", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png" },
       { symbol: "GMX", name: "GMX", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a/logo.png" },
       { symbol: "MAGIC", name: "MAGIC", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0x539bdE0d7Dbd336b79148AA742883198BBF60342/logo.png" },
+      { symbol: "PENDLE", name: "Pendle", logo: "https://assets.coingecko.com/coins/images/15069/standard/Pendle_Logo_Normal-03.png" },
     ],
   },
   {
@@ -106,6 +139,8 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "USDT", name: "Tether USD", logo: "https://assets.coingecko.com/coins/images/325/standard/Tether.png" },
       { symbol: "SNX", name: "Synthetix Network", logo: "https://assets.coingecko.com/coins/images/3406/standard/SNX.png" },
       { symbol: "VELO", name: "Velodrome", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/assets/0x9560e827aF36c94D2Ac33a39bCE1Fe78631088Db/logo.png" },
+      { symbol: "WLD", name: "World", logo: "https://assets.coingecko.com/coins/images/31069/standard/worldcoin.jpeg" },
+      { symbol: "WCT", name: "WalletConnect Token", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/assets/0xef4461891dfb3ac8572ccf7c794664a8dd927945/logo.png" },
     ],
   },
   {
@@ -117,6 +152,7 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       { symbol: "USDT", name: "Tether USD", logo: "https://assets.coingecko.com/coins/images/325/standard/Tether.png" },
       { symbol: "WETH", name: "Wrapped Ether", logo: "https://assets.coingecko.com/coins/images/2518/standard/weth.png" },
       { symbol: "WBTC", name: "Wrapped BTC", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png" },
+      { symbol: "JOE", name: "JoeToken", logo: "https://assets.coingecko.com/coins/images/17569/standard/traderjoe.png" },
     ],
   },
   {
@@ -153,6 +189,7 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
     tokens: [
       { symbol: "CRO", name: "Cronos", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/cronos/info/logo.png" },
       { symbol: "XRP", name: "XRP", logo: "/tokens/xrp.png" },
+      { symbol: "RLUSD", name: "Ripple USD", logo: "https://coin-images.coingecko.com/coins/images/39651/large/RLUSD_200x200_%281%29.png" },
       { symbol: "KIND", name: "Kindred", logo: HOUSE_LOGO },
       { symbol: "NBAA", name: "NBAA", logo: HOUSE_LOGO },
       { symbol: "POL", name: "Polygon", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png" },
@@ -163,27 +200,99 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
   },
 ];
 
+const curatedLogos = new Map(
+  curatedTokenGroups.flatMap((group) =>
+    group.tokens
+      .filter((token) => token.logo)
+      .map((token) => [token.symbol.toUpperCase(), token.logo] as const),
+  ),
+);
+
+// Keep this page in sync with the swap registry instead of maintaining a
+// second, incomplete token list by hand.
+const tokenGroups = CHAIN_OPTIONS.map((chain) => ({
+  title: `${chain.label} Tokens`,
+  eyebrow: chain.label,
+  tokens: TOKENS
+    .filter((token) => token.chainId === chain.id)
+    .map((token) => ({
+      symbol: token.symbol,
+      name: token.name,
+      logo: token.logo ?? curatedLogos.get(token.symbol.toUpperCase()),
+      address: token.address,
+      chainId: token.chainId,
+    })),
+})).filter((group) => group.tokens.length > 0);
+
 const networks = [
-  { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity for SHIB, BONE, TREAT, OSCAR, BNB, MAME, WETH, DAI, LINK, UNI, AAVE, PEPE, FLOKI, USDC, USDT, and ETH." },
-  { name: "Base", badge: "Swap + Bridge", desc: "Home for QUEENJOSHI, KINGJOSHI, SHIB, WETH, cbBTC, AERO, BRETT, MOG, TOSHI, and VIRTUAL with faster, lower-cost trading." },
+  { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity including ONDO, ENA, USDe, PENDLE, LDO, EIGEN, PYUSD, blue chips, community tokens, and stablecoins." },
+  { name: "Base", badge: "Swap + Bridge", desc: "Home for mr_lightspeed and its live Zora post-coin catalog, MORPHO, DEGEN, VIRTUAL, AERO, House of Joshi tokens, and core assets." },
+  { name: "Zora", badge: "Token Catalog", desc: "Chain-aware discovery for creator and content coins deployed on Zora Network. Modern Zora coins deployed on Base remain listed under Base." },
   { name: "Polygon", badge: "Swap", desc: "POL, WETH, WBTC, USDC, USDT, AAVE, LINK, and DAI routed through 0x liquidity." },
   { name: "BNB Chain", badge: "Swap", desc: "BNB, USDT, USDC, DOGE, FDUSD, CAKE, and BabyDoge through 0x liquidity." },
-  { name: "Arbitrum", badge: "Swap", desc: "ARB, ETH, USDC, WETH, USDT, WBTC, GMX, and MAGIC across Ethereum L2 liquidity." },
-  { name: "Optimism", badge: "Swap", desc: "OP, ETH, USDC, WETH, USDT, SNX, and VELO across Ethereum L2 liquidity." },
-  { name: "Avalanche", badge: "Swap", desc: "AVAX, USDC, USDT, WETH, and WBTC on Avalanche C-Chain." },
+  { name: "Arbitrum", badge: "Swap", desc: "ARB, PENDLE, ETH, stablecoins, GMX, MAGIC, and wrapped assets across Ethereum L2 liquidity." },
+  { name: "Optimism", badge: "Swap", desc: "OP, WLD, ETH, stablecoins, SNX, and VELO across Ethereum L2 liquidity." },
+  { name: "Avalanche", badge: "Swap", desc: "AVAX, JOE, stablecoins, WETH, and WBTC on Avalanche C-Chain." },
   { name: "Unichain", badge: "Swap", desc: "ETH, WETH, and USDC on Unichain for new Uniswap-native liquidity." },
   { name: "Robinhood Chain", badge: "Swap", desc: "ETH, WETH, USDG, CASHCAT, VEX, HOODRAT, JUGGERNAUT, MYSTERY, ARROW, VIBE CAT, ROBIN, CashDog, and BOW through 0x liquidity." },
   { name: "Cronos", badge: "Bridge", desc: "USDC, USDT, and ETH routes via Li.Fi between Ethereum, Base, and Cronos." },
   { name: "XRP Ledger EVM", badge: "Coming Soon", desc: "Listed for network continuity while swap and bridge routes mature." },
 ];
 
-const highlights = [
-  { value: "11", label: "Supported chains" },
-  { value: "85", label: "Shown assets" },
-  { value: "1%", label: "House fee" },
-];
-
 export default function About() {
+  const [lightspeedTokens, setLightspeedTokens] = useState<Token[]>([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const loadLightspeedTokens = async () => {
+      for (let attempt = 1; attempt <= 4; attempt += 1) {
+        try {
+          const response = await fetch("/api/zora-profile-tokens", {
+            cache: "no-store",
+            signal: controller.signal,
+          });
+          if (!response.ok) throw new Error(`Profile token API ${response.status}`);
+          const tokens = await response.json() as Token[];
+          if (!Array.isArray(tokens) || tokens.length === 0) {
+            throw new Error("Profile token API returned no tokens");
+          }
+          setLightspeedTokens(tokens);
+          return;
+        } catch (error) {
+          if (controller.signal.aborted) return;
+          if (attempt === 4) {
+            console.error("Error loading Lightspeed tokens on About:", error);
+            return;
+          }
+          await new Promise((resolve) => setTimeout(resolve, attempt * 1_000));
+        }
+      }
+    };
+    void loadLightspeedTokens();
+    return () => controller.abort();
+  }, []);
+
+  const displayedTokenGroups = useMemo(() => tokenGroups.map((group) => {
+    if (group.eyebrow !== "Base" || lightspeedTokens.length === 0) return group;
+    const tokensById = new Map<string, Token>(
+      group.tokens.map((token) => [token.address?.toLowerCase() ?? token.symbol.toLowerCase(), token]),
+    );
+    for (const token of lightspeedTokens.filter((token) => token.chainId === 8453)) {
+      const id = token.address?.toLowerCase() ?? token.symbol.toLowerCase();
+      if (!tokensById.has(id)) tokensById.set(id, token);
+    }
+    return { ...group, tokens: Array.from(tokensById.values()) };
+  }), [lightspeedTokens]);
+
+  const highlights = useMemo(() => [
+    { value: String(CHAIN_OPTIONS.length), label: "Supported chains" },
+    {
+      value: String(displayedTokenGroups.reduce((total, group) => total + group.tokens.length, 0)),
+      label: "Shown assets",
+    },
+    { value: "1%", label: "House fee" },
+  ], [displayedTokenGroups]);
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
       <section className="mb-10 grid gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -195,7 +304,7 @@ export default function About() {
             House of Joshi across every chain that matters.
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-white/66 sm:text-base">
-            Trade community tokens, blue-chip assets, stablecoins, and chain-native coins across 10 supported networks from one non-custodial interface.
+            Trade and discover community tokens, blue-chip assets, stablecoins, and chain-native coins across 12 supported networks from one non-custodial interface.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
@@ -251,7 +360,7 @@ export default function About() {
           title="Logo-first token coverage"
         />
         <div className="grid gap-4 lg:grid-cols-2">
-          {tokenGroups.map((group) => (
+          {displayedTokenGroups.map((group) => (
             <div key={group.title} className="hoj-panel rounded-2xl p-5">
               <div className="mb-4 flex items-end justify-between gap-3">
                 <div>
@@ -262,7 +371,7 @@ export default function About() {
               </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {group.tokens.map((token) => (
-                  <TokenTile key={`${group.title}-${token.symbol}`} {...token} />
+                  <TokenTile key={`${group.title}-${token.address ?? token.symbol}`} {...token} />
                 ))}
               </div>
             </div>

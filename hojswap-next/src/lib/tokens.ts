@@ -1,6 +1,6 @@
 import { getAddress } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp } from "@/lib/chains";
+import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp, zora } from "@/lib/chains";
 
 export type Token = {
   symbol: string;
@@ -8,6 +8,8 @@ export type Token = {
   address?: `0x${string}`;
   decimals?: number;
   chainId: number;
+  logo?: string;
+  imported?: boolean;
 };
 
 export const HOUSE_WALLET: `0x${string}` = getAddress(
@@ -67,6 +69,38 @@ export const TOKENS: Token[] = [
     decimals: 8,
   },
   {
+    symbol: "cbXRP",
+    name: "Coinbase Wrapped XRP",
+    address: getAddress("0xcb585250f852c6c6bf90434ab21a00f02833a4af"),
+    chainId: base.id,
+    decimals: 6,
+    logo: "/tokens/xrp.png",
+  },
+  {
+    symbol: "cbDOGE",
+    name: "Coinbase Wrapped DOGE",
+    address: getAddress("0xcbd06e5a2b0c65597161de254aa074e489deb510"),
+    chainId: base.id,
+    decimals: 8,
+    logo: "https://assets.coingecko.com/coins/images/5/standard/dogecoin.png",
+  },
+  {
+    symbol: "cbLTC",
+    name: "Coinbase Wrapped LTC",
+    address: getAddress("0xcb17c9db87b595717c857a08468793f5bab6445f"),
+    chainId: base.id,
+    decimals: 8,
+    logo: "https://assets.coingecko.com/coins/images/1/standard/litecoin.png",
+  },
+  {
+    symbol: "cbADA",
+    name: "Coinbase Wrapped ADA",
+    address: getAddress("0xcbada732173e39521cdbe8bf59a6dc85a9fc7b8c"),
+    chainId: base.id,
+    decimals: 6,
+    logo: "https://assets.coingecko.com/coins/images/975/standard/cardano.png",
+  },
+  {
     symbol: "QUEENJOSHI",
     name: "Queen Joshi",
     address: getAddress("0x1f2f727f043e5f92371f853084242a3584c70aa5"),
@@ -81,11 +115,20 @@ export const TOKENS: Token[] = [
     decimals: 18,
   },
   {
+    symbol: "TOTEM",
+    name: "Totem",
+    address: getAddress("0x0f8ac22b85076f9bfe0b93cc49fb6426cb150f88"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://www.totemprotocol.io/logo.png",
+  },
+  {
     symbol: "SHIB",
     name: "SchismaticShib",
     address: getAddress("0xFCa95aeb5bF44aE355806A5ad14659c940dC6BF7"),
     chainId: base.id,
     decimals: 9,
+    logo: "https://s2.coinmarketcap.com/static/img/coins/200x200/37553.png",
   },
   {
     symbol: "AERO",
@@ -121,6 +164,172 @@ export const TOKENS: Token[] = [
     address: getAddress("0x0b3e328455c4059eeb9e3f84b5543f74e24e7e1b"),
     chainId: base.id,
     decimals: 18,
+  },
+  {
+    symbol: "MORPHO",
+    name: "Morpho",
+    address: getAddress("0xbaa5cc21fd487b8fcc2f632f3f4e8d37262a0842"),
+    chainId: base.id,
+    decimals: 18,
+  },
+  {
+    symbol: "DEGEN",
+    name: "Degen",
+    address: getAddress("0x4ed4e862860bed51a9570b96d89af5e1b0efefed"),
+    chainId: base.id,
+    decimals: 18,
+  },
+  {
+    symbol: "mr_lightspeed",
+    name: "Mr. Lightspeed Creator Coin",
+    address: getAddress("0xf0cb96a4011a0a6f73d100c7080bf8020d10f87a"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "/tokens/mr-lightspeed.jpg",
+  },
+  {
+    symbol: "ZORA",
+    name: "Zora",
+    address: getAddress("0x1111111111166b7FE7bd91427724B487980aFc69"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/54693/large/zora.jpg",
+  },
+  {
+    symbol: "cbETH",
+    name: "Coinbase Wrapped Staked ETH",
+    address: getAddress("0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://assets.coingecko.com/coins/images/27008/large/cbeth.png",
+  },
+  {
+    symbol: "EURC",
+    name: "EURC",
+    address: getAddress("0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42"),
+    chainId: base.id,
+    decimals: 6,
+    logo: "https://assets.coingecko.com/coins/images/26045/standard/euro.png",
+  },
+  {
+    symbol: "WELL",
+    name: "Moonwell",
+    address: getAddress("0xA88594D404727625A9437C3f886C7643872296AE"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://assets.coingecko.com/coins/images/26133/large/WELL.png",
+  },
+  {
+    symbol: "AIXBT",
+    name: "aixbt by Virtuals",
+    address: getAddress("0x4F9Fd6Be4a90f2620860d680c0d4d5Fb53d1A825"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/51784/large/3.png",
+  },
+  {
+    symbol: "KAITO",
+    name: "Kaito",
+    address: getAddress("0x98d0baa52b2D063E780DE12F615f963Fe8537553"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/54411/large/Qm4DW488_400x400.jpg",
+  },
+  {
+    symbol: "CLANKER",
+    name: "tokenbot",
+    address: getAddress("0x1bc0c42215582d5A085795f4baDbaC3ff36d1Bcb"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/51440/large/CLANKER.png",
+  },
+  {
+    symbol: "SPX",
+    name: "SPX6900",
+    address: getAddress("0x50da645f148798f68ef2d7db7c1cb22a6819bb2c"),
+    chainId: base.id,
+    decimals: 8,
+    logo: "https://coin-images.coingecko.com/coins/images/31401/large/centeredcoin_%281%29.png",
+  },
+  {
+    symbol: "SYRUP",
+    name: "Maple Finance",
+    address: getAddress("0x688aee022aa544f150678b8e5720b6b96a9e9a2f"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/51232/large/_syrup_token_logo.png",
+  },
+  {
+    symbol: "FLUID",
+    name: "Fluid",
+    address: getAddress("0x61e030a56d33e8260fdd81f03b162a79fe3449cd"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/14688/large/Frame_1686566116_%281%29_%281%29.png",
+  },
+  {
+    symbol: "COW",
+    name: "CoW Protocol",
+    address: getAddress("0xc694a91e6b071bf030a18bd3053a7fe09b6dae69"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/24384/large/CoW-token_logo.png",
+  },
+  {
+    symbol: "EUL",
+    name: "Euler",
+    address: getAddress("0xa153ad732f831a79b5575fa02e793ec4e99181b0"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/26149/large/Coingecko_logo_%281%29.png",
+  },
+  {
+    symbol: "ZRO",
+    name: "LayerZero",
+    address: getAddress("0x6985884c4392d348587b19cb9eaaf157f13271cd"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x6985884C4392D348587B19cb9eAAf157F13271cd/logo.png",
+  },
+  {
+    symbol: "W",
+    name: "Wormhole",
+    address: getAddress("0xb0ffa8000886e57f86dd5264b9582b2ad87b2b91"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0xb0ffa8000886e57f86dd5264b9582b2ad87b2b91/logo.png",
+  },
+  {
+    symbol: "AXL",
+    name: "Axelar",
+    address: getAddress("0x23ee2343b892b1bb63503a4fabc840e0e2c6810f"),
+    chainId: base.id,
+    decimals: 6,
+    logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x23ee2343b892b1bb63503a4fabc840e0e2c6810f/logo.png",
+  },
+  {
+    symbol: "SUSHI",
+    name: "Sushi",
+    address: getAddress("0x7d49a065d17d6d4a55dc13649901fdbb98b2afba"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://assets.coingecko.com/coins/images/12271/standard/512x512_Logo_no_chop.png",
+  },
+  {
+    symbol: "NPC",
+    name: "Non-Playable Coin",
+    address: getAddress("0xb166e8b140d35d9d8226e40c09f757bac5a4d87d"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0xb166e8b140d35d9d8226e40c09f757bac5a4d87d/logo.png",
+  },
+  {
+    symbol: "TIBBIR",
+    name: "Ribbita by Virtuals",
+    address: getAddress("0xa4a2e2ca3fbfe21aed83471d28b6f65a233c6e00"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0xa4a2e2ca3fbfe21aed83471d28b6f65a233c6e00/logo.png",
   },
 
   // ─── Ethereum mainnet ────────────────────────────────────
@@ -222,6 +431,46 @@ export const TOKENS: Token[] = [
     decimals: 18,
   },
   {
+    symbol: "1INCH",
+    name: "1inch",
+    address: getAddress("0x111111111117dc0aa78b770fa6a738034120c302"),
+    chainId: mainnet.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/13469/large/1inch-logo.jpeg",
+  },
+  {
+    symbol: "YFI",
+    name: "yearn.finance",
+    address: getAddress("0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e"),
+    chainId: mainnet.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/11849/large/yearn.jpg",
+  },
+  {
+    symbol: "BAL",
+    name: "Balancer",
+    address: getAddress("0xba100000625a3754423978a60c9317c58a424e3d"),
+    chainId: mainnet.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/11683/large/Balancer.png",
+  },
+  {
+    symbol: "CVX",
+    name: "Convex Finance",
+    address: getAddress("0x4e3fbd56cd56c3e72c1403e103b45db9da5b9d2b"),
+    chainId: mainnet.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/15585/large/convex.png",
+  },
+  {
+    symbol: "GNO",
+    name: "Gnosis",
+    address: getAddress("0x6810e776880c02933d47db1b9fc05908e5386b96"),
+    chainId: mainnet.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/662/large/logo_square_simple_300px.png",
+  },
+  {
     symbol: "PEPE",
     name: "Pepe",
     address: getAddress("0x6982508145454Ce325dDbE47a25d4ec3d2311933"),
@@ -234,6 +483,104 @@ export const TOKENS: Token[] = [
     address: getAddress("0xcf0c122c6b73ff809c693db761e7baebe62b6a2e"),
     chainId: mainnet.id,
     decimals: 9,
+  },
+  {
+    symbol: "ONDO",
+    name: "Ondo",
+    address: getAddress("0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "ENA",
+    name: "Ethena",
+    address: getAddress("0x57e114b691db790c35207b2e685d4a43181e6061"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "USDe",
+    name: "Ethena USDe",
+    address: getAddress("0x4c9edd5852cd905f086c759e8383e09bff1e68b3"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "PENDLE",
+    name: "Pendle",
+    address: getAddress("0x808507121b80c02388fad14726482e061b8da827"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "LDO",
+    name: "Lido DAO",
+    address: getAddress("0x5a98fcbea516cf06857215779fd812ca3bef1b32"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "EIGEN",
+    name: "EigenLayer",
+    address: getAddress("0xec53bf9167f50cdeb3ae105f56099aaab9061f83"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "PYUSD",
+    name: "PayPal USD",
+    address: getAddress("0x6c3ea9036406852006290770bedfcaba0e23a0e8"),
+    chainId: mainnet.id,
+    decimals: 6,
+  },
+  {
+    symbol: "WBTC",
+    name: "Wrapped BTC",
+    address: getAddress("0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"),
+    chainId: mainnet.id,
+    decimals: 8,
+  },
+  {
+    symbol: "CRV",
+    name: "Curve DAO",
+    address: getAddress("0xD533a949740bb3306d119CC777fa900bA034cd52"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "COMP",
+    name: "Compound",
+    address: getAddress("0xc00e94Cb662C3520282E6f5717214004A7f26888"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "ENS",
+    name: "Ethereum Name Service",
+    address: getAddress("0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "GRT",
+    name: "The Graph",
+    address: getAddress("0xc944E90C64B2c07662A292be6244BDf05Cda44a7"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "RPL",
+    name: "Rocket Pool",
+    address: getAddress("0xD33526068D116cE69F19A9ee46F0bd304F21A51f"),
+    chainId: mainnet.id,
+    decimals: 18,
+  },
+  {
+    symbol: "SKY",
+    name: "Sky",
+    address: getAddress("0x56072C95FAA701256059aa122697B133aDEd9279"),
+    chainId: mainnet.id,
+    decimals: 18,
   },
 
   // ─── Cronos ─────────────────────────────────────────────
@@ -310,7 +657,7 @@ export const TOKENS: Token[] = [
   {
     symbol: "WBTC",
     name: "Wrapped BTC",
-    address: getAddress("0x1BFD62B7D66453f26932296AB7c5409E839A7656"),
+    address: getAddress("0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6"),
     chainId: polygon.id,
     decimals: 8,
   },
@@ -332,6 +679,27 @@ export const TOKENS: Token[] = [
     symbol: "DAI",
     name: "Dai Stablecoin",
     address: getAddress("0x8f3cf7ad23cd3cadbd9735aff958023239c6a063"),
+    chainId: polygon.id,
+    decimals: 18,
+  },
+  {
+    symbol: "QUICK",
+    name: "QuickSwap",
+    address: getAddress("0xB5C064F955D8e7F38fE0460C556a72987494eE17"),
+    chainId: polygon.id,
+    decimals: 18,
+  },
+  {
+    symbol: "SAND",
+    name: "The Sandbox",
+    address: getAddress("0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683"),
+    chainId: polygon.id,
+    decimals: 18,
+  },
+  {
+    symbol: "GHST",
+    name: "Aavegotchi",
+    address: getAddress("0x385Eeac5cB85A38A9a07A70c73eA0eE1bC732679"),
     chainId: polygon.id,
     decimals: 18,
   },
@@ -384,6 +752,27 @@ export const TOKENS: Token[] = [
     address: getAddress("0xc748673057861a797275CD8A068AbB95A902e8de"),
     chainId: bsc.id,
     decimals: 9,
+  },
+  {
+    symbol: "FLOKI",
+    name: "FLOKI",
+    address: getAddress("0xfb5B838b6cfEEdC2873aB27866079AC55363D37E"),
+    chainId: bsc.id,
+    decimals: 9,
+  },
+  {
+    symbol: "XVS",
+    name: "Venus",
+    address: getAddress("0xcf6bb5389c92bdda8a3747ddb454cb7a64626c63"),
+    chainId: bsc.id,
+    decimals: 18,
+  },
+  {
+    symbol: "TWT",
+    name: "Trust Wallet Token",
+    address: getAddress("0x4B0F1812e5Df2A09796481Ff14017e6005508003"),
+    chainId: bsc.id,
+    decimals: 18,
   },
 
   // ─── Arbitrum ────────────────────────────────────────────
@@ -442,6 +831,27 @@ export const TOKENS: Token[] = [
     chainId: arbitrum.id,
     decimals: 18,
   },
+  {
+    symbol: "PENDLE",
+    name: "Pendle",
+    address: getAddress("0x0c880f6761f1af8d9aa9c466984b80dab9a8c9e8"),
+    chainId: arbitrum.id,
+    decimals: 18,
+  },
+  {
+    symbol: "GRAIL",
+    name: "Camelot Token",
+    address: getAddress("0x3d9907F9a368ad0a51Be60f7Da3b97cf940982D8"),
+    chainId: arbitrum.id,
+    decimals: 18,
+  },
+  {
+    symbol: "RDNT",
+    name: "Radiant Capital",
+    address: getAddress("0x3082CC23568eA640225c2467653dB90e9250AaA0"),
+    chainId: arbitrum.id,
+    decimals: 18,
+  },
 
   // ─── Optimism ────────────────────────────────────────────
   {
@@ -460,7 +870,7 @@ export const TOKENS: Token[] = [
   {
     symbol: "USDC",
     name: "USD Coin",
-    address: getAddress("0x0b2C639c533813f4Aa9D7837CAe62653423a6504"),
+    address: getAddress("0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"),
     chainId: optimism.id,
     decimals: 6,
   },
@@ -491,6 +901,28 @@ export const TOKENS: Token[] = [
     address: getAddress("0x9560e827aF36c94D2Ac33a39bCE1Fe78631088Db"),
     chainId: optimism.id,
     decimals: 18,
+  },
+  {
+    symbol: "WLD",
+    name: "World",
+    address: getAddress("0xdc6ff44d5d932cbd77b52e5612ba0529dc6226f1"),
+    chainId: optimism.id,
+    decimals: 18,
+  },
+  {
+    symbol: "LUSD",
+    name: "Liquity USD",
+    address: getAddress("0xc40F949F8a4e094D1b49a23ea9241D289B7b2819"),
+    chainId: optimism.id,
+    decimals: 18,
+  },
+  {
+    symbol: "WCT",
+    name: "WalletConnect Token",
+    address: getAddress("0xef4461891dfb3ac8572ccf7c794664a8dd927945"),
+    chainId: optimism.id,
+    decimals: 18,
+    logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/assets/0xef4461891dfb3ac8572ccf7c794664a8dd927945/logo.png",
   },
 
   // ─── Avalanche ──────────────────────────────────────────
@@ -528,6 +960,41 @@ export const TOKENS: Token[] = [
     chainId: avalanche.id,
     decimals: 8,
   },
+  {
+    symbol: "JOE",
+    name: "JoeToken",
+    address: getAddress("0x6e84a6216ea6dacc71ee8e6b0a5b7322eebc0fdd"),
+    chainId: avalanche.id,
+    decimals: 18,
+  },
+  {
+    symbol: "PNG",
+    name: "Pangolin",
+    address: getAddress("0x60781C2586D68229fde47564546784ab3fACA982"),
+    chainId: avalanche.id,
+    decimals: 18,
+  },
+  {
+    symbol: "QI",
+    name: "BENQI",
+    address: getAddress("0x8729438Eb15e2C8B576fCc6AeCdA6A148776C0F5"),
+    chainId: avalanche.id,
+    decimals: 18,
+  },
+  {
+    symbol: "COQ",
+    name: "Coq Inu",
+    address: getAddress("0x420FcA0121DC28039145009570975747295f2329"),
+    chainId: avalanche.id,
+    decimals: 18,
+  },
+  {
+    symbol: "sAVAX",
+    name: "BENQI Liquid Staked AVAX",
+    address: getAddress("0x2b2C81e08f1Af8835a78Bb2A90AE924ACE0eA4bE"),
+    chainId: avalanche.id,
+    decimals: 18,
+  },
 
   // ─── Unichain ───────────────────────────────────────────
   {
@@ -549,6 +1016,13 @@ export const TOKENS: Token[] = [
     address: getAddress("0x078d782b760474a361dda0af3839290b0ef57ad6"),
     chainId: unichain.id,
     decimals: 6,
+  },
+  {
+    symbol: "UNI",
+    name: "Uniswap",
+    address: getAddress("0x8f187aA05619a017077f5308904739877ce9eA21"),
+    chainId: unichain.id,
+    decimals: 18,
   },
 
   // ─── Robinhood Chain ────────────────────────────────────
@@ -643,34 +1117,222 @@ export const TOKENS: Token[] = [
     decimals: 18,
   },
 
+  // ─── Zora Network ───────────────────────────────────────
+  {
+    symbol: "ETH",
+    name: "Ether",
+    chainId: zora.id,
+    decimals: 18,
+    logo: "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
+  },
+  {
+    symbol: "WETH",
+    name: "Wrapped Ether",
+    address: getAddress("0x4200000000000000000000000000000000000006"),
+    chainId: zora.id,
+    decimals: 18,
+    logo: "https://assets.coingecko.com/coins/images/2518/standard/weth.png",
+  },
+
   // ─── XRP Ledger EVM Sidechain ────────────────────────────
   {
     symbol: "XRP",
     name: "XRP",
     chainId: xrp.id,
-    decimals: 6,
-  },
-  {
-    symbol: "ETH",
-    name: "Ethereum (XRP EVM)",
-    address: getAddress("0x6b175474e89094c44da98b954eedeac495271d0f"),
-    chainId: xrp.id,
     decimals: 18,
+    logo: "/tokens/xrp.png",
   },
   {
     symbol: "USDC",
-    name: "USD Coin (XRP EVM)",
-    address: getAddress("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"),
+    name: "USD Coin (Hammy)",
+    address: getAddress("0xa16148c6Ac9EDe0D82f0c52899e22a575284f131"),
     chainId: xrp.id,
     decimals: 6,
   },
   {
-    symbol: "USDT",
-    name: "Tether USD (XRP EVM)",
-    address: getAddress("0xdac17f958d2ee523a2206206994597c13d831ec7"),
+    symbol: "WETH",
+    name: "Wrapped Ether (Hammy)",
+    address: getAddress("0x50498dC52bCd3dAeB54B7225A7d2FA8D536F313E"),
     chainId: xrp.id,
-    decimals: 6,
+    decimals: 18,
   },
+
+  // ─── Additional verified Base assets ────────────────────
+  { symbol: "AAVE", name: "Aave", address: getAddress("0x63706e401c06ac8513145b7687A14804d17f814b"), chainId: base.id, decimals: 18 },
+  { symbol: "DAI", name: "Dai Stablecoin", address: getAddress("0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb"), chainId: base.id, decimals: 18 },
+  { symbol: "USDbC", name: "USD Base Coin", address: getAddress("0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA"), chainId: base.id, decimals: 6 },
+  { symbol: "GHO", name: "GHO", address: getAddress("0x6Bb7a212910682DCFdbd5BCBb3e28FB4E8da10Ee"), chainId: base.id, decimals: 18 },
+  { symbol: "USDS", name: "USDS", address: getAddress("0x820C137fa70C8691f0e44Dc420a5e53c168921Dc"), chainId: base.id, decimals: 18 },
+  { symbol: "PRIME", name: "Echelon Prime", address: getAddress("0xfa980ced6895ac314e7de34ef1bfae90a5add21b"), chainId: base.id, decimals: 18 },
+  { symbol: "wstETH", name: "Wrapped stETH", address: getAddress("0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452"), chainId: base.id, decimals: 18 },
+  { symbol: "rETH", name: "Rocket Pool ETH", address: getAddress("0xB6fe221Fe9EeF5aba221C348bA20A1bF5e73624c"), chainId: base.id, decimals: 18 },
+  { symbol: "1INCH", name: "1inch", address: getAddress("0xc5fecc3a29fb57b5024eec8a2239d4621e111cbe"), chainId: base.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/13469/standard/1inch-token.png" },
+  { symbol: "UNI", name: "Uniswap", address: getAddress("0xc3de830ea07524a0761646a6a4e4be0e114a3c83"), chainId: base.id, decimals: 18, logo: "https://ethereum-optimism.github.io/data/UNI/logo.png" },
+  { symbol: "COMP", name: "Compound", address: getAddress("0x9e1028f5f1d5ede59748ffcee5532509976840e0"), chainId: base.id, decimals: 18, logo: "https://ethereum-optimism.github.io/data/COMP/logo.svg" },
+  { symbol: "SEAM", name: "Seamless", address: getAddress("0x1c7a460413dd4e964f96d8dfc56e7223ce88cd85"), chainId: base.id, decimals: 18, logo: "https://basescan.org/token/images/seamless_32.png" },
+  { symbol: "SNX", name: "Synthetix Network Token", address: getAddress("0x22e6966b799c4d5b13be962e1d117b56327fda66"), chainId: base.id, decimals: 18, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F/logo.png" },
+  { symbol: "WCT", name: "WalletConnect Token", address: getAddress("0xef4461891dfb3ac8572ccf7c794664a8dd927945"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/50390/large/wc-token1.png" },
+  { symbol: "ZRX", name: "0x Protocol Token", address: getAddress("0x3bb4445d30ac020a84c1b5a8a2c6248ebc9779d0"), chainId: base.id, decimals: 18, logo: "https://ethereum-optimism.github.io/data/ZRX/logo.png" },
+  { symbol: "RPL", name: "Rocket Pool Protocol", address: getAddress("0x1f73eaf55d696bffa9b0ea16fa987b93b0f4d302"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/2090/large/rocket_pool_%28RPL%29.png" },
+  { symbol: "ODOS", name: "Odos Token", address: getAddress("0xca73ed1815e5915489570014e024b7ebe65de679"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/52914/large/odos.jpg" },
+  { symbol: "KEYCAT", name: "Keyboard Cat", address: getAddress("0x9a26f5433671751c3276a065f57e5a02d2817973"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/36608/large/keyboard_cat.jpeg" },
+  { symbol: "doginme", name: "doginme", address: getAddress("0x6921b130d297cc43754afba22e5eac0fbf8db75b"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/35123/large/doginme-logo1-transparent200.png" },
+  { symbol: "B3", name: "B3", address: getAddress("0xb3b32f9f8827d4634fe7d973fa1034ec9fddb3b3"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/54287/large/B3.png" },
+  { symbol: "BNKR", name: "BankrCoin", address: getAddress("0x22af33fe49fd1fa80c7149773dde5890d3c76f3b"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/52626/large/bankr-static.png" },
+  { symbol: "AVNT", name: "Avantis", address: getAddress("0x696f9436b67233384889472cd7cd58a6fb5df4f1"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/68972/large/avnt-token.png" },
+  { symbol: "VVV", name: "Venice Token", address: getAddress("0xacfe6019ed1a7dc6f7b508c02d1b04ec88cc21bf"), chainId: base.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/54023/standard/Venice_Token_(1).png" },
+
+  // ─── Additional verified Ethereum assets ────────────────
+  { symbol: "MKR", name: "Maker", address: getAddress("0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "stETH", name: "Lido Staked Ether", address: getAddress("0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "wstETH", name: "Wrapped stETH", address: getAddress("0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "rETH", name: "Rocket Pool ETH", address: getAddress("0xae78736Cd615f374D3085123A210448E74Fc6393"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "GHO", name: "GHO", address: getAddress("0x40D16FC0246aD3160ccc09B8D0D3A2cD28aE6c2f"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "USDS", name: "USDS", address: getAddress("0xdC035D45d973E3EC169d2276DDab16f1e407384F"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "FRAX", name: "Legacy Frax Dollar", address: getAddress("0x853d955aCEf822Db058eb8505911ED77F175b99e"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "LUSD", name: "Liquity USD", address: getAddress("0x5f98805A4E8be255a32880FDeC7F6728C6568bA0"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "cbETH", name: "Coinbase Wrapped Staked ETH", address: getAddress("0xBe9895146f7AF43049ca1c1AE358B0541Ea49704"), chainId: mainnet.id, decimals: 18 },
+
+  // ─── Additional verified Arbitrum assets ─────────────────
+  { symbol: "LINK", name: "Chainlink", address: getAddress("0xf97f4df75117a78c1A5a0DBb814Af92458539FB4"), chainId: arbitrum.id, decimals: 18 },
+  { symbol: "AAVE", name: "Aave", address: getAddress("0xba5DdD1f9d7F570dc94a51479a000E3BCE967196"), chainId: arbitrum.id, decimals: 18 },
+  { symbol: "UNI", name: "Uniswap", address: getAddress("0xFa7F8980b0f1E64A2062791cc3b0871572F1F7f0"), chainId: arbitrum.id, decimals: 18 },
+  { symbol: "cbBTC", name: "Coinbase Wrapped BTC", address: getAddress("0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf"), chainId: arbitrum.id, decimals: 8 },
+  { symbol: "GHO", name: "GHO", address: getAddress("0x7dfF72693F6A4149B17e7C6314655F6A9f7c8B33"), chainId: arbitrum.id, decimals: 18 },
+  { symbol: "USDS", name: "USDS", address: getAddress("0x6491c05A82219b8D1479057361ff1654749b876b"), chainId: arbitrum.id, decimals: 18 },
+  { symbol: "wstETH", name: "Wrapped stETH", address: getAddress("0x5979D7b546E38E414F7E9822514be443A4800529"), chainId: arbitrum.id, decimals: 18 },
+  { symbol: "rETH", name: "Rocket Pool ETH", address: getAddress("0xEC70DcB4A1EFA46b8F2D97C310C9c4790ba5ffA8"), chainId: arbitrum.id, decimals: 18 },
+
+  // ─── Additional verified Optimism assets ─────────────────
+  { symbol: "LINK", name: "Chainlink", address: getAddress("0x350a791Bfc2C21F9Ed5d10980Dad2e2638ffa7f6"), chainId: optimism.id, decimals: 18 },
+  { symbol: "AAVE", name: "Aave", address: getAddress("0x76FB31fb4af56892A25e32cFC43De717950c9278"), chainId: optimism.id, decimals: 18 },
+  { symbol: "UNI", name: "Uniswap", address: getAddress("0x6fd9d7AD17242c41f7131d257212c54A0e816691"), chainId: optimism.id, decimals: 18 },
+  { symbol: "wstETH", name: "Wrapped stETH", address: getAddress("0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb"), chainId: optimism.id, decimals: 18 },
+  { symbol: "rETH", name: "Rocket Pool ETH", address: getAddress("0x9Bcef72be871e61ED4fBbC7630889beE758eb81D"), chainId: optimism.id, decimals: 18 },
+
+  // ─── Additional verified Polygon assets ──────────────────
+  { symbol: "UNI", name: "Uniswap", address: getAddress("0xb33EaAd8d922B1083446DC23f610c2567fB5180f"), chainId: polygon.id, decimals: 18 },
+  { symbol: "CRV", name: "Curve DAO", address: getAddress("0x172370d5Cd63279eFa6d502DAB29171933a610AF"), chainId: polygon.id, decimals: 18 },
+  { symbol: "COMP", name: "Compound", address: getAddress("0x8505b9d2254A7Ae468c0E9dd10Ccea3A837aef5c"), chainId: polygon.id, decimals: 18 },
+  { symbol: "ENS", name: "Ethereum Name Service", address: getAddress("0xbD7A5Cf51d22930B8B3Df6d834F9BCEf90EE7c4f"), chainId: polygon.id, decimals: 18 },
+  { symbol: "GRT", name: "The Graph", address: getAddress("0x5fe2B58c013d7601147DcdD68C143A77499f5531"), chainId: polygon.id, decimals: 18 },
+  { symbol: "QUICK OLD", name: "QuickSwap Legacy", address: getAddress("0x831753DD7087CaC61aB5644b308642cc1c33Dc13"), chainId: polygon.id, decimals: 18 },
+
+  // ─── Additional verified Avalanche assets ────────────────
+  { symbol: "WAVAX", name: "Wrapped AVAX", address: getAddress("0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7"), chainId: avalanche.id, decimals: 18 },
+  { symbol: "BTC.b", name: "Bitcoin Avalanche Bridged", address: getAddress("0x152b9d0FdC40C096757F570A51E494bD4B943E50"), chainId: avalanche.id, decimals: 8 },
+  { symbol: "LINK", name: "Chainlink", address: getAddress("0x5947BB275c521040051D82396192181b413227A3"), chainId: avalanche.id, decimals: 18 },
+  { symbol: "AAVE", name: "Aave", address: getAddress("0x63a72806098Bd3D9520cC43356dD78afe5D386D9"), chainId: avalanche.id, decimals: 18 },
+  { symbol: "EURC", name: "EURC", address: getAddress("0xC891EB4cbdEFf6e073e859e987815Ed1505c2ACD"), chainId: avalanche.id, decimals: 6 },
+  { symbol: "GMX", name: "GMX", address: getAddress("0x62edc0692BD897D2295872a9FFCac5425011c661"), chainId: avalanche.id, decimals: 18 },
+  { symbol: "XAVA", name: "Avalaunch", address: getAddress("0xd1c3f94DE7e5B45fa4edbBA472491a9f4B166fc4"), chainId: avalanche.id, decimals: 18 },
+
+  // ─── Additional verified BNB Chain assets ────────────────
+  { symbol: "BTCB", name: "Binance Bitcoin", address: getAddress("0x7130d2A12B9bCBfae4f2634d864A1Ee1CE3Ead9c"), chainId: bsc.id, decimals: 18 },
+  { symbol: "ETH", name: "Binance-Peg Ethereum", address: getAddress("0x2170Ed0880ac9A755fd29B2688956BD959F933F8"), chainId: bsc.id, decimals: 18 },
+  { symbol: "UNI", name: "Uniswap", address: getAddress("0xBf5140A22578168FD562DCcF235E5D43A02ce9B1"), chainId: bsc.id, decimals: 18 },
+  { symbol: "LISTA", name: "Lista DAO", address: getAddress("0xFceB31A79F71AC9CBDCF853519c1b12D379EdC46"), chainId: bsc.id, decimals: 18 },
+  { symbol: "THE", name: "Thena", address: getAddress("0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11"), chainId: bsc.id, decimals: 18 },
+  { symbol: "ALPACA", name: "Alpaca Finance", address: getAddress("0x8F0528CE5EF7B51152A59745beFDD91D97091d2F"), chainId: bsc.id, decimals: 18 },
+
+  // ─── Additional verified Unichain assets ─────────────────
+  { symbol: "USDT0", name: "USDT0", address: getAddress("0x9151434b16b9763660705744891fA906F660EcC5"), chainId: unichain.id, decimals: 6 },
+  { symbol: "WBTC", name: "Wrapped Bitcoin", address: getAddress("0x0555E30da8f98308EdB960Aa94C0Db47230d2B9c"), chainId: unichain.id, decimals: 8 },
+  { symbol: "wstETH", name: "Wrapped stETH", address: getAddress("0xC02fE7317D4eb8753a02c35fe019786854A92001"), chainId: unichain.id, decimals: 18 },
+
+  // ─── Binance-listed, on-chain verified assets ───────────
+  { symbol: "USD1", name: "World Liberty Financial USD", address: getAddress("0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d"), chainId: mainnet.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/54977/large/USD1_1000x1000_transparent.png" },
+  { symbol: "RLUSD", name: "RLUSD", address: getAddress("0x8292bb45bf1ee4d140127049757c2e0ff06317ed"), chainId: mainnet.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/39651/large/RLUSD_200x200_(1).png" },
+  { symbol: "XAUt", name: "Tether Gold", address: getAddress("0x68749665ff8d2d112fa859aa293f07a622782f38"), chainId: mainnet.id, decimals: 6, logo: "https://coin-images.coingecko.com/coins/images/10481/large/Tether_Gold.png" },
+  { symbol: "PAXG", name: "PAX Gold", address: getAddress("0x45804880de22913dafe09f4980848ece6ecbaf78"), chainId: mainnet.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/9519/thumb/paxg.PNG" },
+  { symbol: "FET", name: "Fetch.ai", address: getAddress("0xaea46a60368a7bd060eec7df8cba43b7ef41ad85"), chainId: mainnet.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/5681/thumb/Fetch.jpg" },
+  { symbol: "INJ", name: "Injective", address: getAddress("0xe28b3b32b6c345a34ff64674606124dd5aceca30"), chainId: mainnet.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/12882/thumb/Secondary_Symbol.png" },
+  { symbol: "USD1", name: "World Liberty Financial USD", address: getAddress("0x7550de0a4b9fb8caba8c32e72ee356afdd217a33"), chainId: arbitrum.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/54977/large/USD1_1000x1000_transparent.png" },
+  { symbol: "SOL", name: "SOL Wormhole", address: getAddress("0xb74da9fe2f96b9e0a5f4a3cf0b92dd2bec617124"), chainId: arbitrum.id, decimals: 9, logo: "https://assets.coingecko.com/coins/images/22876/thumb/SOL_wh_small.png" },
+  { symbol: "ONDO", name: "Ondo Finance", address: getAddress("0xa2d52a05b8bead5d824df54dd1aa63188b37a5e7"), chainId: arbitrum.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/26580/standard/ONDO.png" },
+  { symbol: "PEPE", name: "Pepe", address: getAddress("0x35e6a59f786d9266c7961ea28c7b768b33959cbb"), chainId: arbitrum.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/29850/large/pepe-token.jpeg" },
+  { symbol: "ENA", name: "Ethena", address: getAddress("0xdf8f0c63d9335a0abd89f9f752d293a98ea977d8"), chainId: arbitrum.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/36530/standard/ethena.png" },
+  { symbol: "XAUt", name: "Tether Gold", address: getAddress("0x9b86f3c7d145979ec6b2f42ed7f92d06cfc6c9d3"), chainId: arbitrum.id, decimals: 6, logo: "https://coin-images.coingecko.com/coins/images/10481/large/Tether_Gold.png" },
+  { symbol: "SOL", name: "SOL Wormhole", address: getAddress("0xba1cf949c382a32a09a17b2adf3587fc7fa664f1"), chainId: optimism.id, decimals: 9, logo: "https://assets.coingecko.com/coins/images/22876/thumb/SOL_wh_small.png" },
+  { symbol: "PEPE", name: "Pepe", address: getAddress("0xc1c167cc44f7923cd0062c4370df962f9ddb16f5"), chainId: optimism.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/29850/large/pepe-token.jpeg" },
+  { symbol: "LDO", name: "Lido DAO", address: getAddress("0xfdb794692724153d1488ccdbe0c56c252596735f"), chainId: optimism.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/13573/thumb/Lido_DAO.png" },
+  { symbol: "PENDLE", name: "Pendle", address: getAddress("0xbc7b1ff1c6989f006a1185318ed4e7b5796e66e1"), chainId: optimism.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/15069/large/Pendle_Logo_Normal-03.png" },
+  { symbol: "WBTC", name: "Wrapped BTC", address: getAddress("0x68f180fcce6836688e9084f035309e29bf0a2095"), chainId: optimism.id, decimals: 8, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png" },
+  { symbol: "CRV", name: "Curve DAO Token", address: getAddress("0x0994206dfe8de6ec6920ff4d779b0d950605fb53"), chainId: optimism.id, decimals: 18, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xD533a949740bb3306d119CC777fa900bA034cd52/logo.png" },
+  { symbol: "AAVE", name: "Aave", address: getAddress("0xfb6115445bff7b52feb98650c87f44907e58f802"), chainId: bsc.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/12645/thumb/AAVE.png" },
+  { symbol: "LINK", name: "Chainlink", address: getAddress("0xf8a0bf9cf54bb92f17374d9e9a321e6a111a51bd"), chainId: bsc.id, decimals: 18, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x514910771AF9Ca656af840dff83E8264EcF986CA/logo.png" },
+  { symbol: "SOL", name: "SOL Wormhole", address: getAddress("0xfa54ff1a158b5189ebba6ae130ced6bbd3aea76e"), chainId: bsc.id, decimals: 9, logo: "https://assets.coingecko.com/coins/images/22876/thumb/SOL_wh_small.png" },
+  { symbol: "INJ", name: "Injective", address: getAddress("0xa2b726b1145a4773f68593cf171187d8ebe4d495"), chainId: bsc.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/12882/thumb/Secondary_Symbol.png" },
+  { symbol: "FET", name: "Fetch.ai", address: getAddress("0x031b41e504677879370e9dbcf937283a8691fa7f"), chainId: bsc.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/5681/thumb/Fetch.jpg" },
+  { symbol: "ASTER", name: "Aster", address: getAddress("0x000ae314e2a2172a039b26378814c252734f556a"), chainId: bsc.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/69040/large/_ASTER.png" },
+  { symbol: "SOL", name: "SOL Wormhole", address: getAddress("0xfe6b19286885a4f7f55adad09c3cd1f906d2478f"), chainId: avalanche.id, decimals: 9, logo: "https://assets.coingecko.com/coins/images/22876/thumb/SOL_wh_small.png" },
+  { symbol: "uTAO", name: "Bittensor", address: getAddress("0xfdca15bd55f350a36e63c47661914d80411d2c22"), chainId: avalanche.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/28452/large/ARUsPeNQ_400x400.jpeg" },
+  { symbol: "SYN", name: "Synapse", address: getAddress("0x1f1e7c893855525b303f99bdf5c3c05be09ca251"), chainId: avalanche.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/18024/thumb/syn.png" },
+  { symbol: "PENDLE", name: "Pendle", address: getAddress("0xfb98b335551a418cd0737375a2ea0ded62ea213b"), chainId: avalanche.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/15069/large/Pendle_Logo_Normal-03.png" },
+  { symbol: "GUN", name: "GUNZ", address: getAddress("0x26debd39d5ed069770406fca10a0e4f8d2c743eb"), chainId: avalanche.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/55027/standard/gunz.jpg" },
+  { symbol: "COMP.e", name: "Compound", address: getAddress("0xc3048e19e76cb9a3aa9d77d8c03c29fc906e2437"), chainId: avalanche.id, decimals: 18, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xc00e94Cb662C3520282E6f5717214004A7f26888/logo.png" },
+  { symbol: "BAND", name: "Band Protocol", address: getAddress("0xa8b1e0764f85f53dfe21760e8afe5446d82606ac"), chainId: polygon.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/9545/thumb/band-protocol.png" },
+  { symbol: "MANA", name: "Decentraland", address: getAddress("0xa1c57f48f0deb89f569dfbe6e2b7f46d33606fd4"), chainId: polygon.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/878/thumb/decentraland-mana.png" },
+  { symbol: "STORJ", name: "Storj Token", address: getAddress("0xd72357daca2cf11a5f155b9ff7880e595a3f5792"), chainId: polygon.id, decimals: 8, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xB64ef51C888972c908CFacf59B47C1AfBC0Ab8aC/logo.png" },
+  { symbol: "ZRX", name: "0x Protocol Token", address: getAddress("0x5559edb74751a0ede9dea4dc23aee72cca6be3d5"), chainId: polygon.id, decimals: 18, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xE41d2489571d322189246DaFA5ebDe1F4699F498/logo.png" },
+  { symbol: "SNX", name: "Synthetix Network Token", address: getAddress("0x50b728d8d964fd00c2d0aad81718b71311fef68a"), chainId: polygon.id, decimals: 18, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F/logo.png" },
+  { symbol: "XRP", name: "XRP", address: getAddress("0x2615a94df961278dcbc41fb0a54fec5f10a693ae"), chainId: unichain.id, decimals: 18, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ripple/info/logo.png" },
+  { symbol: "AAVE", name: "Aave", address: getAddress("0x02a24c380da560e4032dc6671d8164cfbeeaae1e"), chainId: unichain.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/12645/thumb/AAVE.png" },
+  { symbol: "DOGE", name: "Dogecoin", address: getAddress("0x12e96c2bfea6e835cf8dd38a5834fa61cf723736"), chainId: unichain.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/5/standard/dogecoin.png" },
+  { symbol: "ONDO", name: "Ondo Finance", address: getAddress("0xad0bae21db0b471dffc6f8f9eeacfe9a85321557"), chainId: unichain.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/26580/standard/ONDO.png" },
+  { symbol: "LINK", name: "Chainlink", address: getAddress("0x5a53b6d19d8edcb7923f0d840eebb3f09bbeefb7"), chainId: unichain.id, decimals: 18, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x514910771AF9Ca656af840dff83E8264EcF986CA/logo.png" },
+  { symbol: "EUL", name: "Euler", address: getAddress("0x6319f47719b6713b1624c1b3a8e2dbf15b5d03fe"), chainId: unichain.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/26149/thumb/YCvKDfl8_400x400.jpeg" },
+
+  // ─── Additional verified trending assets ────────────────
+  { symbol: "HYPE", name: "Hyperliquid", address: getAddress("0x15d0e0c55a3e7ee67152ad7e89acf164253ff68d"), chainId: unichain.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/50882/large/hyperliquid.jpg" },
+  { symbol: "ZEC", name: "Zcash", address: getAddress("0x83f31af747189c2fa9e5deb253200c505eff6ed2"), chainId: unichain.id, decimals: 18, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/zcash/info/logo.png" },
+  { symbol: "QNT", name: "Quant", address: getAddress("0x4a220e6096b25eadb88358cb44068a3248254675"), chainId: mainnet.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/3370/thumb/5ZOu7brX_400x400.jpg" },
+  { symbol: "BICO", name: "Biconomy", address: getAddress("0xf17e65822b568b3903685a7c9f496cf7656cc6c2"), chainId: mainnet.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/21061/thumb/biconomy_logo.jpg" },
+  { symbol: "HOME", name: "Defi App", address: getAddress("0x4bfaa776991e85e5f8b1255461cbbd216cfc714f"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/54873/large/defi-app.png" },
+  { symbol: "GRVT", name: "GRVT Token", address: getAddress("0xad29f2723fcdbcf665f210f25e06f97477e417cf"), chainId: mainnet.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/102172513/large/grvt_400x400.jpg" },
+  { symbol: "ZAMA", name: "Zama", address: getAddress("0xa12cc123ba206d4031d1c7f6223d1c2ec249f4f3"), chainId: mainnet.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/70921/large/zama.png" },
+  { symbol: "ERA", name: "Caldera", address: getAddress("0xe2ad0bf751834f2fbdc62a41014f84d67ca1de2a"), chainId: mainnet.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/54475/large/Token_Logo.png" },
+
+  // ─── Additional verified stablecoins ────────────────────
+  // Ethereum
+  { symbol: "EURC", name: "Euro Coin", address: getAddress("0x1abaea1f7c830bd89acc67ec4af516284b1bc33c"), chainId: mainnet.id, decimals: 6, logo: "https://assets.coingecko.com/coins/images/26045/thumb/euro-coin.png?1655394420" },
+  { symbol: "MIM", name: "Magic Internet Money", address: getAddress("0x99d8a9c45b2eca8864373a26d1459e3dff1e17f3"), chainId: mainnet.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/16786/thumb/mimlogopng.png?1624979612" },
+  { symbol: "sUSD", name: "Synth sUSD", address: getAddress("0x57ab1ec28d129707052df4df418d58a2d46d5f51"), chainId: mainnet.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/5013/thumb/sUSD.png?1616150765" },
+  { symbol: "USDG", name: "Global Dollar", address: getAddress("0xe343167631d89b6ffc58b88d6b7fb0228795491d"), chainId: mainnet.id, decimals: 6, logo: "https://assets.coingecko.com/coins/images/51281/large/GDN_USDG_Token_200x200.png" },
+  // Optimism
+  { symbol: "DAI", name: "Dai Stablecoin", address: getAddress("0xda10009cbd5d07dd0cecc66161fc93d7c9000da1"), chainId: optimism.id, decimals: 18, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png" },
+  { symbol: "FRAX", name: "Frax", address: getAddress("0x2e3d870790dc77a83dd1d18184acc7439a53f475"), chainId: optimism.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/13422/thumb/frax_logo.png?1608476506" },
+  { symbol: "sUSD", name: "Synth sUSD", address: getAddress("0x8c6f28f2f1a3c87f0f938b96d27520d9751ec8d9"), chainId: optimism.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/5013/thumb/sUSD.png?1616150765" },
+  { symbol: "USD₮0", name: "USDT0", address: getAddress("0x01bff41798a0bcf287b996046ca68b395dbc1071"), chainId: optimism.id, decimals: 6, logo: "https://coin-images.coingecko.com/coins/images/53705/large/usdt0.jpg?1737086183" },
+  // BNB Chain
+  { symbol: "DAI", name: "Dai Stablecoin", address: getAddress("0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3"), chainId: bsc.id, decimals: 18, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png" },
+  { symbol: "FRAX", name: "Frax", address: getAddress("0x90c97f71e18723b0cf0dfa30ee176ab653e89f40"), chainId: bsc.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/13422/thumb/frax_logo.png?1608476506" },
+  { symbol: "MIM", name: "Magic Internet Money", address: getAddress("0xfe19f0b51438fd612f6fd59c1dbb3ea319f433ba"), chainId: bsc.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/16786/thumb/mimlogopng.png?1624979612" },
+  // Unichain
+  { symbol: "DAI", name: "Dai Stablecoin", address: getAddress("0x20cab320a855b39f724131c69424240519573f81"), chainId: unichain.id, decimals: 18, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png" },
+  { symbol: "EURC", name: "Euro Coin", address: getAddress("0x72f34bc403a005a9be390762eaa46ed42813b0a8"), chainId: unichain.id, decimals: 6, logo: "https://assets.coingecko.com/coins/images/26045/thumb/euro-coin.png?1655394420" },
+  { symbol: "FRAX", name: "Frax", address: getAddress("0x8c7879bf25d678d9949f305857bd4437d74132b9"), chainId: unichain.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/13422/thumb/frax_logo.png?1608476506" },
+  { symbol: "LUSD", name: "Liquity USD", address: getAddress("0xf81b7485b4cb59645f74528d702c7f8cd72577fb"), chainId: unichain.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/14666/thumb/Group_3.png?1617631327" },
+  { symbol: "MIM", name: "Magic Internet Money", address: getAddress("0x397c1f55feff63c8947624b0d457a2ca3e3602ab"), chainId: unichain.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/16786/thumb/mimlogopng.png?1624979612" },
+  { symbol: "PYUSD", name: "PayPal USD", address: getAddress("0x0d2f98904d88909072ea6e61105cbbf78e6207c5"), chainId: unichain.id, decimals: 6, logo: "https://assets.coingecko.com/coins/images/31212/large/PYUSD_Logo_%282%29.png?1691458314" },
+  { symbol: "sUSD", name: "Synth sUSD", address: getAddress("0x7251d204c2e867b31096d5c7091298239b3a6a0f"), chainId: unichain.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/5013/thumb/sUSD.png?1616150765" },
+  { symbol: "USDG", name: "Global Dollar", address: getAddress("0x2a22868610610199d43fe93a16661473a9f86f1e"), chainId: unichain.id, decimals: 6, logo: "https://assets.coingecko.com/coins/images/51281/large/GDN_USDG_Token_200x200.png" },
+  { symbol: "USDS", name: "USDS Stablecoin", address: getAddress("0x116ee4d63847fb295dd919ae57b768ea3b2f7bb4"), chainId: unichain.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/39926/large/usds.webp?1726666683" },
+  { symbol: "USDT", name: "Tether USD", address: getAddress("0x588ce4f028d8e7b53b687865d6a67b3a54c75518"), chainId: unichain.id, decimals: 6, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png" },
+  // Polygon
+  { symbol: "sUSD", name: "Synth sUSD", address: getAddress("0xf81b4bec6ca8f9fe7be01ca734f55b2b6e03a7a0"), chainId: polygon.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/5013/thumb/sUSD.png?1616150765" },
+  // Arbitrum
+  { symbol: "DAI", name: "Dai Stablecoin", address: getAddress("0xda10009cbd5d07dd0cecc66161fc93d7c9000da1"), chainId: arbitrum.id, decimals: 18, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png" },
+  { symbol: "EUROC", name: "Euro Coin (Legacy)", address: getAddress("0x863708032b5c328e11abcbc0df9d79c71fc52a48"), chainId: arbitrum.id, decimals: 6, logo: "https://assets.coingecko.com/coins/images/26045/thumb/euro-coin.png?1655394420" },
+  { symbol: "FRAX", name: "Frax", address: getAddress("0x7468a5d8e02245b00e8c0217fce021c70bc51305"), chainId: arbitrum.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/13422/thumb/frax_logo.png?1608476506" },
+  { symbol: "LUSD", name: "Liquity USD", address: getAddress("0x93b346b6bc2548da6a1e7d98e9a421b42541425b"), chainId: arbitrum.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/14666/thumb/Group_3.png?1617631327" },
+  { symbol: "MIM", name: "Magic Internet Money", address: getAddress("0xb20a02dffb172c474bc4bda3fd6f4ee70c04daf2"), chainId: arbitrum.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/16786/thumb/mimlogopng.png?1624979612" },
+  { symbol: "PYUSD", name: "PayPal USD", address: getAddress("0x327006c8712fe0abdbbd55b7999db39b0967342e"), chainId: arbitrum.id, decimals: 6, logo: "https://assets.coingecko.com/coins/images/31212/large/PYUSD_Logo_%282%29.png?1691458314" },
+  { symbol: "sUSD", name: "Synth sUSD", address: getAddress("0xa970af1a584579b618be4d69ad6f73459d112f95"), chainId: arbitrum.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/5013/thumb/sUSD.png?1616150765" },
+  // Avalanche
+  { symbol: "FRAX", name: "Frax", address: getAddress("0xd24c2ad096400b6fbcd2ad8b24e7acbc21a1da64"), chainId: avalanche.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/13422/thumb/frax_logo.png?1608476506" },
+  { symbol: "MIM", name: "Magic Internet Money", address: getAddress("0x130966628846bfd36ff31a822705796e8cb8c18d"), chainId: avalanche.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/16786/thumb/mimlogopng.png?1624979612" },
+  { symbol: "USDt", name: "Tether USD", address: getAddress("0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7"), chainId: avalanche.id, decimals: 6, logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png" },
 ];
 
 export function tokensForChain(chainId: number) {
@@ -690,6 +1352,7 @@ export function defaultSellForChain(chainId: number) {
   if (chainId === avalanche.id) return list.find((t) => t.symbol === "AVAX") ?? list[0]!;
   if (chainId === robinhood.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
   if (chainId === unichain.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
+  if (chainId === zora.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
   return list.find((t) => t.symbol === "ETH") ?? list[0]!;
 }
 
@@ -706,6 +1369,7 @@ export function defaultBuyForChain(chainId: number) {
   if (chainId === avalanche.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
   if (chainId === robinhood.id) return list.find((t) => t.symbol === "USDG") ?? list[1] ?? list[0]!;
   if (chainId === unichain.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
+  if (chainId === zora.id) return list.find((t) => t.symbol === "WETH") ?? list[1] ?? list[0]!;
   return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
 }
 
@@ -725,5 +1389,26 @@ export function tokenDecimals(t: Token): number {
 }
 
 export function isUsdStableToken(t: Token) {
-  return t.symbol === "USDC" || t.symbol === "USDT" || t.symbol === "USDG" || t.symbol === "DAI";
+  return [
+    "USDC",
+    "USDT",
+    "USDT0",
+    "USD₮0",
+    "USDG",
+    "USD1",
+    "DAI",
+    "USDE",
+    "SUSDE",
+    "PYUSD",
+    "GHO",
+    "USDS",
+    "FRAX",
+    "LUSD",
+    "MIM",
+    "SUSD",
+    "EURC",
+    "EUROC",
+    "FDUSD",
+    "USDBC",
+  ].includes(t.symbol.toUpperCase());
 }
