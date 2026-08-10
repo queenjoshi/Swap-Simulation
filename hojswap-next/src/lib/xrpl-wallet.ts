@@ -1,0 +1,54 @@
+"use client";
+
+import type { WalletManager } from "xrpl-connect";
+
+let walletManagerPromise: Promise<WalletManager> | null = null;
+
+export function getXrplWalletManager() {
+  if (walletManagerPromise) return walletManagerPromise;
+
+  walletManagerPromise = import("xrpl-connect").then(({
+    CrossmarkAdapter,
+    GemWalletAdapter,
+    LedgerAdapter,
+    OtsuAdapter,
+    WalletConnectAdapter,
+    WalletManager,
+    XamanAdapter,
+    XyraAdapter,
+  }) => {
+    const xamanApiKey = process.env.NEXT_PUBLIC_XAMAN_API_KEY;
+    const walletConnectProjectId =
+      process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ??
+      "804fd92cee82146454ccc0a3c75a55f4";
+    const adapters = [
+      new XamanAdapter({ apiKey: xamanApiKey }),
+      new CrossmarkAdapter(),
+      new GemWalletAdapter(),
+      new XyraAdapter(),
+      new OtsuAdapter(),
+      new LedgerAdapter(),
+    ];
+
+    adapters.push(new WalletConnectAdapter({
+      projectId: walletConnectProjectId,
+      themeMode: "dark",
+      // WalletConnect's modal presents compatible wallet choices and handles
+      // app/deep links without exposing a QR inside the XRP wallet picker.
+      useModal: true,
+      metadata: {
+        name: "House of Joshi Swap",
+        description: "Non-custodial swaps on the XRP Ledger and EVM networks",
+        url: window.location.origin,
+        icons: ["https://swap.thehouseofjoshi.com/icon.png"],
+      },
+    }));
+
+    return new WalletManager({ adapters, network: "mainnet", autoConnect: true });
+  }).catch((error) => {
+    walletManagerPromise = null;
+    throw error;
+  });
+
+  return walletManagerPromise;
+}

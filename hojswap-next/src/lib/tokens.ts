@@ -1,6 +1,6 @@
 import { getAddress } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp } from "@/lib/chains";
+import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp, zora } from "@/lib/chains";
 
 export type Token = {
   symbol: string;
@@ -8,6 +8,8 @@ export type Token = {
   address?: `0x${string}`;
   decimals?: number;
   chainId: number;
+  logo?: string;
+  imported?: boolean;
 };
 
 export const HOUSE_WALLET: `0x${string}` = getAddress(
@@ -120,6 +122,22 @@ export const TOKENS: Token[] = [
     name: "Virtuals Protocol",
     address: getAddress("0x0b3e328455c4059eeb9e3f84b5543f74e24e7e1b"),
     chainId: base.id,
+    decimals: 18,
+  },
+  {
+    symbol: "mr_lightspeed",
+    name: "Mr. Lightspeed Creator Coin",
+    address: getAddress("0xf0cb96a4011a0a6f73d100c7080bf8020d10f87a"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "/tokens/mr-lightspeed.jpg",
+  },
+
+  // Zora creator coins are loaded dynamically from the profile endpoint.
+  {
+    symbol: "ETH",
+    name: "Ether",
+    chainId: zora.id,
     decimals: 18,
   },
 
@@ -643,33 +661,27 @@ export const TOKENS: Token[] = [
     decimals: 18,
   },
 
-  // ─── XRP Ledger EVM Sidechain ────────────────────────────
+  // ─── XRPL EVM Mainnet (Hammy Swap) ──────────────────────
   {
     symbol: "XRP",
     name: "XRP",
     chainId: xrp.id,
-    decimals: 6,
-  },
-  {
-    symbol: "ETH",
-    name: "Ethereum (XRP EVM)",
-    address: getAddress("0x6b175474e89094c44da98b954eedeac495271d0f"),
-    chainId: xrp.id,
     decimals: 18,
+    logo: "/tokens/xrp.png",
   },
   {
     symbol: "USDC",
-    name: "USD Coin (XRP EVM)",
-    address: getAddress("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"),
+    name: "USD Coin (Hammy Swap)",
+    address: getAddress("0xa16148c6Ac9EDe0D82f0c52899e22a575284f131"),
     chainId: xrp.id,
     decimals: 6,
   },
   {
-    symbol: "USDT",
-    name: "Tether USD (XRP EVM)",
-    address: getAddress("0xdac17f958d2ee523a2206206994597c13d831ec7"),
+    symbol: "WETH",
+    name: "Wrapped Ether (Hammy Swap)",
+    address: getAddress("0x50498dC52bCd3dAeB54B7225A7d2FA8D536F313E"),
     chainId: xrp.id,
-    decimals: 6,
+    decimals: 18,
   },
 ];
 

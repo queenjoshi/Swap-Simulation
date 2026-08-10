@@ -70,6 +70,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${displayFont.variable} ${bodyFont.variable} antialiased`}>
       <head>
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8905064413166970"
+          crossOrigin="anonymous"
+        />
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-2QDL68W4EG"
@@ -85,12 +90,6 @@ export default function RootLayout({
         </Script>
       </head>
       <body className="flex min-h-dvh flex-col bg-[#0b0b0d] text-[#f5f1e6]">
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8905064413166970"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
         <Providers>
           <Header />
           <main className="flex-1">

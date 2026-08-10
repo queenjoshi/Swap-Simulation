@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { getChainName } from "@/lib/chains";
+import { TokenLogo } from "@/components/TokenLogo";
 
 interface TrendingToken {
   id: string;
@@ -89,14 +90,7 @@ export function TrendingTokens({ chainId, onSelectToken, availableTokens = [] }:
               className="flex-shrink-0 cursor-pointer rounded-full border border-white/10 bg-black/20 px-3 py-2 transition hover:border-[rgba(212,175,55,0.3)] hover:bg-white/[0.06]"
             >
               <div className="flex items-center gap-2">
-                <img
-                  src={token.image}
-                  alt={token.symbol}
-                  className="h-5 w-5 rounded-full"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
-                />
+                <TokenLogo symbol={token.symbol} logo={token.image} size="xs" />
                 <div className="text-left">
                   <p className="text-xs font-semibold leading-none text-white">
                     {token.symbol}
