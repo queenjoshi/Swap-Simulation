@@ -1329,7 +1329,7 @@ function SwapCardInner() {
                     </div>
                 ) : isSwapSupported && activeTab === "swap" ? (
                     <>
-                        <div className="relative !z-30 space-y-1">
+                        <div className="relative !z-30">
                             <div className="hoj-panel rounded-[26px] p-4 sm:p-5">
                                 <div className="mb-3 flex items-start justify-between gap-3">
                                     <div className="text-[15px] font-semibold text-white/55">Sell</div>
@@ -1377,7 +1377,7 @@ function SwapCardInner() {
                             <button
                                 type="button"
                                 onClick={flipTokens}
-                                className="absolute left-1/2 top-1/2 z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl border-4 border-[#101012] bg-[#19191b] text-2xl text-[rgba(212,175,55,0.95)] shadow-[0_14px_28px_rgba(0,0,0,0.45)] transition hover:bg-[#202022] hover:text-[rgba(255,222,85,1)]"
+                                className="relative z-10 mx-auto -my-3 flex h-12 w-12 items-center justify-center rounded-2xl border-4 border-[#101012] bg-[#19191b] text-2xl text-[rgba(212,175,55,0.95)] shadow-[0_14px_28px_rgba(0,0,0,0.45)] transition hover:bg-[#202022] hover:text-[rgba(255,222,85,1)]"
                                 aria-label="Flip tokens"
                             >
                                 ↓
