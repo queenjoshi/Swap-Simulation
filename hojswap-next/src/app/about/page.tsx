@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { TokenLogo } from "@/components/TokenLogo";
+import { fallbackTokenLogo } from "@/components/TokenSelect";
 import { CHAIN_OPTIONS } from "@/lib/chains";
 import { TOKENS } from "@/lib/tokens";
 
@@ -37,7 +38,7 @@ const curatedTokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[
       { symbol: "VIRTUAL", name: "Virtuals Protocol", logo: "https://assets.coingecko.com/coins/images/34057/standard/LOGOMARK.png" },
       { symbol: "MORPHO", name: "Morpho", logo: "https://assets.coingecko.com/coins/images/29837/standard/Morpho-token-icon.png" },
       { symbol: "DEGEN", name: "Degen", logo: "https://assets.coingecko.com/coins/images/34515/standard/android-chrome-512x512.png" },
-      { symbol: "mr_lightspeed", name: "Mr. Lightspeed Creator Coin", logo: "https://scontent-iad4-1.choicecdn.com/-/rs:fit:600:600/f:best/aHR0cHM6Ly9tYWdpYy5kZWNlbnRyYWxpemVkLWNvbnRlbnQuY29tL2lwZnMvYmFmeWJlaWEzZXVpN29tamNmaG41enIyNDIzdGdtbG9kYm5kcm03bWQ0aWJ2bTVueGticnlpZmlzNjQ=" },
+      { symbol: "mr_lightspeed", name: "Mr. Lightspeed Creator Coin", logo: "/tokens/mr-lightspeed.jpg" },
       { symbol: "SPX", name: "SPX6900", logo: "https://coin-images.coingecko.com/coins/images/31401/large/centeredcoin_%281%29.png" },
       { symbol: "SYRUP", name: "Maple Finance", logo: "https://coin-images.coingecko.com/coins/images/51232/large/_syrup_token_logo.png" },
       { symbol: "FLUID", name: "Fluid", logo: "https://coin-images.coingecko.com/coins/images/14688/large/Frame_1686566116_%281%29_%281%29.png" },
@@ -218,7 +219,10 @@ const tokenGroups = CHAIN_OPTIONS.map((chain) => ({
     .map((token) => ({
       symbol: token.symbol,
       name: token.name,
-      logo: token.logo ?? curatedLogos.get(token.symbol.toUpperCase()),
+      logo:
+        token.logo
+        ?? curatedLogos.get(token.symbol.toUpperCase())
+        ?? fallbackTokenLogo(token.symbol),
       address: token.address,
       chainId: token.chainId,
     })),
