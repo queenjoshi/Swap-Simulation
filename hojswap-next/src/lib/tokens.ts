@@ -774,6 +774,14 @@ export const TOKENS: Token[] = [
     chainId: bsc.id,
     decimals: 18,
   },
+  {
+    symbol: "GMEB",
+    name: "GameStop (bStock)",
+    address: getAddress("0x46cEeFDa28Dd7207059ed19B0acdc026955bb15C"),
+    chainId: bsc.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/102175530/large/gamestop_bstock.png?1786614133",
+  },
 
   // ─── Arbitrum ────────────────────────────────────────────
   {

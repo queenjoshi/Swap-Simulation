@@ -112,6 +112,7 @@ const curatedTokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[
       { symbol: "FDUSD", name: "First Digital USD", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409/logo.png" },
       { symbol: "CAKE", name: "PancakeSwap Token", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x0E09FaBB73Bd3Ade0A17ECC321fD13a19E81cE82/logo.png" },
       { symbol: "BabyDoge", name: "Baby Doge Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xc748673057861a797275CD8A068AbB95A902e8de/logo.png" },
+      { symbol: "GMEB", name: "GameStop (bStock)", logo: "https://coin-images.coingecko.com/coins/images/102175530/large/gamestop_bstock.png?1786614133" },
     ],
   },
   {
