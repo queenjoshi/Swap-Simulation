@@ -102,7 +102,6 @@ const TOKEN_LOGOS: Record<string, string> = {
   TWT: "https://assets.coingecko.com/coins/images/11085/standard/Trust.png",
   QUICK: "https://assets.coingecko.com/coins/images/13970/standard/1_pOU6pBMEmiL-ZJVb0CYRjQ.png",
   SAND: "https://assets.coingecko.com/coins/images/12129/standard/sandbox_logo.jpg",
-  GHST: "https://assets.coingecko.com/coins/images/12467/standard/ghst_200.png",
   GHO: "https://assets.coingecko.com/coins/images/30663/standard/gho-token-logo.png",
   USDS: "https://assets.coingecko.com/coins/images/39926/large/usds.webp",
   USDBC: "https://assets.coingecko.com/coins/images/35220/standard/USDbC.png",
