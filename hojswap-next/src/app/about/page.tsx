@@ -113,11 +113,11 @@ const curatedTokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[
       { symbol: "CAKE", name: "PancakeSwap Token", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x0E09FaBB73Bd3Ade0A17ECC321fD13a19E81cE82/logo.png" },
       { symbol: "BabyDoge", name: "Baby Doge Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xc748673057861a797275CD8A068AbB95A902e8de/logo.png" },
       { symbol: "GMEB", name: "GameStop (bStock)", logo: "https://coin-images.coingecko.com/coins/images/102175530/large/gamestop_bstock.png?1786614133" },
-      { symbol: "COINon", name: "Coinbase (Ondo Tokenized)", logo: "https://bscscan.com/token/images/coinon_64.png" },
-      { symbol: "MSTRon", name: "Strategy (Ondo Tokenized)", logo: "https://bscscan.com/token/images/mstron_64.png" },
-      { symbol: "TQQQon", name: "ProShares UltraPro QQQ (Ondo Tokenized)", logo: "https://assets.coingecko.com/coins/images/26580/standard/ONDO.png" },
-      { symbol: "AMZNon", name: "Amazon (Ondo Tokenized)", logo: "https://bscscan.com/token/images/amznon_64.png" },
-      { symbol: "ORCLon", name: "Oracle (Ondo Tokenized)", logo: "https://bscscan.com/token/images/orclon_64.png" },
+      { symbol: "COINon", name: "Coinbase (Ondo Tokenized)", logo: "https://cdn.ondo.finance/tokens/logos/coinon_160x160.png" },
+      { symbol: "MSTRon", name: "MicroStrategy (Ondo Tokenized)", logo: "https://cdn.ondo.finance/tokens/logos/mstron_160x160.png" },
+      { symbol: "TQQQon", name: "ProShares UltraPro QQQ (Ondo Tokenized)", logo: "https://cdn.ondo.finance/tokens/logos/tqqqon_160x160.png" },
+      { symbol: "AMZNon", name: "Amazon (Ondo Tokenized)", logo: "https://cdn.ondo.finance/tokens/logos/amznon_160x160.png" },
+      { symbol: "ORCLon", name: "Oracle (Ondo Tokenized)", logo: "https://cdn.ondo.finance/tokens/logos/orclon_160x160.png" },
       { symbol: "AAPLon", name: "Apple (Ondo Tokenized)", logo: "https://cdn.ondo.finance/tokens/logos/aaplon_160x160.png" },
       { symbol: "ACNon", name: "Accenture (Ondo Tokenized)", logo: "https://cdn.ondo.finance/tokens/logos/acnon_160x160.png" },
       { symbol: "AMDon", name: "AMD (Ondo Tokenized)", logo: "https://cdn.ondo.finance/tokens/logos/amdon_160x160.png" },
@@ -266,7 +266,7 @@ const networks = [
   { name: "Base", badge: "Swap + Bridge", desc: "Home for mr_lightspeed and its live Zora post-coin catalog, MORPHO, DEGEN, VIRTUAL, AERO, House of Joshi tokens, and core assets." },
   { name: "Zora", badge: "Token Catalog", desc: "Chain-aware discovery for creator and content coins deployed on Zora Network. Modern Zora coins deployed on Base remain listed under Base." },
   { name: "Polygon", badge: "Swap", desc: "POL, WETH, WBTC, USDC, USDT, AAVE, LINK, and DAI routed through 0x liquidity." },
-  { name: "BNB Chain", badge: "Swap", desc: "BNB, USDT, USDC, DOGE, FDUSD, CAKE, and BabyDoge through 0x liquidity." },
+  { name: "BNB Chain", badge: "Swap", desc: "BNB-native assets plus verified Ondo tokenized stocks and ETFs, routed through available 0x and PancakeSwap liquidity." },
   { name: "Arbitrum", badge: "Swap", desc: "ARB, PENDLE, ETH, stablecoins, GMX, MAGIC, and wrapped assets across Ethereum L2 liquidity." },
   { name: "Optimism", badge: "Swap", desc: "OP, WLD, ETH, stablecoins, SNX, and VELO across Ethereum L2 liquidity." },
   { name: "Avalanche", badge: "Swap", desc: "AVAX, JOE, stablecoins, WETH, and WBTC on Avalanche C-Chain." },
@@ -341,7 +341,7 @@ export default function About() {
             House of Joshi across every chain that matters.
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-white/66 sm:text-base">
-            Trade and discover community tokens, blue-chip assets, stablecoins, and chain-native coins across 12 supported networks from one non-custodial interface.
+            Trade and discover community tokens, blue-chip assets, stablecoins, and chain-native coins across {CHAIN_OPTIONS.length} supported networks from one non-custodial interface.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
@@ -396,7 +396,7 @@ export default function About() {
           eyebrow="Supported tokens"
           title="Logo-first token coverage"
         />
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4">
           {displayedTokenGroups.map((group) => (
             <div key={group.title} className="hoj-panel rounded-2xl p-5">
               <div className="mb-4 flex items-end justify-between gap-3">
@@ -406,7 +406,7 @@ export default function About() {
                 </div>
                 <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] text-white/45">{group.tokens.length} assets</span>
               </div>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
                 {group.tokens.map((token) => (
                   <TokenTile key={`${group.title}-${token.address ?? token.symbol}`} {...token} />
                 ))}
