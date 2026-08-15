@@ -21,9 +21,10 @@ const walletConnectProjectId =
 
 const appUrl =
   (process.env.NEXT_PUBLIC_APP_URL as string | undefined) ??
-  (typeof window !== "undefined" ? window.location.origin : "https://swap.thehouseofjoshi.com");
+  "https://swap.thehouseofjoshi.com";
 
 export const wagmiConfig = getDefaultConfig({
+  ssr: true,
   appName: "House of Joshi — Swap & Bridge",
   appDescription:
     "Swap, bridge, and discover assets across Ethereum, Base, Zora, Cronos, XRP EVM, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Robinhood Chain, and Unichain.",

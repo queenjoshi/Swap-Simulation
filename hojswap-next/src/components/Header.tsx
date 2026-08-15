@@ -136,7 +136,7 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-0.5 md:flex">
+        <nav className="hidden items-center gap-0.5 lg:flex">
           {NAV_LINKS.map((link) =>
             link.external ? (
               <a
@@ -164,7 +164,7 @@ export function Header() {
           )}
         </nav>
 
-        <div className="ml-auto flex items-center gap-3 md:hidden">
+        <div className="ml-auto flex items-center gap-3 lg:hidden">
           <span className="hidden text-[13px] text-white/40 min-[380px]:inline">{getPageTitle(location)}</span>
         </div>
 
@@ -173,7 +173,7 @@ export function Header() {
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/60 hover:border-[rgba(212,175,55,0.3)] hover:text-white md:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/60 hover:border-[rgba(212,175,55,0.3)] hover:text-white lg:hidden"
             aria-label="Toggle menu"
           >
             {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}

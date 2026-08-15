@@ -90,7 +90,7 @@ export const TOKENS: Token[] = [
     address: getAddress("0xcb17c9db87b595717c857a08468793f5bab6445f"),
     chainId: base.id,
     decimals: 8,
-    logo: "https://assets.coingecko.com/coins/images/1/standard/litecoin.png",
+    logo: "https://assets.coingecko.com/coins/images/2/standard/litecoin.png",
   },
   {
     symbol: "cbADA",
@@ -918,6 +918,7 @@ export const TOKENS: Token[] = [
     address: getAddress("0x3d9907F9a368ad0a51Be60f7Da3b97cf940982D8"),
     chainId: arbitrum.id,
     decimals: 18,
+    logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0x3d9907F9a368ad0a51Be60f7Da3b97cf940982D8/logo.png",
   },
   {
     symbol: "RDNT",
@@ -1047,6 +1048,7 @@ export const TOKENS: Token[] = [
     address: getAddress("0x60781C2586D68229fde47564546784ab3fACA982"),
     chainId: avalanche.id,
     decimals: 18,
+    logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchec/assets/0x60781C2586D68229fde47564546784ab3fACA982/logo.png",
   },
   {
     symbol: "QI",
@@ -1061,6 +1063,7 @@ export const TOKENS: Token[] = [
     address: getAddress("0x420FcA0121DC28039145009570975747295f2329"),
     chainId: avalanche.id,
     decimals: 18,
+    logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchec/assets/0x420FcA0121DC28039145009570975747295f2329/logo.png",
   },
   {
     symbol: "sAVAX",

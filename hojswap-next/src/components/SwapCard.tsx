@@ -1158,7 +1158,7 @@ function SwapCardInner() {
     }
 
     return (
-        <div className="w-full max-w-[480px]">
+        <div className="w-full max-w-[450px]">
             {apiKeyError && (
                 <div className="mb-4 flex items-start gap-3 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3">
                     <span className="mt-0.5 shrink-0 text-amber-300">⚠</span>
@@ -1184,7 +1184,7 @@ function SwapCardInner() {
                 </div>
             )}
 
-            <div className="hoj-card space-y-2.5 rounded-[28px] p-2.5 sm:p-3">
+            <div className="hoj-card space-y-2 rounded-[24px] p-2 sm:rounded-[26px] sm:p-2.5">
                 <div className="relative z-[90] flex items-center justify-between gap-2 px-1 pb-1">
                     <div className="min-w-0">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Trade</p>
@@ -1198,7 +1198,7 @@ function SwapCardInner() {
                                 updateChainMenuRect();
                                 setChainMenuOpen((next) => !next);
                             }}
-                            className="flex min-w-[8.75rem] items-center justify-between gap-2 rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-2 text-left outline-none transition hover:border-[rgba(212,175,55,0.3)] focus:border-[rgba(212,175,55,0.55)]"
+                            className="flex min-w-[8.25rem] items-center justify-between gap-2 rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-1.5 text-left outline-none transition hover:border-[rgba(212,175,55,0.3)] focus:border-[rgba(212,175,55,0.55)] sm:min-w-[8.75rem] sm:py-2"
                             aria-haspopup="listbox"
                             aria-expanded={chainMenuOpen}
                             aria-label="Select network"
@@ -1271,7 +1271,7 @@ function SwapCardInner() {
                             key={id}
                             type="button"
                             onClick={() => setActiveTab(id)}
-                            className={`min-w-0 flex-1 rounded-full px-2 py-2 text-[12px] font-semibold capitalize transition sm:px-3 ${activeTab === id
+                                className={`min-w-0 flex-1 rounded-full px-2 py-1.5 text-[12px] font-semibold capitalize transition sm:px-3 sm:py-2 ${activeTab === id
                                 ? "bg-[rgba(212,175,55,0.95)] text-black"
                                 : "bg-transparent text-white/70 hover:bg-white/5"
                                 }`}
@@ -1330,8 +1330,8 @@ function SwapCardInner() {
                 ) : isSwapSupported && activeTab === "swap" ? (
                     <>
                         <div className="relative !z-30">
-                            <div className="hoj-panel rounded-[26px] p-4 sm:p-5">
-                                <div className="mb-3 flex items-start justify-between gap-3">
+                            <div className="hoj-panel rounded-[22px] p-3.5 sm:rounded-[24px] sm:p-4">
+                                <div className="mb-2 flex items-start justify-between gap-3 sm:mb-2.5">
                                     <div className="text-[15px] font-semibold text-white/55">Sell</div>
                                     <div className="w-[8.5rem] shrink-0 sm:w-[9.25rem]">
                                         <TokenSelect
@@ -1354,17 +1354,17 @@ function SwapCardInner() {
                                             const next = sellDecimals != null ? clampToDecimals(nextRaw, sellDecimals) : nextRaw;
                                             setSellAmountInput(next);
                                         }}
-                                        className="hoj-input w-full min-w-0 bg-transparent text-5xl font-semibold leading-none text-white outline-none placeholder:text-white/25 sm:text-6xl"
+                                        className="hoj-input w-full min-w-0 bg-transparent text-[2.65rem] font-semibold leading-none text-white outline-none placeholder:text-white/25 sm:text-5xl"
                                     />
                                 </div>
-                                <div className="mt-4 grid grid-cols-4 gap-2" aria-label="Choose percentage of balance to swap">
+                                <div className="mt-3 grid grid-cols-4 gap-1.5 sm:gap-2" aria-label="Choose percentage of balance to swap">
                                     {BALANCE_PERCENTAGES.map((percent) => (
                                         <button
                                             key={percent}
                                             type="button"
                                             onClick={() => amountForBalancePercentage(percent)}
                                             disabled={!sellBalanceData || sellBalanceData.value === 0n || !walletOnSelectedChain}
-                                            className="rounded-xl border border-white/10 bg-white/[0.04] px-2 py-2 text-xs font-semibold tabular-nums text-white/60 transition hover:border-[rgba(212,175,55,0.45)] hover:bg-[rgba(212,175,55,0.1)] hover:text-[rgba(255,222,85,0.95)] disabled:cursor-not-allowed disabled:opacity-30"
+                                            className="min-h-9 rounded-xl border border-white/10 bg-white/[0.04] px-1.5 py-1.5 text-[11px] font-semibold tabular-nums text-white/60 transition hover:border-[rgba(212,175,55,0.45)] hover:bg-[rgba(212,175,55,0.1)] hover:text-[rgba(255,222,85,0.95)] disabled:cursor-not-allowed disabled:opacity-30 sm:px-2 sm:text-xs"
                                             aria-label={`Swap ${percent}% of ${sellToken.symbol} balance`}
                                         >
                                             {percent}%
@@ -1377,14 +1377,14 @@ function SwapCardInner() {
                             <button
                                 type="button"
                                 onClick={flipTokens}
-                                className="relative z-10 mx-auto -my-3 flex h-12 w-12 items-center justify-center rounded-2xl border-4 border-[#101012] bg-[#19191b] text-2xl text-[rgba(212,175,55,0.95)] shadow-[0_14px_28px_rgba(0,0,0,0.45)] transition hover:bg-[#202022] hover:text-[rgba(255,222,85,1)]"
+                                className="relative z-10 mx-auto -my-2.5 flex h-10 w-10 items-center justify-center rounded-xl border-[3px] border-[#101012] bg-[#19191b] text-xl text-[rgba(212,175,55,0.95)] shadow-[0_12px_24px_rgba(0,0,0,0.45)] transition hover:bg-[#202022] hover:text-[rgba(255,222,85,1)] sm:h-11 sm:w-11 sm:rounded-2xl sm:text-2xl"
                                 aria-label="Flip tokens"
                             >
                                 ↓
                             </button>
 
-                            <div className="hoj-panel rounded-[26px] p-4 pt-7 sm:p-5 sm:pt-8">
-                                <div className="mb-3 flex items-start justify-between gap-3">
+                            <div className="hoj-panel rounded-[22px] p-3.5 pt-6 sm:rounded-[24px] sm:p-4 sm:pt-7">
+                                <div className="mb-2 flex items-start justify-between gap-3 sm:mb-2.5">
                                     <div className="text-[15px] font-semibold text-white/55">Buy</div>
                                     <div className="w-[8.5rem] shrink-0 sm:w-[9.25rem]">
                                         <TokenSelect
@@ -1397,7 +1397,7 @@ function SwapCardInner() {
                                     </div>
                                 </div>
                                 <div className="min-w-0 overflow-hidden">
-                                    <div className="truncate text-4xl font-semibold leading-none tabular-nums text-white/90 sm:text-5xl" title={buyAmountRaw ?? undefined}>
+                                    <div className="truncate text-[2.25rem] font-semibold leading-none tabular-nums text-white/90 sm:text-[2.65rem]" title={buyAmountRaw ?? undefined}>
                                         {(() => {
                                             if (isQuoting) return "…";
                                             if (!sellAmountInput) return "—";
@@ -1483,7 +1483,7 @@ function SwapCardInner() {
                                 type="button"
                                 onClick={() => switchChainAsync({ chainId: selectedChainId })}
                                 disabled={isSwitching}
-                                className="w-full rounded-[22px] bg-[rgba(212,175,55,0.95)] px-4 py-4 text-base font-semibold text-black transition hover:bg-[rgba(212,175,55,0.85)] disabled:opacity-60"
+                                className="w-full min-h-12 rounded-[20px] bg-[rgba(212,175,55,0.95)] px-4 py-3 text-sm font-semibold text-black transition hover:bg-[rgba(212,175,55,0.85)] disabled:opacity-60 sm:text-base"
                             >
                                 {isSwitching ? "Switching…" : `Switch to ${selectedChainName}`}
                             </button>
@@ -1496,7 +1496,7 @@ function SwapCardInner() {
                                 type="button"
                                 onClick={needsApproval ? approveAndSwap : () => swap()}
                                 disabled={primaryDisabled}
-                                className="w-full rounded-[24px] bg-[rgba(255,222,85,0.98)] px-4 py-4 text-base font-bold text-black shadow-[0_14px_28px_-18px_rgba(255,222,85,0.9)] transition hover:bg-[rgba(255,210,65,0.98)] disabled:opacity-60"
+                                className="w-full min-h-12 rounded-[20px] bg-[rgba(255,222,85,0.98)] px-4 py-3 text-sm font-bold text-black shadow-[0_14px_28px_-18px_rgba(255,222,85,0.9)] transition hover:bg-[rgba(255,210,65,0.98)] disabled:opacity-60 sm:text-base"
                             >
                                 {primaryLabel}
                             </button>
