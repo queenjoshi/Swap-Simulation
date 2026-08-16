@@ -6,7 +6,7 @@ export const USDC_CURRENCY = "5553444300000000000000000000000000000000";
 export const XRPL_HOUSE_WALLET = "rUG7tHZ5sGCVxuhkAiL9fUqVFhki2Z6bVU";
 
 export type XrplAsset = {
-  symbol: "XRP" | "RLUSD" | "USDC" | "SOLO" | "CSC" | "XRdoge";
+  symbol: "XRP" | "RLUSD" | "USDC" | "SOLO" | "CSC" | "XRdoge" | "ARMY" | "DROP" | "FUZZY" | "PHNIX";
   name: string;
   currency: string;
   issuer?: string;
@@ -49,6 +49,34 @@ export const XRPL_ASSETS: XrplAsset[] = [
     currency: "5852646F67650000000000000000000000000000",
     issuer: "rLqUC2eCPohYvJCEBJ77eCCqVL2uEiczjA",
     logo: "https://xrdoge.org/favicon.ico",
+  },
+  {
+    symbol: "ARMY",
+    name: "XRP Army",
+    currency: "41524D5900000000000000000000000000000000",
+    issuer: "rGG3wQ4kUzd7Jnmk1n5NWPZjjut62kCBfC",
+    logo: "https://ipfs.firstledger.net/ipfs/QmbWMQRXp1JR9mypBerpPo9syYyqLQdyuQuDNJzSmgcaHJ",
+  },
+  {
+    symbol: "DROP",
+    name: "DROP",
+    currency: "44524F5000000000000000000000000000000000",
+    issuer: "rszenFJoDdiGjyezQc8pME9KWDQH43Tswh",
+    logo: "https://ipfs.firstledger.net/ipfs/QmUEVJNfo5CKcaTnGgb9AwWFRaKyEg8uRYShgsNoVAihpB",
+  },
+  {
+    symbol: "FUZZY",
+    name: "Fuzzybear",
+    currency: "46555A5A59000000000000000000000000000000",
+    issuer: "rhCAT4hRdi2Y9puNdkpMzxrdKa5wkppR62",
+    logo: "https://ipfs.firstledger.net/ipfs/QmWGNu6FmQDQNHDnxGek3DPQj832G3qzs4kfDddMSttYMk",
+  },
+  {
+    symbol: "PHNIX",
+    name: "PHNIX",
+    currency: "50484E4958000000000000000000000000000000",
+    issuer: "rDFXbW2ZZCG5WgPtqwNiA2xZokLMm9ivmN",
+    logo: "https://coin-images.coingecko.com/coins/images/52497/large/photo_2024-12-03_21-46-21_%281%29.jpg",
   },
 ];
 

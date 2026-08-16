@@ -19,6 +19,8 @@ const COINGECKO_IDS = [
   "velodrome-finance", "worldcoin-wld", "connect-token-wct", "avalanche-2", "joe", "pangolin",
   "benqi", "coq-inu", "benqi-liquid-staked-avax", "wrapped-avax", "bitcoin-avalanche-bridged-btc-b",
   "yield-yak", "arena-token", "global-dollar",
+  "turbo", "apu-s-club", "wojak", "milady-meme-coin", "toby-toadgod", "mister-miggles",
+  "russell", "moew", "dino-2", "cheems-token", "why", "polydoge", "arbdoge-ai", "boop-4",
 ];
 
 const DEXSCREENER_CHAINS: Record<number, string> = {
