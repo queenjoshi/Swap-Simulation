@@ -331,6 +331,38 @@ export const TOKENS: Token[] = [
     decimals: 18,
     logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0xa4a2e2ca3fbfe21aed83471d28b6f65a233c6e00/logo.png",
   },
+  {
+    symbol: "DOGINME",
+    name: "doginme",
+    address: getAddress("0x6921B130D297cc43754afba22e5EAc0FBf8Db75b"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/35123/large/doginme-logo1-transparent200.png",
+  },
+  {
+    symbol: "SKI",
+    name: "Ski Mask Dog",
+    address: getAddress("0x768BE13e1680b5ebE0024C42c896E3dB59ec0149"),
+    chainId: base.id,
+    decimals: 9,
+    logo: "https://coin-images.coingecko.com/coins/images/37195/large/32992128-F52F-4346-84CA-8E0C48F43606.jpeg",
+  },
+  {
+    symbol: "KEYCAT",
+    name: "Keyboard Cat",
+    address: getAddress("0x9a26F5433671751C3276a065f57e5a02D2817973"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/36608/large/IMG_9500.jpeg",
+  },
+  {
+    symbol: "BENJI",
+    name: "Basenji",
+    address: getAddress("0xBC45647eA894030a4E9801Ec03479739FA2485F0"),
+    chainId: base.id,
+    decimals: 18,
+    logo: "https://coin-images.coingecko.com/coins/images/36416/large/photo_2025-12-04_22.13.35.png",
+  },
 
   // ─── Ethereum mainnet ────────────────────────────────────
   {

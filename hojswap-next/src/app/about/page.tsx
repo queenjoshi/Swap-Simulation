@@ -50,6 +50,10 @@ const curatedTokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[
       { symbol: "SUSHI", name: "Sushi", logo: "https://assets.coingecko.com/coins/images/12271/standard/512x512_Logo_no_chop.png" },
       { symbol: "NPC", name: "Non-Playable Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0xb166e8b140d35d9d8226e40c09f757bac5a4d87d/logo.png" },
       { symbol: "TIBBIR", name: "Ribbita by Virtuals", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0xa4a2e2ca3fbfe21aed83471d28b6f65a233c6e00/logo.png" },
+      { symbol: "DOGINME", name: "doginme", logo: "https://coin-images.coingecko.com/coins/images/35123/large/doginme-logo1-transparent200.png" },
+      { symbol: "SKI", name: "Ski Mask Dog", logo: "https://coin-images.coingecko.com/coins/images/37195/large/32992128-F52F-4346-84CA-8E0C48F43606.jpeg" },
+      { symbol: "KEYCAT", name: "Keyboard Cat", logo: "https://coin-images.coingecko.com/coins/images/36608/large/IMG_9500.jpeg" },
+      { symbol: "BENJI", name: "Basenji", logo: "https://coin-images.coingecko.com/coins/images/36416/large/photo_2025-12-04_22.13.35.png" },
     ],
   },
   {

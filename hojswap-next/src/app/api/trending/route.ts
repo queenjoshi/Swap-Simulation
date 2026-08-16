@@ -7,7 +7,7 @@ export async function GET(request: Request) {
 
     // Map chainId to CoinGecko category with fallback
     const categoryMap: { [key: string]: string[] } = {
-      '8453': ['base-ecosystem'],
+      '8453': ['base-meme-coins', 'base-ecosystem'],
       '1': ['ethereum-ecosystem', 'defi'], // Ethereum - with fallback to DeFi
       '25': ['cronos-ecosystem', 'defi'], // Cronos - with fallback to DeFi
       '137': ['polygon-ecosystem', 'defi'],
