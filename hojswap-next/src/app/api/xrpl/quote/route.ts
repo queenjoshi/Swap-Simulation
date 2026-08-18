@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { XRPL_ASSETS, XRPL_MAINNET_RPC, xrplBookAsset, xrplTransactionAmount } from "@/lib/xrpl-native";
+import { XRPL_ASSETS, XRPL_MAINNET_RPC, xrplAssetId, xrplBookAsset, xrplTransactionAmount, type XrplAsset } from "@/lib/xrpl-native";
 
 type LedgerAmount = string | { currency: string; issuer: string; value: string };
 type BookOffer = {
@@ -15,11 +15,11 @@ function decimalAmount(amount: LedgerAmount) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json() as { account?: string; sell?: string; buy?: string; amount?: string; slippageBps?: number };
-    const sell = XRPL_ASSETS.find((asset) => asset.symbol === body.sell);
-    const buy = XRPL_ASSETS.find((asset) => asset.symbol === body.buy);
+    const body = await request.json() as { account?: string; sell?: string; buy?: string; sellAsset?: XrplAsset; buyAsset?: XrplAsset; amount?: string; slippageBps?: number };
+    const sell = validatedAsset(body.sellAsset) ?? XRPL_ASSETS.find((asset) => asset.symbol === body.sell);
+    const buy = validatedAsset(body.buyAsset) ?? XRPL_ASSETS.find((asset) => asset.symbol === body.buy);
     const sellAmount = Number(body.amount);
-    if (!sell || !buy || sell.symbol === buy.symbol || !Number.isFinite(sellAmount) || sellAmount <= 0) {
+    if (!sell || !buy || xrplAssetId(sell) === xrplAssetId(buy) || !Number.isFinite(sellAmount) || sellAmount <= 0) {
       return NextResponse.json({ error: "Invalid native XRPL quote request" }, { status: 400 });
     }
     if (sell.symbol !== "XRP" && buy.symbol !== "XRP") {
@@ -83,4 +83,20 @@ export async function POST(request: Request) {
     console.error("[XRPL QUOTE]", error);
     return NextResponse.json({ error: "Native XRP Ledger quote failed" }, { status: 502 });
   }
+}
+
+function validatedAsset(asset: XrplAsset | undefined): XrplAsset | undefined {
+  if (!asset || typeof asset.symbol !== "string" || typeof asset.name !== "string" || typeof asset.currency !== "string") return undefined;
+  if (asset.currency === "XRP" && !asset.issuer) return { symbol: "XRP", name: "XRP", currency: "XRP", logo: "/tokens/xrp.png" };
+  if (!asset.issuer || !/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(asset.issuer)) return undefined;
+  if (!(asset.currency.length === 3 && /^[\x21-\x7E]{3}$/.test(asset.currency)) && !/^[A-Fa-f0-9]{40}$/.test(asset.currency)) return undefined;
+  return {
+    symbol: asset.symbol.slice(0, 20),
+    name: asset.name.slice(0, 80),
+    currency: asset.currency,
+    issuer: asset.issuer,
+    logo: typeof asset.logo === "string" ? asset.logo : "",
+    imported: Boolean(asset.imported),
+    verified: Boolean(asset.verified),
+  };
 }

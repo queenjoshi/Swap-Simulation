@@ -6,11 +6,13 @@ export const USDC_CURRENCY = "5553444300000000000000000000000000000000";
 export const XRPL_HOUSE_WALLET = "rUG7tHZ5sGCVxuhkAiL9fUqVFhki2Z6bVU";
 
 export type XrplAsset = {
-  symbol: "XRP" | "RLUSD" | "USDC" | "SOLO" | "CSC" | "XRdoge" | "ARMY" | "DROP" | "FUZZY" | "PHNIX";
+  symbol: string;
   name: string;
   currency: string;
   issuer?: string;
   logo: string;
+  verified?: boolean;
+  imported?: boolean;
 };
 
 export const XRPL_ASSETS: XrplAsset[] = [
@@ -78,6 +80,38 @@ export const XRPL_ASSETS: XrplAsset[] = [
     issuer: "rDFXbW2ZZCG5WgPtqwNiA2xZokLMm9ivmN",
     logo: "https://coin-images.coingecko.com/coins/images/52497/large/photo_2024-12-03_21-46-21_%281%29.jpg",
   },
+  {
+    symbol: "SIGMA",
+    name: "SIGMA",
+    currency: "5349474D41000000000000000000000000000000",
+    issuer: "rfKYWZ84fm9eVEdoTcsQCo1WdqMPyaUF5z",
+    logo: "https://coin-images.coingecko.com/coins/images/54120/large/SIGMA.jpg",
+    verified: true,
+  },
+  {
+    symbol: "SEAL",
+    name: "Seal",
+    currency: "5345414C00000000000000000000000000000000",
+    issuer: "r4pXXQzJ8soYSX4QKeeW4BzRQS1PCtVYLJ",
+    logo: "https://coin-images.coingecko.com/coins/images/68390/large/icon-512.png",
+    verified: true,
+  },
+  {
+    symbol: "XRPH",
+    name: "XRP Healthcare",
+    currency: "5852504800000000000000000000000000000000",
+    issuer: "rM8hNqA3jRJ5Zgp3Xf3xzdZcx2G37guiZk",
+    logo: "https://coin-images.coingecko.com/coins/images/28982/large/favicon.png",
+    verified: true,
+  },
+  {
+    symbol: "XPM",
+    name: "XPMarket Token",
+    currency: "XPM",
+    issuer: "rXPMxBeefHGxx2K7g5qmmWq3gFsgawkoa",
+    logo: "https://s2.xrplmeta.org/icon/4E7902ED1F.png",
+    verified: true,
+  },
 ];
 
 export function xrplBookAsset(asset: XrplAsset) {
@@ -87,4 +121,8 @@ export function xrplBookAsset(asset: XrplAsset) {
 export function xrplTransactionAmount(asset: XrplAsset, amount: string) {
   if (!asset.issuer) return String(Math.floor(Number(amount) * 1_000_000));
   return { currency: asset.currency, issuer: asset.issuer, value: amount };
+}
+
+export function xrplAssetId(asset: Pick<XrplAsset, "currency" | "issuer">) {
+  return asset.issuer ? `${asset.issuer}:${asset.currency}` : "XRP";
 }

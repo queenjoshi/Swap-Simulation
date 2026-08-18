@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import type { Transaction } from "xrpl";
 import type { WalletManager } from "xrpl-connect";
 import { TokenLogo } from "@/components/TokenLogo";
-import { XRPL_ASSETS, XRPL_HOUSE_WALLET, type XrplAsset } from "@/lib/xrpl-native";
+import { XRPL_ASSETS, XRPL_HOUSE_WALLET, xrplAssetId, type XrplAsset } from "@/lib/xrpl-native";
 import { getXrplWalletManager } from "@/lib/xrpl-wallet";
 
 type Quote = {
@@ -20,6 +20,8 @@ type AccountState = {
   xrpBalance: number;
   balances: Record<string, number>;
   trustlines: Record<string, boolean>;
+  assetBalances: Record<string, number>;
+  assetTrustlines: Record<string, boolean>;
 };
 
 export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
@@ -84,7 +86,7 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
       void fetch("/api/xrpl/quote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ account: address, sell: sell.symbol, buy: buy.symbol, amount, slippageBps: 50 }),
+        body: JSON.stringify({ account: address, sellAsset: sell, buyAsset: buy, amount, slippageBps: 50 }),
         signal: controller.signal,
       }).then(async (response) => {
         const payload = await response.json() as Quote & { error?: string };
@@ -102,10 +104,10 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [address, amount, buy.symbol, sell.symbol]);
+  }, [address, amount, buy, sell]);
 
-  const needsTrustline = Boolean(buy.issuer && account && !account.trustlines[buy.symbol]);
-  const sellBalance = sell.symbol === "XRP" ? account?.xrpBalance : account?.balances[sell.symbol];
+  const needsTrustline = Boolean(buy.issuer && account && !account.assetTrustlines?.[xrplAssetId(buy)]);
+  const sellBalance = sell.symbol === "XRP" ? account?.xrpBalance : account?.assetBalances?.[xrplAssetId(sell)];
   const selectedIssuedAsset = buy.issuer ? buy : sell.issuer ? sell : XRPL_ASSETS[1]!;
   const insufficient = sellBalance != null && Number(amount) > sellBalance;
   const primaryLabel = !address
@@ -208,7 +210,7 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
         {address && (
           <div className="rounded-xl border border-white/8 bg-black/20 px-3 py-2 text-xs text-white/50">
             <span className="block truncate font-mono">{address}</span>
-            <span>{account ? `${account.xrpBalance.toFixed(6)} XRP · ${(account.balances[selectedIssuedAsset.symbol] ?? 0).toLocaleString()} ${selectedIssuedAsset.symbol}` : "Loading balances…"}</span>
+            <span>{account ? `${account.xrpBalance.toFixed(6)} XRP · ${(account.assetBalances?.[xrplAssetId(selectedIssuedAsset)] ?? 0).toLocaleString()} ${selectedIssuedAsset.symbol}` : "Loading balances…"}</span>
           </div>
         )}
 
@@ -310,23 +312,79 @@ function AssetButton({ asset, onClick }: { asset: XrplAsset; onClick: () => void
 }
 
 function AssetSelector({ selected, onChoose }: { selected: XrplAsset; onChoose: (asset: XrplAsset) => void }) {
+  const [registryTokens, setRegistryTokens] = useState<XrplAsset[]>([]);
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [registryOffset, setRegistryOffset] = useState(0);
+
+  async function loadMore() {
+    if (loading || !hasMore) return;
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/xrpl/tokens?offset=${registryOffset}&limit=50`, { cache: "no-store" });
+      const payload = await response.json() as { tokens?: XrplAsset[]; nextOffset?: number; hasMore?: boolean };
+      if (!response.ok) throw new Error("Registry unavailable");
+      const incoming = payload.tokens ?? [];
+      setRegistryTokens((current) => {
+        const seen = new Set(current.map(xrplAssetId));
+        return [...current, ...incoming.filter((asset) => !seen.has(xrplAssetId(asset)))];
+      });
+      setRegistryOffset(Number(payload.nextOffset ?? registryOffset + 50));
+      setHasMore(Boolean(payload.hasMore));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { void loadMore(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const assets = useMemo(() => {
+    const seen = new Set<string>();
+    const combined = [XRPL_ASSETS[0]!, ...XRPL_ASSETS.slice(1), ...registryTokens].filter((asset) => {
+      const id = xrplAssetId(asset);
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+    const needle = query.trim().toLowerCase();
+    if (!needle) return combined;
+    return combined.filter((asset) =>
+      asset.symbol.toLowerCase().includes(needle)
+      || asset.name.toLowerCase().includes(needle)
+      || asset.issuer?.toLowerCase().includes(needle)
+      || asset.currency.toLowerCase().includes(needle),
+    );
+  }, [query, registryTokens]);
+
   return (
-    <div className="grid grid-cols-1 gap-1 rounded-2xl border border-white/10 bg-black/40 p-2 sm:grid-cols-2">
-      {XRPL_ASSETS.map((asset) => (
+    <div className="rounded-2xl border border-white/10 bg-black/40 p-2">
+      <input
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder="Search name, ticker, issuer or currency"
+        className="mb-2 w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-amber-300/40"
+      />
+      <div className="grid max-h-72 grid-cols-1 gap-1 overflow-y-auto sm:grid-cols-2">
+      {assets.map((asset) => (
         <button
-          key={asset.symbol}
+          key={xrplAssetId(asset)}
           type="button"
           onClick={() => onChoose(asset)}
-          className={`flex items-center gap-3 rounded-xl px-3 py-2 text-left hover:bg-white/8 ${selected.symbol === asset.symbol ? "bg-amber-300/10" : ""}`}
+          className={`flex items-center gap-3 rounded-xl px-3 py-2 text-left hover:bg-white/8 ${xrplAssetId(selected) === xrplAssetId(asset) ? "bg-amber-300/10" : ""}`}
         >
           <TokenLogo symbol={asset.symbol} logo={asset.logo} size="sm" />
           <span className="min-w-0">
             <span className="block text-sm font-semibold text-white">{asset.symbol}</span>
             <span className="block truncate text-[11px] text-white/45">{asset.name}</span>
+            {asset.issuer && <span className="block max-w-44 truncate font-mono text-[9px] text-white/25">{asset.issuer}</span>}
           </span>
+          {asset.verified && <span className="ml-auto text-[9px] font-semibold text-emerald-300/80">VERIFIED</span>}
         </button>
       ))}
-      <p className="col-span-full px-2 py-1 text-[10px] leading-4 text-white/35">Issued-token routes use the exact verified XRPL issuer shown in the app configuration. XRP remains one side of every pair.</p>
+      </div>
+      {hasMore && !query && <button type="button" onClick={() => void loadMore()} disabled={loading} className="mt-2 w-full rounded-xl border border-white/10 px-3 py-2 text-xs text-white/55 hover:border-amber-300/35 disabled:opacity-50">{loading ? "Loading XRPL tokens…" : "Load more XRPL tokens"}</button>}
+      <p className="px-2 py-2 text-[10px] leading-4 text-white/35">Only curated assets and registry-verified issuers are shown. Always confirm the issuer address; swaps remain limited to pairs with live XRP liquidity.</p>
     </div>
   );
 }

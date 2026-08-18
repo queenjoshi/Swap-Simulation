@@ -24,6 +24,10 @@ export async function GET(request: Request) {
     ]);
     const accountData = info.result?.account_data as { Balance?: string } | undefined;
     const trustLines = (lines.result?.lines ?? []) as Array<{ account?: string; balance?: string; currency?: string }>;
+    const assetBalances = Object.fromEntries(trustLines.flatMap((line) =>
+      line.account && line.currency ? [[`${line.account}:${line.currency}`, Number(line.balance ?? 0)]] : [],
+    ));
+    const assetTrustlines = Object.fromEntries(Object.keys(assetBalances).map((key) => [key, true]));
     const issuedAssets = XRPL_ASSETS.filter((asset) => asset.issuer);
     const balances = Object.fromEntries(issuedAssets.map((asset) => {
       const line = trustLines.find((candidate) => candidate.account === asset.issuer && candidate.currency === asset.currency);
@@ -37,6 +41,8 @@ export async function GET(request: Request) {
       xrpBalance: Number(accountData?.Balance ?? 0) / 1_000_000,
       balances,
       trustlines,
+      assetBalances,
+      assetTrustlines,
     });
   } catch (error) {
     console.error("[XRPL ACCOUNT]", error);
