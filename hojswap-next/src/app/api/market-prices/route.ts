@@ -33,7 +33,6 @@ const DEXSCREENER_CHAINS: Record<number, string> = {
   4663: "robinhood",
   42161: "arbitrum",
   43114: "avalanche",
-  1440000: "xrplevm",
   7777777: "zora",
   8453: "base",
 };

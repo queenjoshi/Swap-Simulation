@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { getHojswapRouterAddress, ZERO_ADDRESS } from "@/lib/hojswap-router";
 import { calculateRouterSellAmount } from "@/lib/swap-fee";
-import { xrp } from "@/lib/chains";
-import { getHammyPrice } from "@/lib/hammy-swap";
 import type { PriceResponse, QuoteResponse } from "@/lib/quote";
 import { consumeQuoteRequest } from "@/lib/server-rate-limit";
 
@@ -73,28 +71,6 @@ export async function POST(request: Request) {
     body = await request.json() as SwapRequestBody;
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
-  }
-
-  if (Number(body.chainId) === xrp.id) {
-    try {
-      const routerAddress = getHojswapRouterAddress(xrp.id);
-      if (!routerAddress) return atomicRouterRequiredResponse();
-      const swapSellAmount = calculateRouterSellAmount(String(body.sellAmount));
-      const data = await getHammyPrice({
-        sellToken: String(body.sellToken),
-        buyToken: String(body.buyToken),
-        sellAmount: swapSellAmount,
-        chainId: xrp.id,
-        slippageBps: Number(body.slippageBps ?? 100),
-        recipient: routerAddress,
-      });
-      return NextResponse.json(attachRouterMetadata(data, routerAddress, String(body.sellAmount), swapSellAmount));
-    } catch (error) {
-      return NextResponse.json({
-        error: "xrp_price_failed",
-        reason: error instanceof Error ? error.message : "Failed to fetch XRP price",
-      }, { status: 502 });
-    }
   }
 
   if (!ZEROX_API_KEY) {

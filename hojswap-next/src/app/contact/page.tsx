@@ -107,7 +107,7 @@ export default function Contact() {
       <section className="rounded-2xl border border-[rgba(212,175,55,0.2)] bg-[rgba(212,175,55,0.05)] p-6 text-center">
         <h2 className="hoj-display mb-2 text-base font-semibold text-[rgba(212,175,55,0.9)]">Need help with swapping?</h2>
         <p className="mb-4 text-sm text-white/60">
-          Visit the swap page to connect across Ethereum, Base, Cronos, XRP EVM, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Robinhood Chain, and Unichain.
+          Visit the swap page to connect across Ethereum, Base, Cronos, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Robinhood Chain, Unichain, and the native XRP Ledger.
         </p>
         <Link
           href="/"

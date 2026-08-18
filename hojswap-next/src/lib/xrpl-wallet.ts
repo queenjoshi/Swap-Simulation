@@ -39,7 +39,7 @@ export function getXrplWalletManager() {
       modalMode: "always",
       metadata: {
         name: "House of Joshi Swap",
-        description: "Non-custodial swaps on the XRP Ledger and EVM networks",
+        description: "Non-custodial swaps on the XRP Ledger and supported EVM networks",
         url: window.location.origin,
         icons: ["https://swap.thehouseofjoshi.com/icon.png"],
       },

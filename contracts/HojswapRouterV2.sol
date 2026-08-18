@@ -132,7 +132,6 @@ contract HojswapRouterV2 {
         _setDestinationChainSupport(8453, true); // Base
         _setDestinationChainSupport(42161, true); // Arbitrum
         _setDestinationChainSupport(43114, true); // Avalanche
-        _setDestinationChainSupport(1440000, true); // XRP EVM
         _setDestinationChainSupport(7777777, true); // Zora
     }
 

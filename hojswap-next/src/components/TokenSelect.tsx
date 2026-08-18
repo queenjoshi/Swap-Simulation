@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { isAddress } from "viem";
 import { base } from "wagmi/chains";
 import { Token, tokenId } from "@/lib/tokens";
 import { TokenLogo } from "@/components/TokenLogo";
@@ -159,19 +158,13 @@ export function TokenSelect({
   tokens,
   value,
   onChange,
-  allowAddressImport = false,
-  onTokenImported,
 }: {
   tokens: Token[];
   value: Token;
   onChange: (t: Token) => void;
-  allowAddressImport?: boolean;
-  onTokenImported?: (token: Token) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [isImporting, setIsImporting] = useState(false);
-  const [importError, setImportError] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
   const options = useMemo(
@@ -204,36 +197,6 @@ export function TokenSelect({
       || token.address?.toLowerCase().includes(normalized),
     );
   }, [options, query]);
-
-  const importableAddress = allowAddressImport && isAddress(query.trim())
-    && !tokens.some((token) => token.address?.toLowerCase() === query.trim().toLowerCase());
-
-  async function importAddress() {
-    if (!importableAddress || isImporting) return;
-    setIsImporting(true);
-    setImportError(null);
-    try {
-      const response = await fetch("/api/xrp-token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address: query.trim() }),
-      });
-      const payload = await response.json() as { token?: Token; warning?: string; error?: string };
-      if (!response.ok || !payload.token) throw new Error(payload.error ?? "Unable to import token");
-      const confirmed = window.confirm(
-        `${payload.warning}\n\n${payload.token.symbol} — ${payload.token.name}\n${payload.token.address}`,
-      );
-      if (!confirmed) return;
-      onTokenImported?.(payload.token);
-      onChange(payload.token);
-      setQuery("");
-      setOpen(false);
-    } catch (error) {
-      setImportError(error instanceof Error ? error.message : "Unable to import token");
-    } finally {
-      setIsImporting(false);
-    }
-  }
 
   useEffect(() => {
     if (!open) return;
@@ -281,22 +244,10 @@ export function TokenSelect({
               value={query}
               onChange={(event) => {
                 setQuery(event.target.value);
-                setImportError(null);
               }}
               placeholder="Search name, symbol, or address"
               className="w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-[rgba(212,175,55,0.45)]"
             />
-            {importableAddress && (
-              <button
-                type="button"
-                onClick={importAddress}
-                disabled={isImporting}
-                className="mt-1.5 w-full rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-left text-xs font-semibold text-amber-200 hover:bg-amber-400/15 disabled:opacity-50"
-              >
-                {isImporting ? "Checking contract and liquidity…" : "Import unverified XRPL EVM token"}
-              </button>
-            )}
-            {importError && <p className="px-1 pt-1.5 text-xs text-red-300">{importError}</p>}
             <p className="px-1 pt-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-white/35">
               {filteredOptions.length} of {options.length} tokens
             </p>

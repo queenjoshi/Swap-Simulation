@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 
 const ETHERSCAN_KEY = process.env.ETHERSCAN_API_KEY ?? "";
 const HOUSE_WALLET = "0x6736d2eA9807297F0e56967361B9410854B86a5f";
-const XRP_EVM_CHAIN_ID = 1440000;
 const AVALANCHE_CHAIN_ID = 43114;
 const UNICHAIN_CHAIN_ID = 130;
 const ROBINHOOD_CHAIN_ID = 4663;
@@ -48,7 +47,6 @@ function getEtherscanApiUrl(chainId: number): string | null {
   if (chainId === AVALANCHE_CHAIN_ID) return "https://api.snowtrace.io/api";
   if (chainId === UNICHAIN_CHAIN_ID) return "https://api.uniscan.xyz/api";
   if (chainId === ROBINHOOD_CHAIN_ID) return "https://robinhoodchain.blockscout.com/api";
-  if (chainId === XRP_EVM_CHAIN_ID) return null; // No Etherscan-compatible API for XRP EVM
   return null;
 }
 

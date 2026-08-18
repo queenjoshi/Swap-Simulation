@@ -12,7 +12,7 @@ import {
 } from "wagmi";
 import { encodeFunctionData, formatUnits, parseUnits, type Hex } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { cronos, robinhood, xrp, getChainName } from "@/lib/chains";
+import { cronos, robinhood, getChainName } from "@/lib/chains";
 import { clampToDecimals, formatCompactNumber, isValidNumberInput } from "@/lib/format";
 import { useToast } from "@/components/Toast";
 import {
@@ -41,7 +41,6 @@ const ALL_CHAINS = [
   { id: base.id, name: "Base" },
   { id: cronos.id, name: "Cronos" },
   { id: robinhood.id, name: "Robinhood Chain" },
-  { id: xrp.id, name: "XRP Ledger" },
 ];
 
 const TOKEN_DECIMALS: Record<string, number> = { USDC: 6, USDT: 6, ETH: 18 };
@@ -49,7 +48,6 @@ const TOKEN_DECIMALS: Record<string, number> = { USDC: 6, USDT: 6, ETH: 18 };
 type BridgeMode = "stargate" | "lifi" | "unsupported";
 
 function getBridgeMode(fromChainId: number, toChainId: number): BridgeMode {
-  if (fromChainId === xrp.id || toChainId === xrp.id) return "unsupported";
   const stargate = getStargateRouteTokens(fromChainId, toChainId);
   if (stargate.length > 0) return "stargate";
   const lifi = getLiFiRouteTokens(fromChainId, toChainId);

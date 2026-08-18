@@ -1,6 +1,6 @@
 import { getAddress } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp, zora } from "@/lib/chains";
+import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, zora } from "@/lib/chains";
 
 export type Token = {
   symbol: string;
@@ -1162,29 +1162,6 @@ export const TOKENS: Token[] = [
     logo: "https://assets.coingecko.com/coins/images/2518/standard/weth.png",
   },
 
-  // ─── XRP Ledger EVM Sidechain ────────────────────────────
-  {
-    symbol: "XRP",
-    name: "XRP",
-    chainId: xrp.id,
-    decimals: 18,
-    logo: "/tokens/xrp.png",
-  },
-  {
-    symbol: "USDC",
-    name: "USD Coin (Hammy)",
-    address: getAddress("0xa16148c6Ac9EDe0D82f0c52899e22a575284f131"),
-    chainId: xrp.id,
-    decimals: 6,
-  },
-  {
-    symbol: "WETH",
-    name: "Wrapped Ether (Hammy)",
-    address: getAddress("0x50498dC52bCd3dAeB54B7225A7d2FA8D536F313E"),
-    chainId: xrp.id,
-    decimals: 18,
-  },
-
   // ─── Additional verified Base assets ────────────────────
   { symbol: "AAVE", name: "Aave", address: getAddress("0x63706e401c06ac8513145b7687A14804d17f814b"), chainId: base.id, decimals: 18 },
   { symbol: "DAI", name: "Dai Stablecoin", address: getAddress("0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb"), chainId: base.id, decimals: 18 },
@@ -1403,7 +1380,6 @@ export function defaultSellForChain(chainId: number) {
   if (chainId === mainnet.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
   if (chainId === base.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
   if (chainId === cronos.id) return list.find((t) => t.symbol === "CRO") ?? list[0]!;
-  if (chainId === xrp.id) return list.find((t) => t.symbol === "XRP") ?? list[0]!;
   if (chainId === polygon.id) return list.find((t) => t.symbol === "POL") ?? list[0]!;
   if (chainId === bsc.id) return list.find((t) => t.symbol === "BNB") ?? list[0]!;
   if (chainId === arbitrum.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
@@ -1420,7 +1396,6 @@ export function defaultBuyForChain(chainId: number) {
   if (chainId === mainnet.id) return list.find((t) => t.symbol === "BONE") ?? list[1] ?? list[0]!;
   if (chainId === base.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
   if (chainId === cronos.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
-  if (chainId === xrp.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
   if (chainId === polygon.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
   if (chainId === bsc.id) return list.find((t) => t.symbol === "USDT") ?? list[1] ?? list[0]!;
   if (chainId === arbitrum.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;

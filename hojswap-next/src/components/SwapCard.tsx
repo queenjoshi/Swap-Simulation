@@ -14,7 +14,7 @@ import {
 } from "wagmi";
 import { concat, decodeEventLog, encodeFunctionData, formatUnits, numberToHex, parseUnits, size, type Hex } from "viem";
 import { base } from "wagmi/chains";
-import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, explorerAddressUrl, getChainName, xrp, zora } from "@/lib/chains";
+import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, explorerAddressUrl, getChainName, zora } from "@/lib/chains";
 import { clampToDecimals, formatSwapAmountDisplay, isValidNumberInput } from "@/lib/format";
 import { calculateHouseFeeAmount, tokenTo0xParam, type QuoteResponse, type PriceResponse } from "@/lib/quote";
 import { erc20Abi } from "@/lib/erc20";
@@ -51,7 +51,6 @@ const CHAIN_LOGOS: Record<number, string> = {
     7777777: "https://zora.co/favicon.ico",
     43114: "https://assets.coingecko.com/coins/images/12559/standard/Avalanche_Circle_RedWhite_Trans.png",
     42161: "https://assets.coingecko.com/coins/images/16547/standard/arb.jpg",
-    1440000: "/tokens/xrp.png",
 };
 
 type ActiveTab = "swap" | "bridge";
@@ -144,27 +143,6 @@ function SwapCardInner() {
     const [chainMenuOpen, setChainMenuOpen] = useState(false);
     const [nativeXrplMode, setNativeXrplMode] = useState(false);
     const [zoraProfileTokens, setZoraProfileTokens] = useState<Token[]>([]);
-    const [importedXrpTokens, setImportedXrpTokens] = useState<Token[]>([]);
-
-    useEffect(() => {
-        queueMicrotask(() => {
-            try {
-                const parsed = JSON.parse(localStorage.getItem("hojswap-xrp-imported-tokens") ?? "[]") as Token[];
-                setImportedXrpTokens(parsed.filter((token) => token.chainId === xrp.id && !!token.address));
-            } catch {
-                setImportedXrpTokens([]);
-            }
-        });
-    }, []);
-
-    const rememberImportedXrpToken = useCallback((token: Token) => {
-        setImportedXrpTokens((current) => {
-            const next = [...current.filter((item) => item.address?.toLowerCase() !== token.address?.toLowerCase()), token];
-            localStorage.setItem("hojswap-xrp-imported-tokens", JSON.stringify(next));
-            return next;
-        });
-    }, []);
-
     const availableTokens = useMemo(() => {
         const staticTokens = tokensForChain(selectedChainId);
         if (selectedChainId !== base.id && selectedChainId !== zora.id) return staticTokens;
@@ -179,16 +157,11 @@ function SwapCardInner() {
                 byAddress.set(token.address.toLowerCase(), token);
             }
         }
-        for (const token of importedXrpTokens.filter((token) => token.chainId === selectedChainId)) {
-            if (token.address && !byAddress.has(token.address.toLowerCase())) {
-                byAddress.set(token.address.toLowerCase(), token);
-            }
-        }
         return [
             ...staticTokens.filter((token) => !token.address),
             ...byAddress.values(),
         ];
-    }, [selectedChainId, zoraProfileTokens, importedXrpTokens]);
+    }, [selectedChainId, zoraProfileTokens]);
 
     const [sellToken, setSellToken] = useState<Token>(() => {
         const sellSymbol = searchParams.get("sell");
@@ -1307,8 +1280,6 @@ function SwapCardInner() {
                                         tokens={availableTokens}
                                         value={buyToken}
                                         onChange={setBuyToken}
-                                        allowAddressImport={selectedChainId === xrp.id}
-                                        onTokenImported={rememberImportedXrpToken}
                                     />
                                 </div>
                             </div>
@@ -1338,8 +1309,6 @@ function SwapCardInner() {
                                             tokens={availableTokens}
                                             value={sellToken}
                                             onChange={onSellTokenChange}
-                                            allowAddressImport={selectedChainId === xrp.id}
-                                            onTokenImported={rememberImportedXrpToken}
                                         />
                                     </div>
                                 </div>
@@ -1391,8 +1360,6 @@ function SwapCardInner() {
                                             tokens={availableTokens}
                                             value={buyToken}
                                             onChange={onBuyTokenChange}
-                                            allowAddressImport={selectedChainId === xrp.id}
-                                            onTokenImported={rememberImportedXrpToken}
                                         />
                                     </div>
                                 </div>

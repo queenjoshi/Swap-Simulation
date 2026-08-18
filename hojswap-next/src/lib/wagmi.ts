@@ -12,7 +12,7 @@ import {
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp, zora } from "@/lib/chains";
+import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, zora } from "@/lib/chains";
 import { getRpcTransport } from "@/lib/rpc";
 
 const walletConnectProjectId =
@@ -27,7 +27,7 @@ export const wagmiConfig = getDefaultConfig({
   ssr: true,
   appName: "House of Joshi — Swap & Bridge",
   appDescription:
-    "Swap, bridge, and discover assets across Ethereum, Base, Zora, Cronos, XRP EVM, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Robinhood Chain, and Unichain.",
+    "Swap, bridge, and discover assets across Ethereum, Base, Zora, Cronos, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Robinhood Chain, Unichain, and the native XRP Ledger.",
   appUrl,
   appIcon: `${appUrl}/logo.png`,
   projectId: walletConnectProjectId,
@@ -35,7 +35,6 @@ export const wagmiConfig = getDefaultConfig({
     base,
     mainnet,
     cronos as Chain,
-    xrp as Chain,
     polygon as Chain,
     bsc as Chain,
     arbitrum as Chain,
@@ -49,7 +48,6 @@ export const wagmiConfig = getDefaultConfig({
     [base.id]: getRpcTransport(base.id),
     [mainnet.id]: getRpcTransport(mainnet.id),
     [cronos.id]: getRpcTransport(cronos.id),
-    [xrp.id]: getRpcTransport(xrp.id),
     [polygon.id]: getRpcTransport(polygon.id),
     [bsc.id]: getRpcTransport(bsc.id),
     [arbitrum.id]: getRpcTransport(arbitrum.id),
@@ -63,7 +61,7 @@ export const wagmiConfig = getDefaultConfig({
     metadata: {
       name: "House of Joshi — Swap & Bridge",
       description:
-        "Swap, bridge, and discover assets across Ethereum, Base, Zora, Cronos, XRP EVM, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Robinhood Chain, and Unichain.",
+        "Swap, bridge, and discover assets across Ethereum, Base, Zora, Cronos, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Robinhood Chain, Unichain, and the native XRP Ledger.",
       url: appUrl,
       icons: [`${appUrl}/logo.png`],
     },

@@ -247,7 +247,7 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
         {selecting === "buy" && <AssetSelector selected={buy} onChoose={(asset) => chooseAsset("buy", asset)} />}
 
         <div className="rounded-xl border border-amber-400/15 bg-amber-400/[0.06] px-3 py-2 text-xs leading-5 text-amber-100/65">
-          Uses native XRPL DEX and AMM liquidity. Token identity includes its issuer address. This route does not use Hammy or an EVM contract.
+          Uses native XRPL DEX and AMM liquidity. Token identity includes its issuer address and swaps use XRPL-native transactions rather than an EVM contract.
         </div>
 
         {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div>}

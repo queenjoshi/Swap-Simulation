@@ -66,7 +66,6 @@ House of Joshi Swap is designed for a multichain environment. The complete curre
 | Base | 8453 | ETH | Swap network and deployed House router |
 | Arbitrum | 42161 | ETH | Swap network |
 | Avalanche C-Chain | 43114 | AVAX | Swap network |
-| XRP EVM | 1440000 | XRP | Configured EVM network; execution depends on routing availability |
 | Zora | 7777777 | ETH | Token discovery and catalog |
 | XRP Ledger | Native ledger - no EVM chain ID | XRP | Native XRPL swap experience |
 
@@ -187,18 +186,7 @@ The repository includes BNB RPC configuration, BscScan transaction and address l
 | House router | `0x2C5F372746330465C3f4084CE6C6aBce22a48B4d` configured |
 | Current role | Swap network |
 
-### 4.10 XRP EVM profile
-
-| Property | Value |
-| --- | --- |
-| Network | XRP EVM mainnet |
-| Chain ID | 1440000 |
-| Native asset | XRP |
-| Explorer | https://explorer.xrplevm.org |
-| House router | No EVM House router currently configured |
-| Current role | Configured EVM network; execution depends on routing availability |
-
-### 4.11 Zora profile
+### 4.10 Zora profile
 
 | Property | Value |
 | --- | --- |
@@ -209,7 +197,7 @@ The repository includes BNB RPC configuration, BscScan transaction and address l
 | House router | No House router configured |
 | Current role | Token discovery and catalog; swap execution disabled |
 
-### 4.12 Native XRP Ledger profile
+### 4.11 Native XRP Ledger profile
 
 | Property | Value |
 | --- | --- |
@@ -251,7 +239,7 @@ The router does not discover liquidity. Routing providers produce calldata for t
 
 ### 5.4 Native XRP Ledger flow
 
-Native XRPL is implemented separately from XRP EVM. XRP Ledger accounts use classic addresses, trust lines, issued-currency identifiers, and XRPL-native transactions. The application supports wallet flows including Xaman, Crossmark, GemWallet, and compatible WalletConnect wallets when those providers are available in the user's environment.
+Native XRPL uses classic addresses, trust lines, issued-currency identifiers, and XRPL-native transactions. The application supports wallet flows including Xaman, Crossmark, GemWallet, and compatible WalletConnect wallets when those providers are available in the user's environment.
 
 For issued assets, the currency code and issuer together identify the asset. The application currently includes carefully configured pairs involving XRP and selected issued assets such as RLUSD, native USDC, SOLO, CasinoCoin, and XRdoge. Users must still verify issuer, trust line, liquidity, and wallet request details.
 

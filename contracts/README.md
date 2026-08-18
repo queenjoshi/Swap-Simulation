@@ -83,7 +83,6 @@ New deployments register every chain currently exposed by the app as a bridge-me
 - Base (`8453`)
 - Arbitrum (`42161`)
 - Avalanche (`43114`)
-- XRP EVM (`1440000`)
 - Zora (`7777777`)
 
 Call `getDestinationChainIds()` to enumerate the configured chain IDs. The owner can still add, disable, or re-enable a destination with `setDestinationChainSupport(destinationChainId, supported)`.

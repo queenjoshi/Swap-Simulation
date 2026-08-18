@@ -1,5 +1,5 @@
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp, zora } from "@/lib/chains";
+import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, zora } from "@/lib/chains";
 import type { Chain } from "viem";
 import { fallback, http } from "viem";
 
@@ -17,9 +17,6 @@ export const RPC_URLS: Record<number, readonly string[]> = {
   [cronos.id]: [
     "https://mainnet.cronos.org",
     "https://cronos-rpc.publicnode.com",
-  ],
-  [xrp.id]: [
-    "https://rpc.xrplevm.org",
   ],
   [polygon.id]: [
     "https://polygon-rpc.com",
@@ -70,7 +67,6 @@ export function getRpcTransport(chainId: number) {
 export function getViemChain(chainId: number) {
   if (chainId === mainnet.id) return mainnet;
   if (chainId === cronos.id) return cronos as Chain;
-  if (chainId === xrp.id) return xrp as Chain;
   if (chainId === polygon.id) return polygon as Chain;
   if (chainId === bsc.id) return bsc as Chain;
   if (chainId === arbitrum.id) return arbitrum as Chain;

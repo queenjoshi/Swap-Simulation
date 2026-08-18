@@ -1,4 +1,4 @@
-import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp } from "@/lib/chains";
+import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain } from "@/lib/chains";
 import { NATIVE_ETH_ADDRESS } from "@/lib/quote";
 import { isNative, type Token } from "@/lib/tokens";
 import { base, mainnet } from "wagmi/chains";
@@ -83,7 +83,6 @@ const ROUTER_ENV_BY_CHAIN_ID: Record<number, `0x${string}` | undefined> = {
   [polygon.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_POLYGON, SHARED_ROUTER),
   [robinhood.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_ROBINHOOD, SHARED_ROUTER),
   [unichain.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_UNICHAIN, SHARED_ROUTER),
-  [xrp.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_XRP),
 };
 
 export function getHojswapRouterAddress(chainId: number): `0x${string}` | null {

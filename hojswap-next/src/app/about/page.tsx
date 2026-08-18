@@ -245,7 +245,6 @@ const networks = [
   { name: "Unichain", badge: "Swap", desc: "ETH, WETH, and USDC on Unichain for new Uniswap-native liquidity." },
   { name: "Robinhood Chain", badge: "Swap", desc: "ETH, WETH, USDG, CASHCAT, VEX, HOODRAT, JUGGERNAUT, MYSTERY, ARROW, VIBE CAT, ROBIN, CashDog, and BOW through 0x liquidity." },
   { name: "Cronos", badge: "Bridge", desc: "USDC, USDT, and ETH routes via Li.Fi between Ethereum, Base, and Cronos." },
-  { name: "XRPL EVM", badge: "Token Catalog", desc: "XRP, Hammy USDC, Hammy WETH, and verified imported contracts remain available for discovery while atomic EVM routing is configured." },
 ];
 
 export default function About() {

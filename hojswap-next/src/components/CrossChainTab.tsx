@@ -12,7 +12,7 @@ import {
 } from "wagmi";
 import { formatUnits, parseUnits, maxUint256 } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { CHAIN_OPTIONS, getChainName, polygon, bsc, arbitrum, optimism, xrp, cronos, avalanche, robinhood, unichain } from "@/lib/chains";
+import { CHAIN_OPTIONS, getChainName, polygon, bsc, arbitrum, optimism, cronos, avalanche, robinhood, unichain } from "@/lib/chains";
 import { clampToDecimals, formatCompactNumber, isValidNumberInput } from "@/lib/format";
 import { useToast } from "@/components/Toast";
 import { SIMPLE_TRANSFER_ABI } from "@/lib/stargate";
@@ -48,11 +48,6 @@ const TOKENS_BY_CHAIN: Record<number, XToken[]> = {
     { symbol: "USDC", address: "0xc21223249CA28397B4B6541dfFaEEC539BfF0c59", decimals: 6 },
     { symbol: "USDT", address: "0x66e428c3f67a68767eb9ef128fda82a14f9061d3", decimals: 6 },
     { symbol: "WETH", address: "0xe44Fd7fCb2b1581822D0c862B68222998a0c299a", decimals: 18 },
-  ],
-  [xrp.id]: [
-    { symbol: "XRP",  address: "0x0000000000000000000000000000000000000000", decimals: 18 },
-    { symbol: "USDC", address: "0x2058A9D763313Aae9296C864B03f7D404A72e4e1", decimals: 6 },
-    { symbol: "USDT", address: "0x34C2eCd3687c15Ec43639eFEB4467c2b8e5C0F74", decimals: 6 },
   ],
   [polygon.id]: [
     { symbol: "POL",  address: "0x0000000000000000000000000000000000000000", decimals: 18 },
