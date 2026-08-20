@@ -6,6 +6,7 @@ import { TokenLogo } from "@/components/TokenLogo";
 import { fallbackTokenLogo } from "@/components/TokenSelect";
 import { CHAIN_OPTIONS } from "@/lib/chains";
 import { TOKENS } from "@/lib/tokens";
+import { XRPL_ASSETS } from "@/lib/xrpl-native";
 
 type Token = {
   address?: `0x${string}`;
@@ -215,25 +216,38 @@ const curatedLogos = new Map(
 
 // Keep this page in sync with the swap registry instead of maintaining a
 // second, incomplete token list by hand.
-const tokenGroups = CHAIN_OPTIONS.map((chain) => ({
-  title: `${chain.label} Tokens`,
-  eyebrow: chain.label,
-  tokens: TOKENS
-    .filter((token) => token.chainId === chain.id)
-    .map((token) => ({
+const tokenGroups = [
+  ...CHAIN_OPTIONS.map((chain) => ({
+    title: `${chain.label} Tokens`,
+    eyebrow: chain.label,
+    tokens: TOKENS
+      .filter((token) => token.chainId === chain.id)
+      .map((token) => ({
+        symbol: token.symbol,
+        name: token.name,
+        logo:
+          token.logo
+          ?? curatedLogos.get(token.symbol.toUpperCase())
+          ?? fallbackTokenLogo(token.symbol),
+        address: token.address,
+        chainId: token.chainId,
+      })),
+  })).filter((group) => group.tokens.length > 0),
+  {
+    title: "XRP Ledger Tokens",
+    eyebrow: "Native XRP Ledger",
+    tokens: XRPL_ASSETS.map((token) => ({
       symbol: token.symbol,
       name: token.name,
-      logo:
-        token.logo
-        ?? curatedLogos.get(token.symbol.toUpperCase())
-        ?? fallbackTokenLogo(token.symbol),
-      address: token.address,
-      chainId: token.chainId,
+      logo: token.logo,
+      address: undefined,
+      chainId: undefined,
     })),
-})).filter((group) => group.tokens.length > 0);
+  },
+];
 
 const networks = [
-  { name: "XRP Ledger", badge: "Native Swap", desc: "XRP pairs for RLUSD, native USDC, SOLO (legacy/migrating), CasinoCoin, and XRdoge through XRPL order-book and AMM liquidity using r-address wallets." },
+  { name: "XRP Ledger", badge: "Native Swap", desc: "XRP pairs for RLUSD, native USDC, SOLO, CasinoCoin, XRdoge, ARMY, DROP, FUZZY, PHNIX, SIGMA, SEAL, XRPH, and XPM through XRPL order-book and AMM liquidity using r-address wallets." },
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity including ONDO, ENA, USDe, PENDLE, LDO, EIGEN, PYUSD, blue chips, community tokens, and stablecoins." },
   { name: "Base", badge: "Swap + Bridge", desc: "Home for mr_lightspeed and its live Zora post-coin catalog, MORPHO, DEGEN, VIRTUAL, AERO, House of Joshi tokens, and core assets." },
   { name: "Zora", badge: "Token Catalog", desc: "Chain-aware discovery for creator and content coins deployed on Zora Network. Modern Zora coins deployed on Base remain listed under Base." },
@@ -293,7 +307,7 @@ export default function About() {
   }), [lightspeedTokens]);
 
   const highlights = useMemo(() => [
-    { value: String(CHAIN_OPTIONS.length), label: "Supported chains" },
+    { value: String(CHAIN_OPTIONS.length + 1), label: "Supported chains" },
     {
       value: String(displayedTokenGroups.reduce((total, group) => total + group.tokens.length, 0)),
       label: "Shown assets",
@@ -312,7 +326,7 @@ export default function About() {
             House of Joshi across every chain that matters.
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-white/66 sm:text-base">
-            Trade and discover community tokens, blue-chip assets, stablecoins, and chain-native coins across {CHAIN_OPTIONS.length} supported networks from one non-custodial interface.
+            Trade and discover community tokens, blue-chip assets, stablecoins, and chain-native coins across {CHAIN_OPTIONS.length + 1} supported networks from one non-custodial interface.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
