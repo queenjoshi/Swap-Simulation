@@ -25,7 +25,17 @@ type MarketRow = {
 type ViewMode = "trending" | "top" | "watchlist" | "new";
 type SortKey = "price" | "change1h" | "change24h" | "change30d" | "volume24h" | "fdv";
 
-const supportedTokens = TOKENS.filter((token) => SWAP_SUPPORTED_CHAIN_IDS.includes(token.chainId));
+const PI_NETWORK_CATALOG_ID = -314159;
+const PI_NETWORK_TOKEN: Token = {
+  symbol: "PI",
+  name: "Pi Network",
+  chainId: PI_NETWORK_CATALOG_ID,
+  logo: "https://coin-images.coingecko.com/coins/images/54342/large/pi_network.jpg?1739347576",
+};
+const supportedTokens = [
+  ...TOKENS.filter((token) => SWAP_SUPPORTED_CHAIN_IDS.includes(token.chainId)),
+  PI_NETWORK_TOKEN,
+];
 
 const FALLBACK_LOGOS: Record<string, string> = {
   ETH: "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
@@ -42,6 +52,10 @@ const FALLBACK_LOGOS: Record<string, string> = {
 
 function normalizeSymbol(symbol: string) {
   return symbol.toUpperCase().replace(/\s+/g, "");
+}
+
+function marketChainName(chainId: number) {
+  return chainId === PI_NETWORK_CATALOG_ID ? "Pi Network" : getChainName(chainId);
 }
 
 function preferredLogo(tokens: Token[], market?: MarketRow) {
@@ -177,7 +191,7 @@ export default function PricesPage() {
     }
     if (view === "watchlist") result = result.filter((row) => watchlist.includes(row.key));
     if (view === "new") result = result.filter((row) =>
-      ["1INCH", "YFI", "BAL", "CVX", "GNO", "SPX", "SYRUP", "FLUID", "COW", "EUL", "ZRO", "W", "AXL", "SUSHI", "NPC", "TIBBIR", "WCT"].includes(row.key)
+      ["PI", "1INCH", "YFI", "BAL", "CVX", "GNO", "SPX", "SYRUP", "FLUID", "COW", "EUL", "ZRO", "W", "AXL", "SUSHI", "NPC", "TIBBIR", "WCT"].includes(row.key)
     );
 
     const getValue = (row: (typeof result)[number]) => row.market?.[sort.key] ?? Number.NEGATIVE_INFINITY;
@@ -216,7 +230,7 @@ export default function PricesPage() {
             </div>
             <h1 className="hoj-display text-3xl font-semibold sm:text-4xl">Token prices</h1>
             <p className="mt-2 max-w-2xl text-sm text-white/50">
-              Explore market data for tokens available in the HOJSwap selector.
+              Explore market data for swap-enabled assets and tracked native-network coins.
             </p>
           </div>
           <div className="flex w-full gap-2 lg:w-auto">
@@ -268,6 +282,16 @@ export default function PricesPage() {
                 {chain.label}
               </button>
             ))}
+            <button
+              onClick={() => setSelectedChain(PI_NETWORK_CATALOG_ID)}
+              className={`rounded-xl border px-3 py-2 text-left text-sm transition ${
+                selectedChain === PI_NETWORK_CATALOG_ID
+                  ? "border-[#d4af37]/50 bg-[#d4af37]/10 text-[#ead173]"
+                  : "border-white/[0.07] bg-white/[0.025] text-white/55 hover:text-white"
+              }`}
+            >
+              Pi Network <span className="ml-1 text-[9px] uppercase text-white/30">Market</span>
+            </button>
           </div>
         </aside>
 
@@ -351,7 +375,7 @@ export default function PricesPage() {
                             <div className="mt-1 flex max-w-64 gap-1 overflow-hidden">
                               {row.chains.slice(0, 3).map((chainId) => (
                                 <span key={chainId} className="rounded bg-white/[0.05] px-1.5 py-0.5 text-[9px] text-white/35">
-                                  {getChainName(chainId)}
+                                  {marketChainName(chainId)}
                                 </span>
                               ))}
                               {row.chains.length > 3 && <span className="text-[9px] text-white/30">+{row.chains.length - 3}</span>}

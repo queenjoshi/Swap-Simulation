@@ -19,6 +19,7 @@ const COINGECKO_IDS: Record<string, string> = {
   PYUSD: "paypal-usd",
   CRO: "crypto-com-chain",
   XRP: "ripple",
+  PI: "pi-network",
 };
 
 export function coingeckoId(symbol: string): string | null {

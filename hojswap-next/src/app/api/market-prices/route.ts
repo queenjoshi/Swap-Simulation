@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { TOKENS } from "@/lib/tokens";
 
 const COINGECKO_IDS = [
+  "pi-network",
   "ethereum", "usd-coin", "tether", "coinbase-wrapped-btc", "aerodrome-finance", "brett",
   "mog-coin", "toshi", "virtual-protocol", "morpho", "degen-base", "zora", "coinbase-wrapped-staked-eth",
   "euro-coin", "moonwell-artemis", "aixbt", "kaito", "tokenbot", "spx6900", "syrup", "instadapp",
