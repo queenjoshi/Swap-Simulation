@@ -1149,7 +1149,7 @@ function SwapCardInner() {
     }
 
     if (nativeSolanaMode) {
-        return <NativeSolanaSwap onBack={() => setNativeSolanaMode(false)} />;
+        return <NativeSolanaSwap networks={CHAINS} onNetworkChange={pickChain} />;
     }
 
     return (
@@ -1226,7 +1226,7 @@ function SwapCardInner() {
                         className="fixed z-[9999] overflow-y-auto rounded-2xl border border-white/10 bg-[#111113] p-1.5 shadow-[0_24px_70px_rgba(0,0,0,0.82)] ring-1 ring-black/50"
                     >
                         {CHAINS.map((chain) => {
-                            const selected = chain.id === selectedChainId;
+                            const selected = chain.id === activeChainId;
                             return (
                                 <button
                                     key={chain.id}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { VersionedTransaction } from "@solana/web3.js";
@@ -41,7 +42,15 @@ function bytesToBase64(bytes: Uint8Array) {
   return btoa(binary);
 }
 
-export function NativeSolanaSwap({ onBack }: { onBack: () => void }) {
+export type SolanaNetworkOption = {
+  id: number;
+  name: string;
+  ticker: string;
+  mode: string;
+  logo?: string;
+};
+
+export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: SolanaNetworkOption[]; onNetworkChange: (chainId: number) => void }) {
   const wallet = useWallet();
   const { setVisible } = useWalletModal();
   const [tokens, setTokens] = useState<SolanaToken[]>(SOLANA_CORE_FALLBACK);
@@ -55,6 +64,7 @@ export function NativeSolanaSwap({ onBack }: { onBack: () => void }) {
   const [swapping, setSwapping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
+  const [networkOpen, setNetworkOpen] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -164,15 +174,23 @@ export function NativeSolanaSwap({ onBack }: { onBack: () => void }) {
   return (
     <div className="w-full max-w-[450px]">
       <div className="hoj-card space-y-3 rounded-[24px] p-3 sm:rounded-[26px] sm:p-4">
-        <div className="flex items-center justify-between gap-3 px-1">
-          <div className="flex items-center gap-3">
-            <TokenLogo symbol="SOL" logo="https://assets.coingecko.com/coins/images/4128/standard/solana.png" size="sm" />
-            <div>
-              <p className="text-sm font-semibold text-white/85">Solana</p>
-              <p className="text-[10px] uppercase tracking-wider text-white/35">Jupiter routing</p>
-            </div>
+        <div className="flex items-center justify-between gap-2 px-1 pb-1">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Trade</p>
+            <p className="truncate text-sm font-semibold text-white/80">Solana</p>
           </div>
-          <button type="button" onClick={onBack} className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/55 hover:text-white">Change network</button>
+          <button
+            type="button"
+            onClick={() => setNetworkOpen(true)}
+            className="flex min-w-[8.75rem] items-center justify-between gap-2 rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-2 text-left transition hover:border-[rgba(212,175,55,0.3)] focus:border-[rgba(212,175,55,0.55)] focus:outline-none"
+            aria-haspopup="dialog"
+          >
+            <span className="flex min-w-0 items-center gap-2">
+              <TokenLogo symbol="SOL" logo="https://assets.coingecko.com/coins/images/4128/standard/solana.png" size="xs" />
+              <span className="truncate text-xs font-semibold text-white/80">Solana</span>
+            </span>
+            <span className="text-xs text-[rgba(212,175,55,0.9)]">▾</span>
+          </button>
         </div>
 
         <div className="hoj-panel rounded-[22px] p-4">
@@ -229,6 +247,35 @@ export function NativeSolanaSwap({ onBack }: { onBack: () => void }) {
         )}
         {wallet.connected && <p className="truncate px-2 text-center font-mono text-[10px] text-white/30">{wallet.publicKey?.toBase58()}</p>}
       </div>
+      {networkOpen && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="presentation" onMouseDown={() => setNetworkOpen(false)}>
+          <div role="dialog" aria-modal="true" aria-label="Select network" onMouseDown={(event) => event.stopPropagation()} className="w-full max-w-sm overflow-hidden rounded-[24px] border border-white/10 bg-[#111113] shadow-[0_28px_90px_rgba(0,0,0,0.8)]">
+            <div className="flex items-center justify-between border-b border-white/8 px-4 py-3.5">
+              <div>
+                <p className="text-sm font-semibold text-white/90">Select network</p>
+                <p className="mt-0.5 text-[10px] uppercase tracking-wider text-white/35">Swap and token networks</p>
+              </div>
+              <button type="button" onClick={() => setNetworkOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-sm text-white/55 hover:text-white" aria-label="Close network selector">×</button>
+            </div>
+            <div className="max-h-[min(68vh,32rem)] overflow-y-auto p-2">
+              {networks.map((network) => {
+                const selected = network.id === -2;
+                return (
+                  <button key={network.id} type="button" onClick={() => { setNetworkOpen(false); onNetworkChange(network.id); }} className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${selected ? "bg-[rgba(212,175,55,0.14)]" : "hover:bg-white/[0.06]"}`}>
+                    <TokenLogo symbol={network.ticker} logo={network.logo} size="sm" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold text-white/88">{network.name}</span>
+                      <span className="block text-[10px] uppercase tracking-wider text-white/35">{network.mode}</span>
+                    </span>
+                    {selected && <span className="text-xs text-[#e7c45b]">✓</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
     </div>
   );
 }
@@ -236,7 +283,6 @@ export function NativeSolanaSwap({ onBack }: { onBack: () => void }) {
 function SolanaTokenSelect({ tokens, value, onChange, onSearch }: { tokens: SolanaToken[]; value: SolanaToken; onChange: (token: SolanaToken) => void; onSearch: (query: string) => void }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const rootRef = useRef<HTMLDivElement>(null);
   const filteredTokens = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     if (!normalized) return tokens;
@@ -249,22 +295,17 @@ function SolanaTokenSelect({ tokens, value, onChange, onSearch }: { tokens: Sola
 
   useEffect(() => {
     if (!open) return;
-    function onPointerDown(event: PointerEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    }
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") setOpen(false);
     }
-    window.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("keydown", onKeyDown);
     return () => {
-      window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
 
   return (
-    <div ref={rootRef} className="relative w-[10.5rem] sm:w-[12rem]">
+    <div className="relative w-[9.5rem] sm:w-[10.5rem]">
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
@@ -279,9 +320,17 @@ function SolanaTokenSelect({ tokens, value, onChange, onSearch }: { tokens: Sola
         <span className={`text-xs text-[rgba(212,175,55,0.9)] transition ${open ? "rotate-180" : ""}`}>▾</span>
       </button>
 
-      {open && (
-        <div role="listbox" className="absolute right-0 top-full z-50 mt-2 max-h-80 min-w-[17rem] overflow-y-auto rounded-2xl border border-white/10 bg-[#151517] p-1.5 shadow-[0_22px_55px_rgba(0,0,0,0.6)]">
-          <div className="sticky top-0 z-10 bg-[#151517] p-1">
+      {open && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="presentation" onMouseDown={() => setOpen(false)}>
+          <div role="dialog" aria-modal="true" aria-label="Select Solana token" onMouseDown={(event) => event.stopPropagation()} className="flex max-h-[min(78vh,38rem)] w-full max-w-md flex-col overflow-hidden rounded-[24px] border border-white/10 bg-[#151517] shadow-[0_28px_90px_rgba(0,0,0,0.8)]">
+            <div className="flex items-center justify-between border-b border-white/8 px-4 py-3.5">
+              <div>
+                <p className="text-sm font-semibold text-white/90">Select a token</p>
+                <p className="mt-0.5 text-[10px] uppercase tracking-wider text-white/35">Jupiter verified · Solana</p>
+              </div>
+              <button type="button" onClick={() => setOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-sm text-white/55 hover:text-white" aria-label="Close token selector">×</button>
+            </div>
+            <div className="border-b border-white/8 bg-[#151517] p-3">
             <input
               autoFocus
               value={query}
@@ -292,9 +341,10 @@ function SolanaTokenSelect({ tokens, value, onChange, onSearch }: { tokens: Sola
               placeholder="Search name, symbol, or mint"
               className="w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-[rgba(212,175,55,0.45)]"
             />
-            <p className="px-1 pt-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-white/35">{filteredTokens.length} tokens</p>
-          </div>
-          {filteredTokens.map((token) => {
+              <p className="px-1 pt-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-white/35">{filteredTokens.length} tokens</p>
+            </div>
+            <div role="listbox" className="min-h-0 flex-1 overflow-y-auto p-2">
+            {filteredTokens.map((token) => {
             const selected = token.mint === value.mint;
             return (
               <button
@@ -317,10 +367,12 @@ function SolanaTokenSelect({ tokens, value, onChange, onSearch }: { tokens: Sola
                 {selected && <span className="text-xs text-[#e7c45b]">✓</span>}
               </button>
             );
-          })}
-          {filteredTokens.length === 0 && <p className="px-3 py-6 text-center text-xs text-white/40">No verified tokens found.</p>}
+            })}
+            {filteredTokens.length === 0 && <p className="px-3 py-6 text-center text-xs text-white/40">No verified tokens found.</p>}
+            </div>
+          </div>
         </div>
-      )}
+      , document.body)}
     </div>
   );
 }
