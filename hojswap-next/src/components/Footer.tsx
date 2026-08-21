@@ -43,6 +43,8 @@ const SOCIAL_LINKS = [
 
 const PROTOCOL_LINKS = [
   { label: "0x Protocol", href: "https://0x.org/" },
+  { label: "Jupiter", href: "https://jup.ag/" },
+  { label: "XRP Ledger", href: "https://xrpl.org/" },
   { label: "Stargate V2 (LayerZero)", href: "https://stargate.finance/" },
   { label: "Li.Fi Bridge", href: "https://li.fi/" },
   { label: "RainbowKit", href: "https://rainbowkit.com/" },

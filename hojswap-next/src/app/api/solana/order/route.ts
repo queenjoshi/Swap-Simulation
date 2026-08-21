@@ -16,12 +16,15 @@ export async function POST(request: Request) {
   if (!apiKey) return NextResponse.json({ error: "Jupiter API key is not configured" }, { status: 503 });
 
   try {
-    const body = await request.json() as { inputMint?: string; outputMint?: string; amount?: string; taker?: string };
+    const body = await request.json() as { inputMint?: string; outputMint?: string; amount?: string; taker?: string; slippageBps?: number };
     if (!body.inputMint || !body.outputMint || !body.taker || !validPublicKey(body.inputMint) || !validPublicKey(body.outputMint) || !validPublicKey(body.taker)) {
       return NextResponse.json({ error: "Invalid Solana address or token mint" }, { status: 400 });
     }
     if (!body.amount || !/^\d+$/.test(body.amount) || BigInt(body.amount) <= 0n) {
       return NextResponse.json({ error: "Invalid swap amount" }, { status: 400 });
+    }
+    if (body.slippageBps != null && (!Number.isInteger(body.slippageBps) || body.slippageBps < 10 || body.slippageBps > 500)) {
+      return NextResponse.json({ error: "Slippage must be between 0.1% and 5%" }, { status: 400 });
     }
 
     const referralAccount = process.env.SOLANA_REFERRAL_ACCOUNT?.trim();
@@ -36,6 +39,7 @@ export async function POST(request: Request) {
       params.set("referralAccount", referralAccount);
       params.set("referralFee", "100");
     }
+    if (body.slippageBps != null) params.set("slippageBps", String(body.slippageBps));
 
     const response = await fetch(`${JUPITER_ORDER_URL}?${params}`, {
       headers: { Accept: "application/json", "x-api-key": apiKey },

@@ -7,6 +7,7 @@ import type { WalletManager } from "xrpl-connect";
 import { TokenLogo } from "@/components/TokenLogo";
 import { XRPL_ASSETS, XRPL_HOUSE_WALLET, xrplAssetId, type XrplAsset } from "@/lib/xrpl-native";
 import { getXrplWalletManager } from "@/lib/xrpl-wallet";
+import { saveTransaction } from "@/lib/transactions";
 
 type Quote = {
   receiveAmount: string;
@@ -162,6 +163,17 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
       });
       if (!feeResponse.hash) throw new Error("Swap succeeded, but the House fee was not approved");
       setHash(feeResponse.hash);
+      saveTransaction({
+        hash: swapHash,
+        chainId: -1,
+        chain: "XRP Ledger",
+        timestamp: Date.now(),
+        status: "success",
+        sellAmount: amount,
+        sellToken: sell.symbol,
+        buyAmount: quote.receiveAmount,
+        buyToken: buy.symbol,
+      });
       setAmount("");
       setQuote(null);
       await refreshAccount(address);
@@ -337,7 +349,7 @@ function AssetSelector({ selected, onChoose }: { selected: XrplAsset; onChoose: 
     }
   }
 
-  useEffect(() => { void loadMore(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { void loadMore(); }, []);
 
   const assets = useMemo(() => {
     const seen = new Set<string>();

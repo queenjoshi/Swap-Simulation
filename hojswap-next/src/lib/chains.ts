@@ -143,6 +143,8 @@ export const SWAP_SUPPORTED_CHAIN_IDS: readonly number[] = CHAIN_OPTIONS
   .map((chain) => chain.id);
 
 export function getChainName(chainId: number) {
+  if (chainId === -2) return "Solana";
+  if (chainId === -1) return "XRP Ledger";
   if (chainId === mainnet.id) return "Ethereum";
   if (chainId === base.id) return "Base";
   if (chainId === cronos.id) return "Cronos";
@@ -158,6 +160,8 @@ export function getChainName(chainId: number) {
 }
 
 export function explorerName(chainId: number) {
+  if (chainId === -2) return "Solscan";
+  if (chainId === -1) return "XRPL Explorer";
   if (chainId === mainnet.id) return "Etherscan";
   if (chainId === base.id) return "Basescan";
   if (chainId === cronos.id) return "Cronoscan";
@@ -173,6 +177,8 @@ export function explorerName(chainId: number) {
 }
 
 export function explorerTxUrl(chainId: number, hash: string) {
+  if (chainId === -2) return `https://solscan.io/tx/${hash}`;
+  if (chainId === -1) return `https://livenet.xrpl.org/transactions/${hash}`;
   if (chainId === mainnet.id) return `https://etherscan.io/tx/${hash}`;
   if (chainId === base.id) return `https://basescan.org/tx/${hash}`;
   if (chainId === cronos.id) return `https://cronoscan.com/tx/${hash}`;

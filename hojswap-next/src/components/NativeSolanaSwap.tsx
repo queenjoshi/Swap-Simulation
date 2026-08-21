@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { VersionedTransaction } from "@solana/web3.js";
+import { PublicKey, VersionedTransaction } from "@solana/web3.js";
 import { TokenLogo } from "@/components/TokenLogo";
-import { SOLANA_CORE_FALLBACK, type SolanaToken } from "@/lib/solana";
+import { SOLANA_CORE_FALLBACK, SOL_MINT, type SolanaToken } from "@/lib/solana";
+import { saveTransaction } from "@/lib/transactions";
 
 type JupiterOrder = {
   requestId?: string;
@@ -52,6 +53,7 @@ export type SolanaNetworkOption = {
 
 export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: SolanaNetworkOption[]; onNetworkChange: (chainId: number) => void }) {
   const wallet = useWallet();
+  const { connection } = useConnection();
   const { setVisible } = useWalletModal();
   const [tokens, setTokens] = useState<SolanaToken[]>(SOLANA_CORE_FALLBACK);
   const [sell, setSell] = useState<SolanaToken>(SOLANA_CORE_FALLBACK[0]!);
@@ -65,6 +67,9 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
   const [error, setError] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
   const [networkOpen, setNetworkOpen] = useState(false);
+  const [balances, setBalances] = useState<Record<string, bigint>>({});
+  const [loadingBalances, setLoadingBalances] = useState(false);
+  const [slippageBps, setSlippageBps] = useState<number | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -106,6 +111,41 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
   }, [tokenSearch]);
 
   useEffect(() => {
+    if (!wallet.publicKey) {
+      setBalances({});
+      return;
+    }
+    let cancelled = false;
+    setLoadingBalances(true);
+
+    async function fetchBalance(token: SolanaToken) {
+      if (!wallet.publicKey) return 0n;
+      if (token.mint === SOL_MINT) return BigInt(await connection.getBalance(wallet.publicKey, "confirmed"));
+      const accounts = await connection.getParsedTokenAccountsByOwner(
+        wallet.publicKey,
+        { mint: new PublicKey(token.mint) },
+        "confirmed",
+      );
+      return accounts.value.reduce((total, account) => {
+        const info = account.account.data.parsed.info as { tokenAmount?: { amount?: string } };
+        return total + BigInt(info.tokenAmount?.amount ?? "0");
+      }, 0n);
+    }
+
+    Promise.all([fetchBalance(sell), fetchBalance(buy)])
+      .then(([sellBalance, buyBalance]) => {
+        if (!cancelled) setBalances((current) => ({ ...current, [sell.mint]: sellBalance, [buy.mint]: buyBalance }));
+      })
+      .catch((reason) => {
+        if (!cancelled) console.error("Unable to load Solana balances", reason);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingBalances(false);
+      });
+    return () => { cancelled = true; };
+  }, [buy, connection, sell, signature, wallet.publicKey]);
+
+  useEffect(() => {
     setOrder(null);
     setError(null);
     const atomic = toAtomic(amount, sell.decimals);
@@ -117,7 +157,13 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
         const response = await fetch("/api/solana/order", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ inputMint: sell.mint, outputMint: buy.mint, amount: atomic, taker: wallet.publicKey!.toBase58() }),
+          body: JSON.stringify({
+            inputMint: sell.mint,
+            outputMint: buy.mint,
+            amount: atomic,
+            taker: wallet.publicKey!.toBase58(),
+            ...(slippageBps == null ? {} : { slippageBps }),
+          }),
           signal: controller.signal,
         });
         const payload = await response.json() as JupiterOrder;
@@ -133,9 +179,23 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [amount, buy.mint, sell.decimals, sell.mint, wallet.publicKey]);
+  }, [amount, buy.mint, sell.decimals, sell.mint, slippageBps, wallet.publicKey]);
 
   const output = useMemo(() => fromAtomic(order?.outAmount, buy.decimals), [buy.decimals, order?.outAmount]);
+  const sellBalance = balances[sell.mint];
+  const buyBalance = balances[buy.mint];
+  const enteredAtomic = toAtomic(amount, sell.decimals);
+  const insufficientBalance = enteredAtomic != null && sellBalance != null && BigInt(enteredAtomic) > sellBalance;
+
+  function applyBalancePercentage(percent: number) {
+    if (sellBalance == null || sellBalance === 0n) return;
+    let selected = (sellBalance * BigInt(percent)) / 100n;
+    if (percent === 100 && sell.mint === SOL_MINT) {
+      const gasReserve = 5_000_000n;
+      selected = selected > gasReserve ? selected - gasReserve : 0n;
+    }
+    setAmount(fromAtomic(selected.toString(), sell.decimals).replace("—", ""));
+  }
 
   function flip() {
     setSell(buy);
@@ -162,6 +222,17 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
       if (!response.ok || result.error || result.status === "Failed") throw new Error(result.error ?? "Jupiter execution failed");
       if (!result.signature) throw new Error("Jupiter did not return a transaction signature");
       setSignature(result.signature);
+      saveTransaction({
+        hash: result.signature,
+        chainId: -2,
+        chain: "Solana",
+        timestamp: Date.now(),
+        status: "success",
+        sellAmount: amount,
+        sellToken: sell.symbol,
+        buyAmount: output,
+        buyToken: buy.symbol,
+      });
       setAmount("");
       setOrder(null);
     } catch (reason) {
@@ -173,7 +244,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
 
   return (
     <div className="w-full max-w-[450px]">
-      <div className="hoj-card space-y-3 rounded-[24px] p-3 sm:rounded-[26px] sm:p-4">
+      <div className="hoj-card space-y-2 rounded-[24px] p-2.5 sm:rounded-[26px]">
         <div className="flex items-center justify-between gap-2 px-1 pb-1">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Trade</p>
@@ -193,8 +264,8 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
           </button>
         </div>
 
-        <div className="hoj-panel rounded-[22px] p-4">
-          <div className="flex items-start justify-between gap-3">
+        <div className="hoj-panel rounded-[22px] p-3.5 sm:p-4">
+          <div className="mb-2 flex items-start justify-between gap-3">
             <span className="text-sm font-semibold text-white/50">Sell</span>
             <SolanaTokenSelect tokens={tokens} value={sell} onSearch={setTokenSearch} onChange={(token) => token.mint !== buy.mint && setSell(token)} />
           </div>
@@ -203,23 +274,45 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
             value={amount}
             onChange={(event) => /^\d*(\.\d*)?$/.test(event.target.value) && setAmount(event.target.value)}
             placeholder="0"
-            className="mt-4 w-full bg-transparent text-4xl font-semibold text-white outline-none placeholder:text-white/20"
+            className="w-full bg-transparent text-[2.65rem] font-semibold leading-none text-white outline-none placeholder:text-white/20 sm:text-5xl"
           />
+          <div className="mt-3 grid grid-cols-4 gap-1.5 sm:gap-2" aria-label="Choose percentage of Solana balance to swap">
+            {[25, 50, 75, 100].map((percent) => (
+              <button key={percent} type="button" onClick={() => applyBalancePercentage(percent)} disabled={!wallet.connected || sellBalance == null || sellBalance === 0n} className="min-h-9 rounded-xl border border-white/10 bg-white/[0.04] px-1.5 py-1.5 text-[11px] font-semibold tabular-nums text-white/60 transition hover:border-[rgba(212,175,55,0.45)] hover:bg-[rgba(212,175,55,0.1)] hover:text-[rgba(255,222,85,0.95)] disabled:cursor-not-allowed disabled:opacity-30 sm:text-xs">{percent}%</button>
+            ))}
+          </div>
+          <div className="mt-2 flex items-center justify-between text-[11px] text-white/38">
+            <span>Balance</span>
+            <span className="font-mono tabular-nums">{!wallet.connected ? "Connect wallet" : loadingBalances && sellBalance == null ? "Loading…" : `${fromAtomic((sellBalance ?? 0n).toString(), sell.decimals)} ${sell.symbol}`}</span>
+          </div>
+          {insufficientBalance && <p className="mt-1 text-right text-[10px] text-rose-300/85">Insufficient {sell.symbol} balance</p>}
         </div>
 
-        <button type="button" onClick={flip} className="mx-auto -my-5 flex h-10 w-10 items-center justify-center rounded-xl border-[3px] border-[#101012] bg-[#19191b] text-xl text-[#e7c45b]">↓</button>
+        <button type="button" onClick={flip} className="relative z-20 mx-auto -my-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-[3px] border-[#0d0d0f] bg-[#202023] text-xl text-[#f0cc61] opacity-100 shadow-[0_12px_24px_rgba(0,0,0,0.65)] transition hover:bg-[#29292c] sm:h-11 sm:w-11 sm:rounded-2xl" aria-label="Flip Solana tokens">↓</button>
 
-        <div className="hoj-panel rounded-[22px] p-4 pt-6">
+        <div className="hoj-panel rounded-[22px] p-3.5 pt-6 sm:p-4 sm:pt-7">
           <div className="flex items-start justify-between gap-3">
             <span className="text-sm font-semibold text-white/50">Buy</span>
             <SolanaTokenSelect tokens={tokens} value={buy} onSearch={setTokenSearch} onChange={(token) => token.mint !== sell.mint && setBuy(token)} />
           </div>
-          <p className="mt-4 truncate text-4xl font-semibold text-white/85" title={output}>{quoting ? "…" : output}</p>
+          <p className="mt-3 truncate text-[2.25rem] font-semibold leading-none text-white/85 sm:text-[2.65rem]" title={output}>{quoting ? "…" : output}</p>
+          <div className="mt-2 flex items-center justify-between text-[11px] text-white/38">
+            <span>Balance</span>
+            <span className="font-mono tabular-nums">{!wallet.connected ? "Connect wallet" : loadingBalances && buyBalance == null ? "Loading…" : `${fromAtomic((buyBalance ?? 0n).toString(), buy.decimals)} ${buy.symbol}`}</span>
+          </div>
         </div>
 
         <div className="rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-xs leading-5 text-white/45">
           <div className="flex justify-between gap-3"><span>Provider</span><span className="font-semibold text-white/65">Jupiter Ultra</span></div>
           <div className="mt-1 flex justify-between gap-3"><span>House fee</span><span className="font-semibold text-white/65">1%</span></div>
+          <div className="mt-1 flex items-center justify-between gap-3">
+            <span>Slippage</span>
+            <div className="flex gap-1">
+              {([{ label: "Auto", value: null }, { label: "0.5%", value: 50 }, { label: "1%", value: 100 }] as const).map((option) => (
+                <button key={option.label} type="button" onClick={() => setSlippageBps(option.value)} className={`rounded-lg border px-2 py-0.5 text-[10px] font-semibold transition ${slippageBps === option.value ? "border-[rgba(212,175,55,0.45)] bg-[rgba(212,175,55,0.12)] text-[#e7c45b]" : "border-white/8 text-white/40 hover:text-white/65"}`}>{option.label}</button>
+              ))}
+            </div>
+          </div>
           <div className="mt-1 flex justify-between gap-3"><span>Tokens</span><span className="font-semibold text-white/65">{loadingTokens ? "Loading…" : `${tokens.length} verified`}</span></div>
         </div>
 
@@ -234,12 +327,21 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
         )}
 
         {!wallet.connected ? (
-          <button type="button" onClick={() => setVisible(true)} className="w-full rounded-2xl bg-[linear-gradient(135deg,#e7c45b,#b78312)] px-5 py-3.5 text-sm font-semibold text-black">Connect Solana wallet</button>
+          <div className="space-y-2.5">
+            <button type="button" onClick={() => setVisible(true)} className="w-full rounded-2xl bg-[linear-gradient(135deg,#e7c45b,#b78312)] px-5 py-3.5 text-sm font-semibold text-black">Connect Solana wallet</button>
+            <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 text-[10px] text-white/35">
+              <span>Phantom</span><span aria-hidden="true">·</span>
+              <span>Solflare</span><span aria-hidden="true">·</span>
+              <span>Backpack</span><span aria-hidden="true">·</span>
+              <span>Android mobile wallets</span>
+            </div>
+            <p className="px-4 text-center text-[10px] leading-4 text-white/28">Works with installed desktop extensions, iOS and Android wallet apps, wallet in-app browsers, phones, and tablets.</p>
+          </div>
         ) : (
           <button
             type="button"
             onClick={executeSwap}
-            disabled={!order?.transaction || !order.feeReady || swapping || quoting}
+            disabled={!order?.transaction || !order.feeReady || swapping || quoting || insufficientBalance}
             className="w-full rounded-2xl bg-[linear-gradient(135deg,#e7c45b,#b78312)] px-5 py-3.5 text-sm font-semibold text-black disabled:cursor-not-allowed disabled:opacity-45"
           >
             {swapping ? "Signing and swapping…" : !order?.feeReady && order ? "Referral setup required" : "Swap with Jupiter"}

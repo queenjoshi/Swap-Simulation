@@ -495,7 +495,7 @@ export default function About() {
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
           {[
-            { step: "1", title: "Connect", desc: "Use MetaMask, Rabby, Coinbase Wallet, Trust Wallet, or WalletConnect." },
+            { step: "1", title: "Connect", desc: "Use an EVM wallet, Phantom, Solflare, Backpack, Xaman, or another wallet offered for the selected network." },
             { step: "2", title: "Route", desc: "Pick a swap or bridge path and review slippage, fees, and outputs." },
             { step: "3", title: "Confirm", desc: "Sign from your wallet and track the transaction in-app." },
           ].map((item) => (
