@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { VersionedTransaction } from "@solana/web3.js";
 import { TokenLogo } from "@/components/TokenLogo";
-import { SOLANA_CORE_FALLBACK, SOLANA_HOUSE_WALLET, type SolanaToken } from "@/lib/solana";
+import { SOLANA_CORE_FALLBACK, type SolanaToken } from "@/lib/solana";
 
 type JupiterOrder = {
   requestId?: string;
@@ -175,17 +175,10 @@ export function NativeSolanaSwap({ onBack }: { onBack: () => void }) {
           <button type="button" onClick={onBack} className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/55 hover:text-white">Change network</button>
         </div>
 
-        <input
-          value={tokenSearch}
-          onChange={(event) => setTokenSearch(event.target.value)}
-          placeholder="Search any Jupiter-verified token or mint"
-          className="h-10 w-full rounded-xl border border-white/10 bg-black/25 px-3 text-xs text-white outline-none placeholder:text-white/30 focus:border-[#d4af37]/45"
-        />
-
         <div className="hoj-panel rounded-[22px] p-4">
           <div className="flex items-start justify-between gap-3">
             <span className="text-sm font-semibold text-white/50">Sell</span>
-            <SolanaTokenSelect tokens={tokens} value={sell} onChange={(token) => token.mint !== buy.mint && setSell(token)} />
+            <SolanaTokenSelect tokens={tokens} value={sell} onSearch={setTokenSearch} onChange={(token) => token.mint !== buy.mint && setSell(token)} />
           </div>
           <input
             inputMode="decimal"
@@ -201,7 +194,7 @@ export function NativeSolanaSwap({ onBack }: { onBack: () => void }) {
         <div className="hoj-panel rounded-[22px] p-4 pt-6">
           <div className="flex items-start justify-between gap-3">
             <span className="text-sm font-semibold text-white/50">Buy</span>
-            <SolanaTokenSelect tokens={tokens} value={buy} onChange={(token) => token.mint !== sell.mint && setBuy(token)} />
+            <SolanaTokenSelect tokens={tokens} value={buy} onSearch={setTokenSearch} onChange={(token) => token.mint !== sell.mint && setBuy(token)} />
           </div>
           <p className="mt-4 truncate text-4xl font-semibold text-white/85" title={output}>{quoting ? "…" : output}</p>
         </div>
@@ -235,27 +228,99 @@ export function NativeSolanaSwap({ onBack }: { onBack: () => void }) {
           </button>
         )}
         {wallet.connected && <p className="truncate px-2 text-center font-mono text-[10px] text-white/30">{wallet.publicKey?.toBase58()}</p>}
-        <p className="px-2 text-center text-[10px] leading-4 text-white/30">Fee destination owner: {SOLANA_HOUSE_WALLET}</p>
       </div>
     </div>
   );
 }
 
-function SolanaTokenSelect({ tokens, value, onChange }: { tokens: SolanaToken[]; value: SolanaToken; onChange: (token: SolanaToken) => void }) {
+function SolanaTokenSelect({ tokens, value, onChange, onSearch }: { tokens: SolanaToken[]; value: SolanaToken; onChange: (token: SolanaToken) => void; onSearch: (query: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const rootRef = useRef<HTMLDivElement>(null);
+  const filteredTokens = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return tokens;
+    return tokens.filter((token) =>
+      token.symbol.toLowerCase().includes(normalized)
+      || token.name.toLowerCase().includes(normalized)
+      || token.mint.toLowerCase().includes(normalized),
+    );
+  }, [query, tokens]);
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(event: PointerEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
   return (
-    <label className="flex max-w-[12rem] items-center gap-2 rounded-full border border-white/10 bg-black/35 px-2.5 py-2">
-      <TokenLogo symbol={value.symbol} logo={value.logo} size="xs" />
-      <select
-        value={value.mint}
-        onChange={(event) => {
-          const token = tokens.find((candidate) => candidate.mint === event.target.value);
-          if (token) onChange(token);
-        }}
-        className="min-w-0 flex-1 bg-transparent text-xs font-semibold text-white outline-none"
-        aria-label="Select Solana token"
+    <div ref={rootRef} className="relative w-[10.5rem] sm:w-[12rem]">
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        className="flex w-full items-center justify-between gap-2 rounded-full border border-white/10 bg-black/45 px-2.5 py-2 text-left text-white transition hover:border-[rgba(212,175,55,0.25)] focus:border-[rgba(212,175,55,0.45)] focus:outline-none"
+        aria-haspopup="listbox"
+        aria-expanded={open}
       >
-        {tokens.map((token) => <option key={token.mint} value={token.mint} className="bg-[#151517]">{token.symbol} · {token.name}</option>)}
-      </select>
-    </label>
+        <span className="flex min-w-0 items-center gap-2">
+          <TokenLogo symbol={value.symbol} logo={value.logo} size="xs" />
+          <span className="truncate text-sm font-semibold">{value.symbol}</span>
+        </span>
+        <span className={`text-xs text-[rgba(212,175,55,0.9)] transition ${open ? "rotate-180" : ""}`}>▾</span>
+      </button>
+
+      {open && (
+        <div role="listbox" className="absolute right-0 top-full z-50 mt-2 max-h-80 min-w-[17rem] overflow-y-auto rounded-2xl border border-white/10 bg-[#151517] p-1.5 shadow-[0_22px_55px_rgba(0,0,0,0.6)]">
+          <div className="sticky top-0 z-10 bg-[#151517] p-1">
+            <input
+              autoFocus
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                onSearch(event.target.value);
+              }}
+              placeholder="Search name, symbol, or mint"
+              className="w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-[rgba(212,175,55,0.45)]"
+            />
+            <p className="px-1 pt-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-white/35">{filteredTokens.length} tokens</p>
+          </div>
+          {filteredTokens.map((token) => {
+            const selected = token.mint === value.mint;
+            return (
+              <button
+                key={token.mint}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                onClick={() => {
+                  onChange(token);
+                  setOpen(false);
+                  setQuery("");
+                }}
+                className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition ${selected ? "bg-[rgba(212,175,55,0.12)]" : "hover:bg-white/[0.055]"}`}
+              >
+                <TokenLogo symbol={token.symbol} logo={token.logo} size="sm" />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold text-white/90">{token.symbol}</span>
+                  <span className="block truncate text-[11px] text-white/40">{token.name}</span>
+                </span>
+                {selected && <span className="text-xs text-[#e7c45b]">✓</span>}
+              </button>
+            );
+          })}
+          {filteredTokens.length === 0 && <p className="px-3 py-6 text-center text-xs text-white/40">No verified tokens found.</p>}
+        </div>
+      )}
+    </div>
   );
 }

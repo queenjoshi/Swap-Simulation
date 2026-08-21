@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const JUPITER_EXECUTE_URL = "https://api.jup.ag/ultra/v1/execute";
+const JUPITER_EXECUTE_URL = "https://api.jup.ag/swap/v2/execute";
 
 export async function POST(request: Request) {
   const apiKey = process.env.JUPITER_API_KEY;

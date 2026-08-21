@@ -1,6 +1,5 @@
-export const SOLANA_HOUSE_WALLET = "6NGoUewhPnKedZTUBs9u85GFgx6CBG9tBKmCeriSV9cK";
 export const SOL_MINT = "So11111111111111111111111111111111111111112";
-export const USDC_SOL_MINT = "EPjFWdd5AufqSSqeM2q9qyWjrdtXtYd9vZ9XBm8H1kF";
+export const USDC_SOL_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
 export type SolanaToken = {
   mint: string;
