@@ -35,10 +35,12 @@ import { useNativeTokenPrice, getNativeSymbol, formatNetworkFee } from "@/lib/ga
 import { hojswapRouterAbi, tokenToRouterAddress } from "@/lib/hojswap-router";
 import { HOUSE_WALLET } from "@/lib/swap-fee";
 import { NativeXrplSwap } from "@/components/NativeXrplSwap";
+import { NativeSolanaSwap } from "@/components/NativeSolanaSwap";
 
 const DEBOUNCE_MS = 750;
 const BALANCE_PERCENTAGES = [25, 50, 75, 100] as const;
 const XRPL_NATIVE_ID = -1;
+const SOLANA_NATIVE_ID = -2;
 const CHAIN_LOGOS: Record<number, string> = {
     1: "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
     10: "https://assets.coingecko.com/coins/images/25244/standard/Optimism.png",
@@ -142,6 +144,7 @@ function SwapCardInner() {
     const [apiKeyError, setApiKeyError] = useState<ApiKeyError>(null);
     const [chainMenuOpen, setChainMenuOpen] = useState(false);
     const [nativeXrplMode, setNativeXrplMode] = useState(false);
+    const [nativeSolanaMode, setNativeSolanaMode] = useState(false);
     const [zoraProfileTokens, setZoraProfileTokens] = useState<Token[]>([]);
     const availableTokens = useMemo(() => {
         const staticTokens = tokensForChain(selectedChainId);
@@ -210,9 +213,16 @@ function SwapCardInner() {
         setChainMenuRect(null);
         if (newChainId === XRPL_NATIVE_ID) {
             setNativeXrplMode(true);
+            setNativeSolanaMode(false);
+            return;
+        }
+        if (newChainId === SOLANA_NATIVE_ID) {
+            setNativeSolanaMode(true);
+            setNativeXrplMode(false);
             return;
         }
         setNativeXrplMode(false);
+        setNativeSolanaMode(false);
         setSelectedChainId(newChainId);
         setSellToken(defaultSellForChain(newChainId));
         setBuyToken(defaultBuyForChain(newChainId));
@@ -1105,6 +1115,13 @@ function SwapCardInner() {
 
     const CHAINS = [
         {
+            id: SOLANA_NATIVE_ID,
+            name: "Solana",
+            ticker: "SOL",
+            mode: "Jupiter",
+            logo: "https://assets.coingecko.com/coins/images/4128/standard/solana.png",
+        },
+        {
             id: XRPL_NATIVE_ID,
             name: "XRP Ledger",
             ticker: "XRP",
@@ -1119,7 +1136,8 @@ function SwapCardInner() {
             logo: CHAIN_LOGOS[id],
         })),
     ];
-    const selectedChainOption = CHAINS.find((chain) => chain.id === (nativeXrplMode ? XRPL_NATIVE_ID : selectedChainId)) ?? CHAINS[0];
+    const activeChainId = nativeSolanaMode ? SOLANA_NATIVE_ID : nativeXrplMode ? XRPL_NATIVE_ID : selectedChainId;
+    const selectedChainOption = CHAINS.find((chain) => chain.id === activeChainId) ?? CHAINS[0];
 
     const TABS: { id: ActiveTab; label: string }[] = [
         { id: "swap", label: "Swap" },
@@ -1128,6 +1146,10 @@ function SwapCardInner() {
 
     if (nativeXrplMode) {
         return <NativeXrplSwap onBack={() => setNativeXrplMode(false)} />;
+    }
+
+    if (nativeSolanaMode) {
+        return <NativeSolanaSwap onBack={() => setNativeSolanaMode(false)} />;
     }
 
     return (

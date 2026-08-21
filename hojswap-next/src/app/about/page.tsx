@@ -7,8 +7,10 @@ import { fallbackTokenLogo } from "@/components/TokenSelect";
 import { CHAIN_OPTIONS } from "@/lib/chains";
 import { TOKENS } from "@/lib/tokens";
 import { XRPL_ASSETS } from "@/lib/xrpl-native";
+import { SOLANA_CORE_FALLBACK, type SolanaToken } from "@/lib/solana";
 
 type Token = {
+  id?: string;
   address?: `0x${string}`;
   chainId?: number;
   symbol: string;
@@ -216,7 +218,7 @@ const curatedLogos = new Map(
 
 // Keep this page in sync with the swap registry instead of maintaining a
 // second, incomplete token list by hand.
-const tokenGroups = [
+const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = [
   ...CHAIN_OPTIONS.map((chain) => ({
     title: `${chain.label} Tokens`,
     eyebrow: chain.label,
@@ -233,6 +235,18 @@ const tokenGroups = [
         chainId: token.chainId,
       })),
   })).filter((group) => group.tokens.length > 0),
+  {
+    title: "Solana Tokens",
+    eyebrow: "Native Solana",
+    tokens: SOLANA_CORE_FALLBACK.map((token) => ({
+      symbol: token.symbol,
+      name: token.name,
+      logo: token.logo,
+      id: token.mint,
+      address: undefined,
+      chainId: undefined,
+    })),
+  },
   {
     title: "XRP Ledger Tokens",
     eyebrow: "Native XRP Ledger",
@@ -259,6 +273,7 @@ const tokenGroups = [
 
 const networks = [
   { name: "XRP Ledger", badge: "Native Swap", desc: "XRP pairs for RLUSD, native USDC, SOLO, CasinoCoin, XRdoge, ARMY, DROP, FUZZY, PHNIX, SIGMA, SEAL, XRPH, and XPM through XRPL order-book and AMM liquidity using r-address wallets." },
+  { name: "Solana", badge: "Jupiter Swap", desc: "Native SOL, stablecoins, ecosystem assets, and Jupiter-verified community and meme coins routed through Jupiter Ultra using Solana wallets." },
   { name: "Pi Network", badge: "Market Tracking", desc: "Native PI market data and token discovery. Pi mainnet wallet signing and executable swap routing are not yet integrated." },
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity including ONDO, ENA, USDe, PENDLE, LDO, EIGEN, PYUSD, blue chips, community tokens, and stablecoins." },
   { name: "Base", badge: "Swap + Bridge", desc: "Home for mr_lightspeed and its live Zora post-coin catalog, MORPHO, DEGEN, VIRTUAL, AERO, House of Joshi tokens, and core assets." },
@@ -275,6 +290,7 @@ const networks = [
 
 export default function About() {
   const [lightspeedTokens, setLightspeedTokens] = useState<Token[]>([]);
+  const [solanaTokens, setSolanaTokens] = useState<SolanaToken[]>(SOLANA_CORE_FALLBACK);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -306,7 +322,33 @@ export default function About() {
     return () => controller.abort();
   }, []);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/solana/tokens", { cache: "no-store", signal: controller.signal })
+      .then(async (response) => {
+        const payload = await response.json() as { tokens?: SolanaToken[] };
+        if (response.ok && payload.tokens?.length) setSolanaTokens(payload.tokens);
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) console.error("Error loading Solana tokens on About:", error);
+      });
+    return () => controller.abort();
+  }, []);
+
   const displayedTokenGroups = useMemo(() => tokenGroups.map((group) => {
+    if (group.eyebrow === "Native Solana") {
+      return {
+        ...group,
+        tokens: solanaTokens.map((token) => ({
+          symbol: token.symbol,
+          name: token.name,
+          logo: token.logo,
+          id: token.mint,
+          address: undefined,
+          chainId: undefined,
+        })),
+      };
+    }
     if (group.eyebrow !== "Base" || lightspeedTokens.length === 0) return group;
     const tokensById = new Map<string, Token>(
       group.tokens.map((token) => [token.address?.toLowerCase() ?? token.symbol.toLowerCase(), token]),
@@ -316,10 +358,10 @@ export default function About() {
       if (!tokensById.has(id)) tokensById.set(id, token);
     }
     return { ...group, tokens: Array.from(tokensById.values()) };
-  }), [lightspeedTokens]);
+  }), [lightspeedTokens, solanaTokens]);
 
   const highlights = useMemo(() => [
-    { value: String(CHAIN_OPTIONS.length + 2), label: "Networks shown" },
+    { value: String(CHAIN_OPTIONS.length + 3), label: "Networks shown" },
     {
       value: String(displayedTokenGroups.reduce((total, group) => total + group.tokens.length, 0)),
       label: "Shown assets",
@@ -338,7 +380,7 @@ export default function About() {
             House of Joshi across every chain that matters.
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-white/66 sm:text-base">
-            Trade and discover community tokens, blue-chip assets, stablecoins, and chain-native coins across {CHAIN_OPTIONS.length + 2} network catalogs from one non-custodial interface.
+            Trade and discover community tokens, blue-chip assets, stablecoins, and chain-native coins across {CHAIN_OPTIONS.length + 3} network catalogs from one non-custodial interface.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
@@ -391,24 +433,35 @@ export default function About() {
       <section className="mb-10">
         <SectionHeading
           eyebrow="Supported tokens"
-          title="Logo-first token coverage"
+          title="Browse tokens by network"
+          desc="Open a network to view its configured assets. Solana listings are sourced from Jupiter's verified token registry."
         />
-        <div className="grid gap-4">
+        <div className="space-y-3">
           {displayedTokenGroups.map((group) => (
-            <div key={group.title} className="hoj-panel rounded-2xl p-5">
-              <div className="mb-4 flex items-end justify-between gap-3">
-                <div>
+            <details key={group.title} className="group hoj-panel overflow-hidden rounded-2xl">
+              <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 marker:content-none sm:px-5">
+                <div className="min-w-0 flex-1">
                   <div className="text-[10px] font-semibold uppercase tracking-widest text-[rgba(212,175,55,0.65)]">{group.eyebrow}</div>
-                  <h3 className="mt-1 text-base font-semibold text-white/90">{group.title}</h3>
+                  <h3 className="mt-1 truncate text-sm font-semibold text-white/90 sm:text-base">{group.title}</h3>
                 </div>
-                <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] text-white/45">{group.tokens.length} assets</span>
+                <div className="hidden -space-x-2 sm:flex" aria-hidden="true">
+                  {group.tokens.slice(0, 4).map((token) => (
+                    <span key={`${group.title}-preview-${token.id ?? token.address ?? token.symbol}`} className="rounded-full border-2 border-[#111113] bg-[#171719]">
+                      <TokenLogo symbol={token.symbol} logo={token.logo} size="xs" />
+                    </span>
+                  ))}
+                </div>
+                <span className="shrink-0 rounded-full border border-white/10 px-2.5 py-1 text-[10px] text-white/45">{group.tokens.length} assets</span>
+                <span className="text-sm text-[rgba(212,175,55,0.8)] transition group-open:rotate-180" aria-hidden="true">▾</span>
+              </summary>
+              <div className="border-t border-white/8 px-4 py-4 sm:px-5">
+                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                  {group.tokens.map((token) => (
+                    <TokenTile key={`${group.title}-${token.id ?? token.address ?? token.symbol}`} {...token} />
+                  ))}
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                {group.tokens.map((token) => (
-                  <TokenTile key={`${group.title}-${token.address ?? token.symbol}`} {...token} />
-                ))}
-              </div>
-            </div>
+            </details>
           ))}
         </div>
       </section>
@@ -418,15 +471,16 @@ export default function About() {
           eyebrow="Supported networks"
           title="Clear routes by chain"
         />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {networks.map((network) => (
-            <div key={network.name} className="hoj-panel rounded-2xl p-4">
-              <div className="mb-3 flex items-start justify-between gap-2">
+            <details key={network.name} className="group hoj-panel overflow-hidden rounded-2xl">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-4 marker:content-none">
                 <h3 className="text-sm font-semibold text-white/90">{network.name}</h3>
-                <span className="shrink-0 rounded-full border border-[rgba(212,175,55,0.3)] px-2 py-0.5 text-[9px] uppercase tracking-wider text-[rgba(212,175,55,0.75)]">{network.badge}</span>
-              </div>
-              <p className="text-xs leading-6 text-white/54">{network.desc}</p>
-            </div>
+                <span className="ml-auto shrink-0 rounded-full border border-[rgba(212,175,55,0.3)] px-2 py-0.5 text-[9px] uppercase tracking-wider text-[rgba(212,175,55,0.75)]">{network.badge}</span>
+                <span className="text-xs text-[rgba(212,175,55,0.8)] transition group-open:rotate-180" aria-hidden="true">▾</span>
+              </summary>
+              <p className="border-t border-white/8 px-4 py-4 text-xs leading-6 text-white/54">{network.desc}</p>
+            </details>
           ))}
         </div>
       </section>
@@ -496,10 +550,12 @@ function SectionHeading({ eyebrow, title, desc }: { eyebrow: string; title: stri
 
 function TokenTile({ symbol, name, logo }: Token) {
   return (
-    <div className="flex min-h-28 flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-center">
-      <TokenLogo symbol={symbol} logo={logo} size="lg" />
-      <div className="mt-3 w-full truncate text-sm font-semibold text-white/90" title={symbol}>{symbol}</div>
-      <div className="mt-1 w-full truncate text-[11px] text-white/45" title={name}>{name}</div>
+    <div className="flex min-w-0 items-center gap-2.5 rounded-xl border border-white/8 bg-white/[0.025] p-2.5">
+      <TokenLogo symbol={symbol} logo={logo} size="sm" />
+      <div className="min-w-0 text-left">
+        <div className="truncate text-xs font-semibold text-white/90" title={symbol}>{symbol}</div>
+        <div className="mt-0.5 truncate text-[10px] text-white/42" title={name}>{name}</div>
+      </div>
     </div>
   );
 }

@@ -3,7 +3,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
+import { WalletProvider as SolanaWalletProvider } from "@solana/wallet-adapter-react";
+import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import "@rainbow-me/rainbowkit/styles.css";
+import "@solana/wallet-adapter-react-ui/styles.css";
 import { wagmiConfig } from "@/lib/wagmi";
 import { ToastProvider } from "@/components/Toast";
 import { useState } from "react";
@@ -35,7 +38,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
           })}
           locale="en-US"
         >
-          <ToastProvider>{children}</ToastProvider>
+          <SolanaWalletProvider wallets={[]} autoConnect>
+            <WalletModalProvider>
+              <ToastProvider>{children}</ToastProvider>
+            </WalletModalProvider>
+          </SolanaWalletProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
