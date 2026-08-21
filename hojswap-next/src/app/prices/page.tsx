@@ -25,17 +25,7 @@ type MarketRow = {
 type ViewMode = "trending" | "top" | "watchlist" | "new";
 type SortKey = "price" | "change1h" | "change24h" | "change30d" | "volume24h" | "fdv";
 
-const PI_NETWORK_CATALOG_ID = -314159;
-const PI_NETWORK_TOKEN: Token = {
-  symbol: "PI",
-  name: "Pi Network",
-  chainId: PI_NETWORK_CATALOG_ID,
-  logo: "https://coin-images.coingecko.com/coins/images/54342/large/pi_network.jpg?1739347576",
-};
-const supportedTokens = [
-  ...TOKENS.filter((token) => SWAP_SUPPORTED_CHAIN_IDS.includes(token.chainId)),
-  PI_NETWORK_TOKEN,
-];
+const supportedTokens = TOKENS.filter((token) => SWAP_SUPPORTED_CHAIN_IDS.includes(token.chainId));
 
 const FALLBACK_LOGOS: Record<string, string> = {
   ETH: "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
@@ -55,7 +45,7 @@ function normalizeSymbol(symbol: string) {
 }
 
 function marketChainName(chainId: number) {
-  return chainId === PI_NETWORK_CATALOG_ID ? "Pi Network" : getChainName(chainId);
+  return getChainName(chainId);
 }
 
 function preferredLogo(tokens: Token[], market?: MarketRow) {
@@ -191,7 +181,7 @@ export default function PricesPage() {
     }
     if (view === "watchlist") result = result.filter((row) => watchlist.includes(row.key));
     if (view === "new") result = result.filter((row) =>
-      ["PI", "1INCH", "YFI", "BAL", "CVX", "GNO", "SPX", "SYRUP", "FLUID", "COW", "EUL", "ZRO", "W", "AXL", "SUSHI", "NPC", "TIBBIR", "WCT"].includes(row.key)
+      ["1INCH", "YFI", "BAL", "CVX", "GNO", "SPX", "SYRUP", "FLUID", "COW", "EUL", "ZRO", "W", "AXL", "SUSHI", "NPC", "TIBBIR", "WCT"].includes(row.key)
     );
 
     const getValue = (row: (typeof result)[number]) => row.market?.[sort.key] ?? Number.NEGATIVE_INFINITY;
@@ -282,16 +272,6 @@ export default function PricesPage() {
                 {chain.label}
               </button>
             ))}
-            <button
-              onClick={() => setSelectedChain(PI_NETWORK_CATALOG_ID)}
-              className={`rounded-xl border px-3 py-2 text-left text-sm transition ${
-                selectedChain === PI_NETWORK_CATALOG_ID
-                  ? "border-[#d4af37]/50 bg-[#d4af37]/10 text-[#ead173]"
-                  : "border-white/[0.07] bg-white/[0.025] text-white/55 hover:text-white"
-              }`}
-            >
-              Pi Network <span className="ml-1 text-[9px] uppercase text-white/30">Market</span>
-            </button>
           </div>
         </aside>
 

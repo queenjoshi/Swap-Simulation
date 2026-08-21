@@ -5,7 +5,7 @@ const faqs = [
   {
     question: "What is Hojswap?",
     answer:
-      "Hojswap is a House of Joshi swap, bridge, and token-discovery interface across supported EVM networks, Solana, and the native XRP Ledger. Pi Network is shown for market tracking and is not currently available for swaps.",
+      "Hojswap is a House of Joshi swap, bridge, and token-discovery interface across supported EVM networks, Solana, and the native XRP Ledger.",
   },
   {
     question: "Do I need to create an account?",
@@ -15,7 +15,7 @@ const faqs = [
   {
     question: "Which chains are supported?",
     answer:
-      "The app lists Ethereum, Base, Zora, Cronos, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Robinhood Chain, Unichain, Solana, and the native XRP Ledger. Swap availability depends on routing support and liquidity; Zora is discovery-only and Pi Network is market-tracking only.",
+      "The app lists Ethereum, Base, Zora, Cronos, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Robinhood Chain, Unichain, Solana, and the native XRP Ledger. Swap availability depends on routing support and liquidity; Zora is discovery-only.",
   },
   {
     question: "How do I swap a token?",

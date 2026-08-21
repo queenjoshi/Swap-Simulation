@@ -258,23 +258,11 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       chainId: undefined,
     })),
   },
-  {
-    title: "Pi Network",
-    eyebrow: "Native Pi mainnet",
-    tokens: [{
-      symbol: "PI",
-      name: "Pi Network",
-      logo: "https://coin-images.coingecko.com/coins/images/54342/large/pi_network.jpg?1739347576",
-      address: undefined,
-      chainId: undefined,
-    }],
-  },
 ];
 
 const networks = [
   { name: "XRP Ledger", badge: "Native Swap", desc: "XRP pairs for RLUSD, native USDC, SOLO, CasinoCoin, XRdoge, ARMY, DROP, FUZZY, PHNIX, SIGMA, SEAL, XRPH, and XPM through XRPL order-book and AMM liquidity using r-address wallets." },
   { name: "Solana", badge: "Jupiter Swap", desc: "Native SOL, stablecoins, ecosystem assets, and Jupiter-verified community and meme coins routed through Jupiter Ultra using Solana wallets." },
-  { name: "Pi Network", badge: "Market Tracking", desc: "Native PI market data and token discovery. Pi mainnet wallet signing and executable swap routing are not yet integrated." },
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity including ONDO, ENA, USDe, PENDLE, LDO, EIGEN, PYUSD, blue chips, community tokens, and stablecoins." },
   { name: "Base", badge: "Swap + Bridge", desc: "Home for mr_lightspeed and its live Zora post-coin catalog, MORPHO, DEGEN, VIRTUAL, AERO, House of Joshi tokens, and core assets." },
   { name: "Zora", badge: "Token Catalog", desc: "Chain-aware discovery for creator and content coins deployed on Zora Network. Modern Zora coins deployed on Base remain listed under Base." },
