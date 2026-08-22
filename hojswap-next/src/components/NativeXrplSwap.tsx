@@ -375,7 +375,7 @@ function AssetSelector({ selected, onChoose }: { selected: XrplAsset; onChoose: 
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Search name, ticker, issuer or currency"
-        className="mb-2 w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-amber-300/40"
+        className="mb-2 w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-base text-white outline-none placeholder:text-white/30 focus:border-amber-300/40 sm:text-sm"
       />
       <div className="grid max-h-72 grid-cols-1 gap-1 overflow-y-auto sm:grid-cols-2">
       {assets.map((asset) => (

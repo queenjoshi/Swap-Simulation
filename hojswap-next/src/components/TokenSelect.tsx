@@ -236,7 +236,7 @@ export function TokenSelect({
       {open && (
         <div
           role="listbox"
-          className="absolute right-0 top-full z-40 mt-2 max-h-72 min-w-[15rem] overflow-y-auto rounded-2xl border border-white/10 bg-[#151517] p-1.5 shadow-[0_22px_55px_rgba(0,0,0,0.55)]"
+          className="absolute right-0 top-full z-40 mt-2 max-h-[min(18rem,60dvh)] w-[min(20rem,calc(100vw-2rem))] overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-[#151517] p-1.5 shadow-[0_22px_55px_rgba(0,0,0,0.55)]"
         >
           <div className="sticky top-0 z-10 bg-[#151517] p-1">
             <input
@@ -246,7 +246,7 @@ export function TokenSelect({
                 setQuery(event.target.value);
               }}
               placeholder="Search name, symbol, or address"
-              className="w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-[rgba(212,175,55,0.45)]"
+              className="w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-base text-white outline-none placeholder:text-white/30 focus:border-[rgba(212,175,55,0.45)] sm:text-sm"
             />
             <p className="px-1 pt-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-white/35">
               {filteredOptions.length} of {options.length} tokens

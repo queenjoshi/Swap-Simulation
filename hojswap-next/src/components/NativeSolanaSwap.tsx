@@ -298,7 +298,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
           {insufficientBalance && <p className="mt-1 text-right text-[10px] text-rose-300/85">Insufficient {sell.symbol} balance</p>}
         </div>
 
-        <button type="button" onClick={flip} className="relative z-20 mx-auto -my-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[rgba(212,175,55,0.35)] bg-[rgba(212,175,55,0.12)] text-[#f0cc61] transition hover:border-[rgba(212,175,55,0.65)] hover:bg-[rgba(212,175,55,0.2)] sm:h-11 sm:w-11 sm:rounded-2xl" aria-label="Flip Solana tokens"><span aria-hidden="true">↓</span></button>
+        <button type="button" onClick={flip} className="relative z-10 mx-auto -my-2.5 flex h-10 w-10 items-center justify-center rounded-xl border-[3px] border-[#101012] bg-[#19191b] text-xl text-[rgba(212,175,55,0.95)] shadow-[0_12px_24px_rgba(0,0,0,0.45)] transition hover:bg-[#202022] hover:text-[rgba(255,222,85,1)] sm:h-11 sm:w-11 sm:rounded-2xl sm:text-2xl" aria-label="Flip Solana tokens">↓</button>
 
         <div className="hoj-panel rounded-[22px] p-3.5 pt-6 sm:p-4 sm:pt-7">
           <div className="flex items-start justify-between gap-3">
@@ -460,7 +460,7 @@ function SolanaTokenSelect({ tokens, value, onChange, onSearch }: { tokens: Sola
                 onSearch(event.target.value);
               }}
               placeholder="Search name, symbol, or mint"
-              className="w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-[rgba(212,175,55,0.45)]"
+              className="w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-base text-white outline-none placeholder:text-white/30 focus:border-[rgba(212,175,55,0.45)] sm:text-sm"
             />
               <p className="px-1 pt-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-white/35">{filteredTokens.length} tokens</p>
             </div>
