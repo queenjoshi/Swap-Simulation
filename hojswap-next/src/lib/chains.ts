@@ -143,7 +143,7 @@ export const SWAP_SUPPORTED_CHAIN_IDS: readonly number[] = CHAIN_OPTIONS
   .map((chain) => chain.id);
 
 export function getChainName(chainId: number) {
-  if (chainId === -2) return "Solana";
+  if (chainId === -2 || chainId === 1151111081099710) return "Solana";
   if (chainId === -1) return "XRP Ledger";
   if (chainId === mainnet.id) return "Ethereum";
   if (chainId === base.id) return "Base";

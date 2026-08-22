@@ -32,6 +32,9 @@ export type LiFiQuote = {
   };
 };
 
+export const LIFI_SOLANA_CHAIN_ID = 1151111081099710;
+export const LIFI_NATIVE_SOL_ADDRESS = "11111111111111111111111111111111";
+
 export const LIFI_SUPPORTED_ROUTES: Array<{
   fromChainId: number;
   toChainId: number;
@@ -41,6 +44,7 @@ export const LIFI_SUPPORTED_ROUTES: Array<{
   { fromChainId: cronos.id, toChainId: mainnet.id, tokens: ["USDC", "USDT", "ETH"] },
   { fromChainId: base.id, toChainId: cronos.id, tokens: ["USDC", "ETH"] },
   { fromChainId: cronos.id, toChainId: base.id, tokens: ["USDC", "ETH"] },
+  { fromChainId: mainnet.id, toChainId: LIFI_SOLANA_CHAIN_ID, tokens: ["ETH"] },
 ];
 
 export const LIFI_TOKEN_ADDRESSES: Record<string, Partial<Record<number, string>>> = {
@@ -57,6 +61,9 @@ export const LIFI_TOKEN_ADDRESSES: Record<string, Partial<Record<number, string>
     [mainnet.id]: "0x0000000000000000000000000000000000000000",
     [base.id]: "0x0000000000000000000000000000000000000000",
     [cronos.id]: "0xe44Fd7fCb2b1581822D0c862B68222998a0c299a",
+  },
+  SOL: {
+    [LIFI_SOLANA_CHAIN_ID]: LIFI_NATIVE_SOL_ADDRESS,
   },
 };
 

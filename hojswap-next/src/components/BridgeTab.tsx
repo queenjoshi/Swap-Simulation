@@ -27,8 +27,11 @@ import {
   getLiFiRouteTokens,
   getLiFiTokenAddress,
   isLiFiNative,
+  LIFI_SOLANA_CHAIN_ID,
   type LiFiQuote,
 } from "@/lib/lifi";
+import { solanaClient } from "@/lib/solana-client";
+import { useConnectedWallet, useConnect, useWallets } from "@solana/kit-plugin-wallet/react";
 import { apiUrl } from "@/lib/api";
 import { HOUSE_WALLET } from "@/lib/tokens";
 import { saveTransaction } from "@/lib/transactions";
@@ -36,12 +39,13 @@ import { calculateHouseFeeAmount, HOUSE_FEE_BPS } from "@/lib/quote";
 
 const SLIPPAGE_BPS = 50;
 
-const ALL_CHAINS = [
+const EVM_CHAINS = [
   { id: mainnet.id, name: "Ethereum" },
   { id: base.id, name: "Base" },
   { id: cronos.id, name: "Cronos" },
   { id: robinhood.id, name: "Robinhood Chain" },
 ];
+const ALL_CHAINS = [...EVM_CHAINS, { id: LIFI_SOLANA_CHAIN_ID, name: "Solana" }];
 
 const TOKEN_DECIMALS: Record<string, number> = { USDC: 6, USDT: 6, ETH: 18 };
 
@@ -96,6 +100,9 @@ export function BridgeTab({
   onChainChange: (chainId: number) => void;
 }) {
   const { showToast } = useToast();
+  const solanaWallet = useConnectedWallet(solanaClient);
+  const solanaWallets = useWallets(solanaClient);
+  const connectSolana = useConnect(solanaClient);
   const chainId = useChainId();
   const { address, isConnected } = useAccount();
   const { switchChainAsync, isPending: isSwitching } = useSwitchChain();
@@ -190,6 +197,9 @@ export function BridgeTab({
   }, [bridgeMode, availableTokens, selectedToken]);
 
   const decimals = TOKEN_DECIMALS[selectedToken] ?? 18;
+  const isSolanaDestination = toChainId === LIFI_SOLANA_CHAIN_ID;
+  const destinationToken = isSolanaDestination ? "SOL" : selectedToken;
+  const destinationDecimals = isSolanaDestination ? 9 : decimals;
   const isNativeToken = selectedToken === "ETH" && (fromChainId === mainnet.id || fromChainId === base.id);
 
   const tokenContractAddress = useMemo((): `0x${string}` | undefined => {
@@ -277,8 +287,9 @@ export function BridgeTab({
       return;
     }
     const fromTokenAddr = getLiFiTokenAddress(selectedToken, fromChainId);
-    const toTokenAddr = getLiFiTokenAddress(selectedToken, toChainId);
-    if (!fromTokenAddr || !toTokenAddr) {
+    const toTokenAddr = getLiFiTokenAddress(destinationToken, toChainId);
+    const destinationAddress = isSolanaDestination ? solanaWallet?.account.address : address;
+    if (!fromTokenAddr || !toTokenAddr || !destinationAddress) {
       setLifiQuote(null);
       return;
     }
@@ -293,6 +304,7 @@ export function BridgeTab({
         toToken: toTokenAddr,
         fromAmount: bridgeAmountBig.toString(),
         fromAddress: address,
+        toAddress: destinationAddress,
       });
       fetch(apiUrl(`/api/bridge/quote?${params}`))
         .then((r) => r.json())
@@ -313,7 +325,7 @@ export function BridgeTab({
         });
     }, 600);
     return () => { cancelled = true; clearTimeout(timer); };
-  }, [bridgeMode, bridgeAmountBig?.toString(), selectedToken, fromChainId, toChainId, address]);
+  }, [bridgeMode, bridgeAmountBig?.toString(), selectedToken, destinationToken, fromChainId, toChainId, address, isSolanaDestination, solanaWallet?.account.address]);
 
   // ─── Li.Fi allowance ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -389,9 +401,9 @@ export function BridgeTab({
             : undefined;
           if (substatus === "COMPLETED") {
             setDestinationState({ status: "completed", message: data.substatusMessage ?? "Destination delivery verified.", received });
-            saveTransaction({ hash: bridgeTxHash, chainId: fromChainId, chain: getChainName(fromChainId), sellToken: selectedToken, buyToken: selectedToken, sellAmount: amount, buyAmount: received ?? formatCompactNumber(bridgeAmount, 6), status: "success", timestamp: Date.now() });
+            saveTransaction({ hash: bridgeTxHash, chainId: fromChainId, chain: getChainName(fromChainId), sellToken: selectedToken, buyToken: destinationToken, sellAmount: amount, buyAmount: received ?? formatCompactNumber(bridgeAmount, 6), status: "success", timestamp: Date.now() });
             setAmount("");
-            showToast({ kind: "success", title: "Bridge delivered and verified", message: `${received ? `${received} ${selectedToken}` : selectedToken} received on ${getChainName(toChainId)}.` });
+            showToast({ kind: "success", title: "Bridge delivered and verified", message: `${received ? `${received} ${destinationToken}` : destinationToken} received on ${getChainName(toChainId)}.` });
           } else if (substatus === "PARTIAL") {
             setDestinationState({ status: "partial", message: data.substatusMessage ?? "Bridge completed with a different destination outcome.", received });
             showToast({ kind: "info", title: "Bridge partially completed", message: "Review the House Guard destination receipt." });
@@ -425,7 +437,7 @@ export function BridgeTab({
       cancelled = true;
       if (timer) clearTimeout(timer);
     };
-  }, [amount, bridgeAmount, bridgeMode, bridgeTxHash, decimals, fromChainId, selectedToken, showToast, step, toChainId]);
+  }, [amount, bridgeAmount, bridgeMode, bridgeTxHash, decimals, destinationToken, fromChainId, selectedToken, showToast, step, toChainId]);
 
   // ─── Stargate execute ─────────────────────────────────────────────────────
   const executeStargateBridge = useCallback(async () => {
@@ -546,6 +558,7 @@ export function BridgeTab({
   const quoteReady = bridgeMode === "stargate" ? lzNativeFee != null : !!lifiQuote;
   const quoteLoading = bridgeMode === "stargate" ? lzFeeLoading : lifiLoading;
 
+  const destinationWalletReady = !isSolanaDestination || !!solanaWallet;
   const canBridge =
     bridgeMode !== "unsupported" &&
     isConnected &&
@@ -555,19 +568,19 @@ export function BridgeTab({
     quoteReady &&
     !quoteLoading &&
     !isBusy &&
-    !needsApproval;
+    !needsApproval &&
+    destinationWalletReady;
 
   const lzFeeEth = lzNativeFee != null ? parseFloat(formatUnits(lzNativeFee, 18)).toFixed(5) : null;
 
   const lifiToAmount = useMemo(() => {
     if (!lifiQuote) return null;
     const { toAmount, toAmountMin } = lifiQuote.estimate;
-    const dec = TOKEN_DECIMALS[selectedToken] ?? 18;
     return {
-      out: formatCompactNumber(parseFloat(formatUnits(BigInt(toAmount), dec)), 6),
-      min: formatCompactNumber(parseFloat(formatUnits(BigInt(toAmountMin), dec)), 6),
+      out: formatCompactNumber(parseFloat(formatUnits(BigInt(toAmount), destinationDecimals)), 6),
+      min: formatCompactNumber(parseFloat(formatUnits(BigInt(toAmountMin), destinationDecimals)), 6),
     };
-  }, [lifiQuote, selectedToken]);
+  }, [destinationDecimals, lifiQuote]);
 
   const lifiTotalFee = useMemo(() => {
     if (!lifiQuote?.estimate.feeCosts) return null;
@@ -581,6 +594,7 @@ export function BridgeTab({
   const stepLabel = useMemo(() => {
     if (!isConnected) return "Connect wallet";
     if (!walletOnCorrectChain) return `Switch to ${getChainName(fromChainId)}`;
+    if (!destinationWalletReady) return "Connect Solana wallet";
     if (!amountBig || amountNum === 0) return "Enter amount";
     if (bridgeMode === "unsupported") return "Not available";
     if (insufficientBalance) return "Insufficient balance";
@@ -594,8 +608,8 @@ export function BridgeTab({
       return "Step 2/2: Bridging…";
     }
     if (needsApproval) return `Approve ${selectedToken}`;
-    return `Bridge ${selectedToken} → ${getChainName(toChainId)}`;
-  }, [isConnected, walletOnCorrectChain, amountBig, amountNum, bridgeMode, insufficientBalance, quoteLoading, lifiError, quoteReady, isBusy, step, needsApproval, selectedToken, fromChainId, toChainId]);
+    return `Swap ${selectedToken} → ${destinationToken}`;
+  }, [isConnected, walletOnCorrectChain, destinationWalletReady, amountBig, amountNum, bridgeMode, insufficientBalance, quoteLoading, lifiError, quoteReady, isBusy, step, needsApproval, selectedToken, destinationToken, fromChainId]);
 
   return (
     <div className="space-y-3">
@@ -604,7 +618,7 @@ export function BridgeTab({
         <div>
           <p className="mb-2 text-[11px] uppercase tracking-[0.18em] text-white/55">From chain</p>
           <div className="flex flex-wrap gap-2">
-            {ALL_CHAINS.map((c) => (
+            {EVM_CHAINS.map((c) => (
               <button key={c.id} type="button" onClick={() => onChainChange(c.id)}
                 className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${fromChainId === c.id ? "bg-[rgba(212,175,55,0.95)] text-black" : "bg-white/5 text-white/70 hover:bg-white/10"}`}>
                 {c.name}
@@ -629,6 +643,30 @@ export function BridgeTab({
           </div>
         </div>
       </div>
+
+      {isSolanaDestination && (
+        <div className="hoj-panel rounded-2xl p-4">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-white/55">Solana recipient</p>
+          {solanaWallet ? (
+            <div className="mt-2 flex items-center gap-3 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] px-3 py-2.5">
+              <img src={solanaWallet.wallet.icon} alt="" className="h-8 w-8 rounded-lg" />
+              <div className="min-w-0"><p className="text-sm font-semibold text-white/85">{solanaWallet.wallet.name}</p><p className="truncate font-mono text-[10px] text-white/45">{solanaWallet.account.address}</p></div>
+            </div>
+          ) : (
+            <div className="mt-2 space-y-2">
+              <p className="text-xs leading-5 text-amber-100/70">Connect the Solana wallet that should receive your SOL.</p>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {solanaWallets.map((wallet) => (
+                  <button key={wallet.name} type="button" disabled={connectSolana.isRunning} onClick={() => connectSolana.dispatch(wallet)} className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/25 px-3 py-2 text-left text-sm font-semibold text-white/75 transition hover:border-[rgba(212,175,55,0.35)] disabled:opacity-50">
+                    <img src={wallet.icon} alt="" className="h-7 w-7 rounded-lg" />{wallet.name}
+                  </button>
+                ))}
+              </div>
+              {solanaWallets.length === 0 && <p className="text-[11px] text-white/40">No Solana Wallet Standard wallet detected.</p>}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Unsupported route ── */}
       {bridgeMode === "unsupported" && (
@@ -730,8 +768,8 @@ export function BridgeTab({
               {lifiError && !lifiLoading && <div className="text-red-300/80 text-[11px] pt-1">{lifiError}</div>}
               {lifiToAmount && !lifiLoading && (
                 <>
-                  <div className="flex items-center justify-between text-white/70 font-medium"><span>You receive on {getChainName(toChainId)}</span><span className="font-mono">~{lifiToAmount.out} {selectedToken}</span></div>
-                  <div className="flex items-center justify-between text-white/40 text-[11px]"><span>Minimum received</span><span className="font-mono">{lifiToAmount.min} {selectedToken}</span></div>
+                  <div className="flex items-center justify-between text-white/70 font-medium"><span>You receive on {getChainName(toChainId)}</span><span className="font-mono">~{lifiToAmount.out} {destinationToken}</span></div>
+                  <div className="flex items-center justify-between text-white/40 text-[11px]"><span>Minimum received</span><span className="font-mono">{lifiToAmount.min} {destinationToken}</span></div>
                   {lifiTotalFee && <div className="flex items-center justify-between text-white/40 text-[11px]"><span>Bridge fee</span><span className="font-mono">{lifiTotalFee}</span></div>}
                   {lifiDuration && <div className="flex items-center justify-between text-white/35 text-[11px]"><span>Est. arrival</span><span>~{lifiDuration} min</span></div>}
                   <div className="flex items-center justify-between text-white/30 text-[11px]"><span>Powered by</span><span>Li.Fi (cBridge / Connext)</span></div>
@@ -772,7 +810,7 @@ export function BridgeTab({
             <p><span className="font-semibold text-white/70">Approval:</span> {isNativeToken ? "No token approval required" : "Limited to this bridge amount"}</p>
             <p><span className="font-semibold text-white/70">Simulation:</span> {bridgeGuard.status === "verified" ? "Exact source transaction passed at the pinned block" : bridgeGuard.status === "failed" ? bridgeGuard.message ?? "Source transaction simulation failed" : "Runs before the bridge wallet signature"}</p>
             <p><span className="font-semibold text-white/70">Destination:</span> {destinationState.status === "idle" ? "Tracked after source confirmation" : destinationState.message ?? destinationState.status}</p>
-            {destinationState.received ? <p><span className="font-semibold text-white/70">Received:</span> {destinationState.received} {selectedToken}</p> : null}
+            {destinationState.received ? <p><span className="font-semibold text-white/70">Received:</span> {destinationState.received} {destinationToken}</p> : null}
           </div>
         </section>
       )}
@@ -787,6 +825,8 @@ export function BridgeTab({
               className="w-full rounded-2xl bg-[rgba(212,175,55,0.95)] px-4 py-3 text-sm font-semibold text-black hover:bg-[rgba(212,175,55,0.85)] disabled:opacity-60 transition">
               {isSwitching ? "Switching…" : `Switch to ${getChainName(fromChainId)}`}
             </button>
+          ) : !destinationWalletReady ? (
+            <div className="hoj-panel rounded-2xl px-4 py-3 text-center text-sm text-amber-100/70">Connect a Solana recipient wallet above.</div>
           ) : needsApproval ? (
             <button type="button" onClick={handleApprove} disabled={isBusy || !amountBig}
               className="w-full rounded-2xl bg-[rgba(212,175,55,0.95)] px-4 py-3 text-sm font-semibold text-black hover:bg-[rgba(212,175,55,0.85)] disabled:opacity-60 transition">
@@ -825,7 +865,7 @@ export function BridgeTab({
       )}
       {bridgeMode === "lifi" && (
         <p className="text-center text-[11px] text-white/35">
-          Powered by Li.Fi (cBridge / Connext) · 1% house fee · Cronos routes
+          Powered by Li.Fi · 1% house fee · EVM and Solana routes
         </p>
       )}
 
