@@ -15,7 +15,7 @@ const faqs = [
   {
     question: "Which chains are supported?",
     answer:
-      "The app lists Ethereum, Base, Zora, Cronos, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Robinhood Chain, Unichain, Solana, and the native XRP Ledger. Swap availability depends on routing support and liquidity; Zora is discovery-only.",
+      "The app lists Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Linea, Scroll, Mantle, World Chain, Sonic, Berachain, Ink, Monad, HyperEVM, Plasma, Cronos, Zora, Solana, and the native XRP Ledger. Swap availability depends on routing support and liquidity; Cronos and Zora are not currently enabled for same-chain swaps.",
   },
   {
     question: "How do I swap a token?",

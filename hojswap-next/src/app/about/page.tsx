@@ -273,6 +273,16 @@ const networks = [
   { name: "Avalanche", badge: "Swap", desc: "AVAX, JOE, stablecoins, WETH, and WBTC on Avalanche C-Chain." },
   { name: "Unichain", badge: "Swap", desc: "ETH, WETH, and USDC on Unichain for new Uniswap-native liquidity." },
   { name: "Robinhood Chain", badge: "Swap", desc: "ETH, WETH, USDG, CASHCAT, VEX, HOODRAT, JUGGERNAUT, MYSTERY, ARROW, VIBE CAT, ROBIN, CashDog, and BOW through 0x liquidity." },
+  { name: "Linea", badge: "Swap", desc: "ETH and USDC swaps through 0x liquidity on Linea mainnet." },
+  { name: "Scroll", badge: "Swap", desc: "ETH and USDC swaps through 0x liquidity on Scroll mainnet." },
+  { name: "Mantle", badge: "Swap", desc: "MNT and USDC swaps through 0x liquidity on Mantle mainnet." },
+  { name: "World Chain", badge: "Swap", desc: "ETH and bridged USDC swaps through 0x liquidity on World Chain." },
+  { name: "Sonic", badge: "Swap", desc: "S and USDC swaps through 0x liquidity on Sonic mainnet." },
+  { name: "Berachain", badge: "Swap", desc: "BERA and bridged USDC swaps through 0x liquidity on Berachain." },
+  { name: "Ink", badge: "Swap", desc: "ETH and USDC swaps through 0x liquidity on Ink mainnet." },
+  { name: "Monad", badge: "Swap", desc: "MON and USDC swaps through 0x liquidity on Monad mainnet." },
+  { name: "HyperEVM", badge: "Swap", desc: "HYPE and USDC swaps through 0x liquidity on HyperEVM." },
+  { name: "Plasma", badge: "Swap", desc: "XPL and USDT0 swaps through 0x liquidity on Plasma mainnet." },
   { name: "Cronos", badge: "Bridge", desc: "USDC, USDT, and ETH routes via Li.Fi between Ethereum, Base, and Cronos." },
 ];
 
@@ -349,7 +359,7 @@ export default function About() {
   }), [lightspeedTokens, solanaTokens]);
 
   const highlights = useMemo(() => [
-    { value: String(CHAIN_OPTIONS.length + 3), label: "Networks shown" },
+    { value: String(CHAIN_OPTIONS.length + 2), label: "Networks shown" },
     {
       value: String(displayedTokenGroups.reduce((total, group) => total + group.tokens.length, 0)),
       label: "Shown assets",
@@ -368,7 +378,7 @@ export default function About() {
             House of Joshi across every chain that matters.
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-white/66 sm:text-base">
-            Trade and discover community tokens, blue-chip assets, stablecoins, and chain-native coins across {CHAIN_OPTIONS.length + 3} network catalogs from one non-custodial interface.
+            Trade and discover community tokens, blue-chip assets, stablecoins, and chain-native coins across {CHAIN_OPTIONS.length + 2} network catalogs from one non-custodial interface.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link

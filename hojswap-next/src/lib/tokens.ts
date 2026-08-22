@@ -1,6 +1,26 @@
 import { getAddress } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, zora } from "@/lib/chains";
+import {
+  arbitrum,
+  avalanche,
+  berachain,
+  bsc,
+  cronos,
+  hyperEvm,
+  ink,
+  linea,
+  mantle,
+  monad,
+  optimism,
+  plasma,
+  polygon,
+  robinhood,
+  scroll,
+  sonic,
+  unichain,
+  worldchain,
+  zora,
+} from "@/lib/chains";
 
 export type Token = {
   symbol: string;
@@ -1369,6 +1389,28 @@ export const TOKENS: Token[] = [
   { symbol: "CASHDOG", name: "Cash Dog", address: getAddress("0x9e93ea35be23ab0e1e20ed6b62d3b1cbd5234a83"), chainId: robinhood.id, decimals: 18, logo: "https://cdn.dexscreener.com/token-images/og/robinhood/0x9e93ea35be23ab0e1e20ed6b62d3b1cbd5234a83" },
   { symbol: "TENDIES", name: "TENDIES", address: getAddress("0x45242320dbb855eea8fd36804c6487e10e97fcf9"), chainId: robinhood.id, decimals: 18, logo: "https://cdn.dexscreener.com/cms/images/j8K5uOi-9TVXuWFJ" },
   { symbol: "BYCOCKET", name: "Bycocket", address: getAddress("0xc79d46d716b33b463b3a6574d6ee26009abf4e9a"), chainId: robinhood.id, decimals: 18, logo: "https://cdn.dexscreener.com/cms/images/9B-Y8-fr8vI-RPNO" },
+
+  // ─── Newly deployed EVM networks ─────────────────────────
+  { symbol: "ETH", name: "Ether", chainId: linea.id, decimals: 18 },
+  { symbol: "USDC", name: "USD Coin", address: getAddress("0x176211869cA2b568f2A7D4EE941E073a821EE1ff"), chainId: linea.id, decimals: 6 },
+  { symbol: "ETH", name: "Ether", chainId: scroll.id, decimals: 18 },
+  { symbol: "USDC", name: "USD Coin", address: getAddress("0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4"), chainId: scroll.id, decimals: 6 },
+  { symbol: "MNT", name: "Mantle", chainId: mantle.id, decimals: 18 },
+  { symbol: "USDC", name: "USD Coin", address: getAddress("0x09Bc4E0D864854c6aFB6eB9A9cdF58aC190D0dF9"), chainId: mantle.id, decimals: 6 },
+  { symbol: "ETH", name: "Ether", chainId: worldchain.id, decimals: 18 },
+  { symbol: "USDC.e", name: "Bridged USD Coin", address: getAddress("0x79A02482A880bCE3F13e09Da970dC34db4CD24d1"), chainId: worldchain.id, decimals: 6 },
+  { symbol: "S", name: "Sonic", chainId: sonic.id, decimals: 18 },
+  { symbol: "USDC", name: "USD Coin", address: getAddress("0x29219dd400f2Bf60E5a23d13Be72B486D4038894"), chainId: sonic.id, decimals: 6 },
+  { symbol: "BERA", name: "Berachain", chainId: berachain.id, decimals: 18 },
+  { symbol: "USDC.e", name: "Bridged USD Coin", address: getAddress("0x549943e04f40284185054145c6E4e9568C1D3241"), chainId: berachain.id, decimals: 6 },
+  { symbol: "ETH", name: "Ether", chainId: ink.id, decimals: 18 },
+  { symbol: "USDC", name: "USD Coin", address: getAddress("0x2D270e6886d130D724215A266106e6832161EAEd"), chainId: ink.id, decimals: 6 },
+  { symbol: "MON", name: "Monad", chainId: monad.id, decimals: 18 },
+  { symbol: "USDC", name: "USD Coin", address: getAddress("0x754704Bc059F8C67012fEd69BC8A327a5aafb603"), chainId: monad.id, decimals: 6 },
+  { symbol: "HYPE", name: "Hyperliquid", chainId: hyperEvm.id, decimals: 18 },
+  { symbol: "USDC", name: "USD Coin", address: getAddress("0xb88339CB7199b77E23DB6E890353E22632Ba630f"), chainId: hyperEvm.id, decimals: 6 },
+  { symbol: "XPL", name: "Plasma", chainId: plasma.id, decimals: 18 },
+  { symbol: "USDT0", name: "Tether USD0", address: getAddress("0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb"), chainId: plasma.id, decimals: 6 },
 ];
 
 export function tokensForChain(chainId: number) {
@@ -1425,6 +1467,7 @@ export function tokenDecimals(t: Token): number {
 export function isUsdStableToken(t: Token) {
   return [
     "USDC",
+    "USDC.E",
     "USDT",
     "USDT0",
     "USD₮0",

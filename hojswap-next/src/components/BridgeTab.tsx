@@ -31,7 +31,8 @@ import {
   type LiFiQuote,
 } from "@/lib/lifi";
 import { solanaClient } from "@/lib/solana-client";
-import { useConnectedWallet, useConnect, useWallets } from "@solana/kit-plugin-wallet/react";
+import { useConnectedWallet } from "@solana/kit-plugin-wallet/react";
+import { SolanaWalletOptions } from "@/components/SolanaWalletOptions";
 import { apiUrl } from "@/lib/api";
 import { HOUSE_WALLET } from "@/lib/tokens";
 import { saveTransaction } from "@/lib/transactions";
@@ -101,8 +102,6 @@ export function BridgeTab({
 }) {
   const { showToast } = useToast();
   const solanaWallet = useConnectedWallet(solanaClient);
-  const solanaWallets = useWallets(solanaClient);
-  const connectSolana = useConnect(solanaClient);
   const chainId = useChainId();
   const { address, isConnected } = useAccount();
   const { switchChainAsync, isPending: isSwitching } = useSwitchChain();
@@ -655,14 +654,7 @@ export function BridgeTab({
           ) : (
             <div className="mt-2 space-y-2">
               <p className="text-xs leading-5 text-amber-100/70">Connect the Solana wallet that should receive your SOL.</p>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {solanaWallets.map((wallet) => (
-                  <button key={wallet.name} type="button" disabled={connectSolana.isRunning} onClick={() => connectSolana.dispatch(wallet)} className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/25 px-3 py-2 text-left text-sm font-semibold text-white/75 transition hover:border-[rgba(212,175,55,0.35)] disabled:opacity-50">
-                    <img src={wallet.icon} alt="" className="h-7 w-7 rounded-lg" />{wallet.name}
-                  </button>
-                ))}
-              </div>
-              {solanaWallets.length === 0 && <p className="text-[11px] text-white/40">No Solana Wallet Standard wallet detected.</p>}
+              <SolanaWalletOptions />
             </div>
           )}
         </div>

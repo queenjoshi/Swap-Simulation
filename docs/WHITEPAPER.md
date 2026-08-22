@@ -12,13 +12,13 @@ X: https://x.com/thehouseofjoshi
 
 House of Joshi Swap is a non-custodial multichain swap and bridge interface designed to make on-chain asset exchange understandable, verifiable, and accessible from a single application. The system combines wallet-native transaction authorization, chain-aware token discovery, third-party liquidity routing, transaction simulation, minimum-output protection, and transparent fee handling.
 
-The application supports BNB Smart Chain and major EVM networks, while also providing a distinct native XRP Ledger experience. House of Joshi Swap does not custody user funds, operate the underlying liquidity pools, or promise execution at a fixed price. Users retain control of their wallets and approve every transaction.
+The application supports 21 configured EVM networks, a native Solana swap experience, and a distinct native XRP Ledger experience. House of Joshi Swap does not custody user funds, operate the underlying liquidity pools, or promise execution at a fixed price. Users retain control of their wallets and approve every transaction.
 
 This whitepaper explains the product architecture, deployed contracts, fee model, security controls, supported ecosystems, current limitations, and development roadmap. It is a technical product document, not an offer of securities or financial advice.
 
 ## 1. Problem and vision
 
-On-chain trading remains fragmented. Users must choose the correct network, verify token identifiers, compare routes, understand approvals, manage gas, and distinguish a wallet request from a completed transaction. Multichain users face additional complexity because EVM chains and the native XRP Ledger use different transaction models, wallet standards, and asset representations.
+On-chain trading remains fragmented. Users must choose the correct network, verify token identifiers, compare routes, understand approvals, manage gas, and distinguish a wallet request from a completed transaction. Multichain users face additional complexity because EVM chains, Solana, and the native XRP Ledger use different transaction models, wallet standards, and asset representations.
 
 House of Joshi Swap aims to provide a clear interface across these environments while preserving the core property of self-custody. Its design goals are:
 
@@ -62,18 +62,29 @@ House of Joshi Swap is designed for a multichain environment. The complete curre
 | BNB Smart Chain | 56 | BNB | Swap network and deployed House router |
 | Unichain | 130 | ETH | Swap network |
 | Polygon | 137 | POL | Swap network |
+| Monad | 143 | MON | Swap network and deployed House router |
+| Sonic | 146 | S | Swap network and deployed House router |
+| World Chain | 480 | ETH | Swap network and deployed House router |
+| HyperEVM | 999 | HYPE | Swap network and deployed House router |
 | Robinhood Chain | 4663 | ETH | Swap network |
+| Mantle | 5000 | MNT | Swap network and deployed House router |
 | Base | 8453 | ETH | Swap network and deployed House router |
+| Plasma | 9745 | XPL | Swap network and deployed House router |
 | Arbitrum | 42161 | ETH | Swap network |
 | Avalanche C-Chain | 43114 | AVAX | Swap network |
+| Ink | 57073 | ETH | Swap network and deployed House router |
+| Linea | 59144 | ETH | Swap network and deployed House router |
+| Berachain | 80094 | BERA | Swap network and deployed House router |
+| Scroll | 534352 | ETH | Swap network and deployed House router |
 | Zora | 7777777 | ETH | Token discovery and catalog |
+| Solana | Native SVM - no EVM chain ID | SOL | Native Solana swap experience |
 | XRP Ledger | Native ledger - no EVM chain ID | XRP | Native XRPL swap experience |
 
 "Swap network" means the application exposes that network for route requests. Execution still depends on live provider support, liquidity, deployed router configuration, token compatibility, and operational RPC endpoints. A network appearing in the interface does not guarantee that every asset pair is executable. Catalog and discovery networks provide token information but do not imply an executable route.
 
-## 4. BNB Chain deployment
+## 4. EVM router deployments
 
-BNB Smart Chain is an explicit production network in the House of Joshi Swap configuration.
+House of Joshi Swap executes supported EVM swaps through `HojswapRouterV2`. BNB Smart Chain is shown below as a representative production deployment; the additional deployment table records the newly enabled networks.
 
 | Property | Value |
 | --- | --- |
@@ -186,7 +197,26 @@ The repository includes BNB RPC configuration, BscScan transaction and address l
 | House router | `0x2C5F372746330465C3f4084CE6C6aBce22a48B4d` configured |
 | Current role | Swap network |
 
-### 4.10 Zora profile
+### 4.10 Additional EVM router deployments
+
+The following production networks use the shared deployed House router address `0x2C5F372746330465C3f4084CE6C6aBce22a48B4d`.
+
+| Network | Chain ID | Native asset | Default configured pair |
+| --- | --- | --- | --- |
+| Linea | 59144 | ETH | ETH / USDC |
+| Scroll | 534352 | ETH | ETH / USDC |
+| Mantle | 5000 | MNT | MNT / USDC |
+| World Chain | 480 | ETH | ETH / USDC.e |
+| Sonic | 146 | S | S / USDC |
+| Berachain | 80094 | BERA | BERA / USDC.e |
+| Ink | 57073 | ETH | ETH / USDC |
+| Monad | 143 | MON | MON / USDC |
+| HyperEVM | 999 | HYPE | HYPE / USDC |
+| Plasma | 9745 | XPL | XPL / USDT0 |
+
+Each deployment uses owner-managed approval pairs for the 0x entry point and allowance holder. A deployed router does not guarantee liquidity for every pair; execution remains dependent on a valid live quote, approved router/spender pair, RPC availability, and sufficient liquidity.
+
+### 4.11 Zora profile
 
 | Property | Value |
 | --- | --- |
@@ -197,7 +227,20 @@ The repository includes BNB RPC configuration, BscScan transaction and address l
 | House router | No House router configured |
 | Current role | Token discovery and catalog; swap execution disabled |
 
-### 4.11 Native XRP Ledger profile
+### 4.12 Native Solana profile
+
+| Property | Value |
+| --- | --- |
+| Network | Solana mainnet |
+| Chain ID | Native SVM; no EVM chain ID |
+| Native asset | SOL |
+| Explorer | https://solscan.io |
+| House contract | Not applicable; swaps use Solana instructions rather than an EVM router |
+| Current role | Native Solana swap experience through Jupiter |
+
+The Solana interface supports compatible installed and mobile wallets, token discovery, disconnected quote previews, wallet balances after connection, and Jupiter-routed swap execution.
+
+### 4.13 Native XRP Ledger profile
 
 | Property | Value |
 | --- | --- |
@@ -237,7 +280,11 @@ Core safeguards include:
 
 The router does not discover liquidity. Routing providers produce calldata for third-party liquidity venues; the House router enforces fee and settlement rules around that route.
 
-### 5.4 Native XRP Ledger flow
+### 5.4 Native Solana flow
+
+Native Solana swaps use Solana wallet-standard connections and Jupiter routing. The application retrieves chain-aware token metadata and quote output independently of wallet connection, while a compatible connected wallet is required to sign and submit the final transaction. Mobile wallet options may open an installed application or its download page when the application is not installed.
+
+### 5.5 Native XRP Ledger flow
 
 Native XRPL uses classic addresses, trust lines, issued-currency identifiers, and XRPL-native transactions. The application supports wallet flows including Xaman, Crossmark, GemWallet, and compatible WalletConnect wallets when those providers are available in the user's environment.
 
@@ -306,7 +353,7 @@ Roadmap items are goals, not guarantees. Features may change based on security, 
 
 ## 12. Conclusion
 
-House of Joshi Swap provides a single non-custodial interface for navigating swaps across BNB Smart Chain, major EVM networks, and the native XRP Ledger. Its architecture combines third-party liquidity discovery with chain-specific wallet authorization, transparent fees, minimum-output protection, and public transaction verification.
+House of Joshi Swap provides a single non-custodial interface for navigating swaps across 21 configured EVM networks, Solana, and the native XRP Ledger. Its architecture combines third-party liquidity discovery with chain-specific wallet authorization, transparent fees, minimum-output protection, and public transaction verification.
 
 The project prioritizes clear network identity, user-controlled signatures, and verifiable configuration. It does not eliminate the risks of digital assets or third-party protocols. Users should independently evaluate every token, route, contract, issuer, and wallet request before transacting.
 

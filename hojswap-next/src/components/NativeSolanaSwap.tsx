@@ -3,11 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { getTransactionDecoder, getTransactionEncoder, isTransactionPartialSigner, partiallySignTransactionWithSigners, type Transaction, type TransactionWithLifetime, type TransactionWithinSizeLimit } from "@solana/kit";
-import { useConnectedWallet, useConnect, useDisconnect, useIsWalletReady, useWalletStatus, useWallets } from "@solana/kit-plugin-wallet/react";
+import { useConnectedWallet, useDisconnect, useIsWalletReady } from "@solana/kit-plugin-wallet/react";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import { TokenLogo } from "@/components/TokenLogo";
 import { SOLANA_CORE_FALLBACK, SOL_MINT, type SolanaToken } from "@/lib/solana";
 import { solanaClient } from "@/lib/solana-client";
+import { SolanaWalletOptions } from "@/components/SolanaWalletOptions";
 import { saveTransaction } from "@/lib/transactions";
 
 type JupiterOrder = {
@@ -54,10 +55,7 @@ export type SolanaNetworkOption = {
 
 export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: SolanaNetworkOption[]; onNetworkChange: (chainId: number) => void }) {
   const connectedWallet = useConnectedWallet(solanaClient);
-  const compatibleWallets = useWallets(solanaClient);
-  const walletStatus = useWalletStatus(solanaClient);
   const walletReady = useIsWalletReady(solanaClient);
-  const connectWallet = useConnect(solanaClient);
   const disconnectWallet = useDisconnect(solanaClient);
   const connection = useMemo(() => new Connection(clusterApiUrl("mainnet-beta"), "confirmed"), []);
   const [tokens, setTokens] = useState<SolanaToken[]>(SOLANA_CORE_FALLBACK);
@@ -157,7 +155,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
     setOrder(null);
     setError(null);
     const atomic = toAtomic(amount, sell.decimals);
-    if (!atomic || !connectedWallet || sell.mint === buy.mint) return;
+    if (!atomic || sell.mint === buy.mint) return;
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
       setQuoting(true);
@@ -169,7 +167,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
             inputMint: sell.mint,
             outputMint: buy.mint,
             amount: atomic,
-            taker: connectedWallet.account.address,
+            ...(connectedWallet ? { taker: connectedWallet.account.address } : {}),
             ...(slippageBps == null ? {} : { slippageBps }),
           }),
           signal: controller.signal,
@@ -391,8 +389,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
           <div role="dialog" aria-modal="true" aria-label="Connect a Solana wallet" onMouseDown={(event) => event.stopPropagation()} className="w-full max-w-sm overflow-hidden rounded-[24px] border border-white/10 bg-[#111113] shadow-[0_28px_90px_rgba(0,0,0,0.8)]">
             <div className="flex items-center justify-between border-b border-white/8 px-4 py-3.5"><div><p className="text-sm font-semibold text-white/90">Connect wallet</p><p className="mt-0.5 text-[10px] uppercase tracking-wider text-white/35">Solana Wallet Standard</p></div><button type="button" onClick={() => setWalletOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-sm text-white/55 hover:text-white" aria-label="Close wallet selector">×</button></div>
             <div className="max-h-[min(68vh,32rem)] overflow-y-auto p-2">
-              {compatibleWallets.map((candidate) => <button key={candidate.name} type="button" disabled={connectWallet.isRunning} onClick={async () => { await connectWallet.dispatchAsync(candidate); setWalletOpen(false); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-white/[0.06] disabled:opacity-50"><img src={candidate.icon} alt="" className="h-9 w-9 rounded-xl" /><span className="text-sm font-semibold text-white/88">{candidate.name}</span></button>)}
-              {walletStatus !== "pending" && compatibleWallets.length === 0 && <p className="px-4 py-8 text-center text-xs leading-5 text-white/45">No compatible wallet was detected. Install or open a Solana Wallet Standard wallet, then refresh this page.</p>}
+              <SolanaWalletOptions onConnected={() => setWalletOpen(false)} />
             </div>
           </div>
         </div>, document.body,

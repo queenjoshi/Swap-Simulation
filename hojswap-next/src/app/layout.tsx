@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   applicationName: "House of Joshi",
   title: "House of Joshi — Swap & Bridge",
   description:
-    "Swap and bridge assets across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Cronos, Solana, and the native XRP Ledger.",
+    "Swap and bridge assets across 21 EVM networks—including Linea, Scroll, Mantle, World Chain, Sonic, Berachain, Ink, Monad, HyperEVM, and Plasma—plus Solana and the XRP Ledger.",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     siteName: "House of Joshi",
     title: "House of Joshi — Swap & Bridge",
     description:
-      "Swap and bridge assets across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Cronos, Solana, and the native XRP Ledger.",
+      "Swap and bridge assets across 21 EVM networks—including Linea, Scroll, Mantle, World Chain, Sonic, Berachain, Ink, Monad, HyperEVM, and Plasma—plus Solana and the XRP Ledger.",
     images: [
       {
         url: "/social/hojswap-share-cover.png",
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "House of Joshi — Swap & Bridge",
     description:
-      "Swap and bridge assets across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Cronos, Solana, and the native XRP Ledger.",
+      "Swap and bridge assets across 21 EVM networks—including Linea, Scroll, Mantle, World Chain, Sonic, Berachain, Ink, Monad, HyperEVM, and Plasma—plus Solana and the XRP Ledger.",
     images: ["/social/hojswap-share-cover.png"],
   },
 };

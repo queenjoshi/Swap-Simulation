@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json() as { inputMint?: string; outputMint?: string; amount?: string; taker?: string; slippageBps?: number };
-    if (!body.inputMint || !body.outputMint || !body.taker || !validPublicKey(body.inputMint) || !validPublicKey(body.outputMint) || !validPublicKey(body.taker)) {
+    if (!body.inputMint || !body.outputMint || !validPublicKey(body.inputMint) || !validPublicKey(body.outputMint) || (body.taker != null && !validPublicKey(body.taker))) {
       return NextResponse.json({ error: "Invalid Solana address or token mint" }, { status: 400 });
     }
     if (!body.amount || !/^\d+$/.test(body.amount) || BigInt(body.amount) <= 0n) {
@@ -33,8 +33,8 @@ export async function POST(request: Request) {
       inputMint: body.inputMint,
       outputMint: body.outputMint,
       amount: body.amount,
-      taker: body.taker,
     });
+    if (body.taker) params.set("taker", body.taker);
     if (referralAccount && feeReady) {
       params.set("referralAccount", referralAccount);
       params.set("referralFee", "100");

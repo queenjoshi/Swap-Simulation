@@ -53,6 +53,16 @@ const CHAIN_LOGOS: Record<number, string> = {
     7777777: "https://zora.co/favicon.ico",
     43114: "https://assets.coingecko.com/coins/images/12559/standard/Avalanche_Circle_RedWhite_Trans.png",
     42161: "https://assets.coingecko.com/coins/images/16547/standard/arb.jpg",
+    143: "https://www.monad.xyz/favicon.ico",
+    146: "https://www.soniclabs.com/favicon.ico",
+    480: "https://world.org/favicon.ico",
+    999: "https://hyperfoundation.org/favicon.ico",
+    5000: "https://www.mantle.xyz/favicon.ico",
+    9745: "https://www.plasma.to/favicon.ico",
+    57073: "https://inkonchain.com/favicon.ico",
+    59144: "https://linea.build/favicon.ico",
+    80094: "https://www.berachain.com/favicon.ico",
+    534352: "https://scroll.io/favicon.ico",
 };
 
 type ActiveTab = "swap" | "bridge";

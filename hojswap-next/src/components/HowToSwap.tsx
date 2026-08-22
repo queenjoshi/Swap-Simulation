@@ -69,7 +69,7 @@ export function HowToSwap({ expanded = false }: { expanded?: boolean }) {
 
           <div className="mt-4 rounded-2xl border border-amber-400/15 bg-amber-400/[0.06] px-4 py-3">
             <p className="text-xs leading-5 text-amber-100/65">
-              Keep a little native currency for gas—such as ETH, BNB, POL, or AVAX. Always verify the network and contract address. Swap availability depends on live liquidity; Zora Network tokens are currently discovery-only.
+              Keep a little native currency for gas—such as ETH, BNB, POL, AVAX, MNT, S, BERA, MON, HYPE, or XPL. Always verify the network and contract address. Swap availability depends on live liquidity; Zora Network tokens are currently discovery-only.
             </p>
           </div>
         </div>

@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain } from "@/lib/chains";
+import {
+  arbitrum, avalanche, berachain, bsc, cronos, hyperEvm, ink, linea, mantle,
+  monad, optimism, plasma, polygon, robinhood, scroll, sonic, unichain, worldchain,
+} from "@/lib/chains";
 import { formatCompactNumber } from "@/lib/format";
 import { apiUrl } from "@/lib/api";
 
@@ -18,6 +21,16 @@ const USDC_BY_CHAIN: Record<number, string> = {
   [avalanche.id]: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
   [unichain.id]: "0x078D782b760474a361dDA0AF3839290b0EF57AD6",
   [robinhood.id]: "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+  [linea.id]: "0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
+  [scroll.id]: "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4",
+  [mantle.id]: "0x09Bc4E0D864854c6aFB6eB9A9cdF58aC190D0dF9",
+  [worldchain.id]: "0x79A02482A880bCE3F13e09Da970dC34db4CD24d1",
+  [sonic.id]: "0x29219dd400f2Bf60E5a23d13Be72B486D4038894",
+  [berachain.id]: "0x549943e04f40284185054145c6E4e9568C1D3241",
+  [ink.id]: "0x2D270e6886d130D724215A266106e6832161EAEd",
+  [monad.id]: "0x754704Bc059F8C67012fEd69BC8A327a5aafb603",
+  [hyperEvm.id]: "0xb88339CB7199b77E23DB6E890353E22632Ba630f",
+  [plasma.id]: "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
 };
 
 export function getNativeSymbol(chainId: number): string {
@@ -25,6 +38,12 @@ export function getNativeSymbol(chainId: number): string {
   if (chainId === polygon.id) return "POL";
   if (chainId === bsc.id) return "BNB";
   if (chainId === avalanche.id) return "AVAX";
+  if (chainId === mantle.id) return "MNT";
+  if (chainId === sonic.id) return "S";
+  if (chainId === berachain.id) return "BERA";
+  if (chainId === monad.id) return "MON";
+  if (chainId === hyperEvm.id) return "HYPE";
+  if (chainId === plasma.id) return "XPL";
   return "ETH";
 }
 

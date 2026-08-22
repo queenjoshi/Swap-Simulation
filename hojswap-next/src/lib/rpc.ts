@@ -1,5 +1,5 @@
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, zora } from "@/lib/chains";
+import { arbitrum, avalanche, berachain, bsc, cronos, hyperEvm, ink, linea, mantle, monad, optimism, plasma, polygon, robinhood, scroll, sonic, unichain, worldchain, zora } from "@/lib/chains";
 import type { Chain } from "viem";
 import { fallback, http } from "viem";
 
@@ -53,6 +53,16 @@ export const RPC_URLS: Record<number, readonly string[]> = {
   [zora.id]: [
     "https://rpc.zora.energy",
   ],
+  [linea.id]: linea.rpcUrls.default.http,
+  [scroll.id]: scroll.rpcUrls.default.http,
+  [mantle.id]: mantle.rpcUrls.default.http,
+  [worldchain.id]: worldchain.rpcUrls.default.http,
+  [sonic.id]: sonic.rpcUrls.default.http,
+  [berachain.id]: berachain.rpcUrls.default.http,
+  [ink.id]: ink.rpcUrls.default.http,
+  [monad.id]: monad.rpcUrls.default.http,
+  [hyperEvm.id]: hyperEvm.rpcUrls.default.http,
+  [plasma.id]: plasma.rpcUrls.default.http,
 };
 
 export function getRpcUrl(chainId: number) {
@@ -75,5 +85,15 @@ export function getViemChain(chainId: number) {
   if (chainId === robinhood.id) return robinhood as Chain;
   if (chainId === unichain.id) return unichain as Chain;
   if (chainId === zora.id) return zora as Chain;
+  if (chainId === linea.id) return linea as Chain;
+  if (chainId === scroll.id) return scroll as Chain;
+  if (chainId === mantle.id) return mantle as Chain;
+  if (chainId === worldchain.id) return worldchain as Chain;
+  if (chainId === sonic.id) return sonic as Chain;
+  if (chainId === berachain.id) return berachain as Chain;
+  if (chainId === ink.id) return ink as Chain;
+  if (chainId === monad.id) return monad as Chain;
+  if (chainId === hyperEvm.id) return hyperEvm as Chain;
+  if (chainId === plasma.id) return plasma as Chain;
   return base;
 }

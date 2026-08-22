@@ -1,4 +1,6 @@
-import { base, mainnet } from "wagmi/chains";
+import { base, mainnet, berachain, hyperEvm, ink, linea, mantle, monad, plasma, scroll, sonic, worldchain } from "wagmi/chains";
+
+export { berachain, hyperEvm, ink, linea, mantle, monad, plasma, scroll, sonic, worldchain };
 
 export const cronos = {
   id: 25,
@@ -121,7 +123,7 @@ export const zora = {
   testnet: false,
 } as const;
 
-export const SUPPORTED_CHAIN_IDS = [base.id, mainnet.id, cronos.id, polygon.id, bsc.id, arbitrum.id, optimism.id, avalanche.id, unichain.id, robinhood.id, zora.id] as const;
+export const SUPPORTED_CHAIN_IDS = [base.id, mainnet.id, cronos.id, polygon.id, bsc.id, arbitrum.id, optimism.id, avalanche.id, unichain.id, robinhood.id, zora.id, linea.id, scroll.id, mantle.id, worldchain.id, sonic.id, berachain.id, ink.id, monad.id, hyperEvm.id, plasma.id] as const;
 export type SupportedChainId = (typeof SUPPORTED_CHAIN_IDS)[number];
 
 export const CHAIN_OPTIONS = [
@@ -136,6 +138,16 @@ export const CHAIN_OPTIONS = [
   { id: robinhood.id, label: "Robinhood Chain", shortLabel: "Robinhood", swap: true },
   { id: unichain.id, label: "Unichain", shortLabel: "Unichain", swap: true },
   { id: zora.id, label: "Zora", shortLabel: "Zora", swap: false, catalog: true },
+  { id: linea.id, label: "Linea", shortLabel: "Linea", swap: true },
+  { id: scroll.id, label: "Scroll", shortLabel: "Scroll", swap: true },
+  { id: mantle.id, label: "Mantle", shortLabel: "Mantle", swap: true },
+  { id: worldchain.id, label: "World Chain", shortLabel: "World", swap: true },
+  { id: sonic.id, label: "Sonic", shortLabel: "Sonic", swap: true },
+  { id: berachain.id, label: "Berachain", shortLabel: "Bera", swap: true },
+  { id: ink.id, label: "Ink", shortLabel: "Ink", swap: true },
+  { id: monad.id, label: "Monad", shortLabel: "Monad", swap: true },
+  { id: hyperEvm.id, label: "HyperEVM", shortLabel: "HyperEVM", swap: true },
+  { id: plasma.id, label: "Plasma", shortLabel: "Plasma", swap: true },
 ] as const;
 
 export const SWAP_SUPPORTED_CHAIN_IDS: readonly number[] = CHAIN_OPTIONS
@@ -156,6 +168,16 @@ export function getChainName(chainId: number) {
   if (chainId === robinhood.id) return "Robinhood Chain";
   if (chainId === unichain.id) return "Unichain";
   if (chainId === zora.id) return "Zora";
+  if (chainId === linea.id) return "Linea";
+  if (chainId === scroll.id) return "Scroll";
+  if (chainId === mantle.id) return "Mantle";
+  if (chainId === worldchain.id) return "World Chain";
+  if (chainId === sonic.id) return "Sonic";
+  if (chainId === berachain.id) return "Berachain";
+  if (chainId === ink.id) return "Ink";
+  if (chainId === monad.id) return "Monad";
+  if (chainId === hyperEvm.id) return "HyperEVM";
+  if (chainId === plasma.id) return "Plasma";
   return "Unknown";
 }
 
@@ -173,7 +195,15 @@ export function explorerName(chainId: number) {
   if (chainId === robinhood.id) return "Robinhood Chain Explorer";
   if (chainId === unichain.id) return "Uniscan";
   if (chainId === zora.id) return "Zora Explorer";
+  const chain = NEW_EVM_CHAINS.find((candidate) => candidate.id === chainId);
+  if (chain) return chain.blockExplorers.default.name;
   return "Explorer";
+}
+
+const NEW_EVM_CHAINS = [linea, scroll, mantle, worldchain, sonic, berachain, ink, monad, hyperEvm, plasma] as const;
+
+function newChainExplorerUrl(chainId: number) {
+  return NEW_EVM_CHAINS.find((chain) => chain.id === chainId)?.blockExplorers.default.url;
 }
 
 export function explorerTxUrl(chainId: number, hash: string) {
@@ -190,6 +220,8 @@ export function explorerTxUrl(chainId: number, hash: string) {
   if (chainId === robinhood.id) return `https://robinhoodchain.blockscout.com/tx/${hash}`;
   if (chainId === unichain.id) return `https://uniscan.xyz/tx/${hash}`;
   if (chainId === zora.id) return `https://explorer.zora.energy/tx/${hash}`;
+  const explorerUrl = newChainExplorerUrl(chainId);
+  if (explorerUrl) return `${explorerUrl}/tx/${hash}`;
   return `https://basescan.org/tx/${hash}`;
 }
 
@@ -205,5 +237,7 @@ export function explorerAddressUrl(chainId: number, address: string) {
   if (chainId === robinhood.id) return `https://robinhoodchain.blockscout.com/address/${address}`;
   if (chainId === unichain.id) return `https://uniscan.xyz/address/${address}`;
   if (chainId === zora.id) return `https://explorer.zora.energy/address/${address}`;
+  const explorerUrl = newChainExplorerUrl(chainId);
+  if (explorerUrl) return `${explorerUrl}/address/${address}`;
   return `https://basescan.org/address/${address}`;
 }
