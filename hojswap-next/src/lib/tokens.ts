@@ -165,6 +165,13 @@ export const TOKENS: Token[] = [
     decimals: 18,
   },
   {
+    symbol: "CAW",
+    name: "crow with knife",
+    address: getAddress("0xdfbea88c4842d30c26669602888d746d30f9d60d"),
+    chainId: base.id,
+    decimals: 18,
+  },
+  {
     symbol: "MOG",
     name: "Mog Coin",
     address: getAddress("0x2Da56AcB9Ea78330f947bD57C54119Debda7AF71"),
@@ -1374,6 +1381,7 @@ export const TOKENS: Token[] = [
   { symbol: "DINO", name: "DINO", address: getAddress("0x85e90a5430af45776548adb82ee4cd9e33b08077"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/53533/large/coin_pfp.png" },
   // BNB Smart Chain
   { symbol: "CHEEMS", name: "Cheems", address: getAddress("0x0df0587216a4a1bb7d5082fdc491d93d2dd4b413"), chainId: bsc.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/30376/large/Hg4_Lhbg_400x400.jpg" },
+  { symbol: "CAW", name: "crow with knife", address: getAddress("0xdfbea88c4842d30c26669602888d746d30f9d60d"), chainId: bsc.id, decimals: 18 },
   { symbol: "WHY", name: "WHY", address: getAddress("0x9ec02756a559700d8d9e79ece56809f7bcc5dc27"), chainId: bsc.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/36812/large/output-onlinepngtools.png" },
   { symbol: "CAT", name: "Simon's Cat", address: getAddress("0x6894cde390a3f51155ea41ed24a33a4827d3063d"), chainId: bsc.id, decimals: 18, logo: "https://cdn.dexscreener.com/cms/images/85f6929f07daa1e1ba77547d4bde843f34e1375b206aa47318005baaf6944478" },
   // Polygon
