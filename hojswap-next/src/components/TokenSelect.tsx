@@ -40,6 +40,7 @@ const TOKEN_LOGOS: Record<string, string> = {
   TOSHI: "/tokens/toshi.png",
   AERO: "https://assets.coingecko.com/coins/images/31745/standard/token.png",
   BRETT: "https://assets.coingecko.com/coins/images/35529/standard/1000050750.png",
+  CAW: "https://s2.coinmarketcap.com/static/img/coins/200x200/30402.png",
   VIRTUAL: "https://assets.coingecko.com/coins/images/34057/standard/LOGOMARK.png",
   ONDO: "https://assets.coingecko.com/coins/images/26580/standard/ONDO.png",
   ENA: "https://assets.coingecko.com/coins/images/36530/standard/ethena.png",
@@ -167,12 +168,12 @@ function tokenLogo(token: Token) {
   if (token.chainId === base.id && token.symbol.toUpperCase() === "SHIB") {
     logos.push("https://s2.coinmarketcap.com/static/img/coins/200x200/37553.png");
   }
+  const symbolLogo = fallbackTokenLogo(token.symbol);
+  if (symbolLogo) logos.push(symbolLogo);
   const chainSlug = DEXSCREENER_CHAIN_SLUGS[token.chainId];
   if (chainSlug && token.address) {
     logos.push(`https://cdn.dexscreener.com/token-images/og/${chainSlug}/${token.address.toLowerCase()}`);
   }
-  const symbolLogo = fallbackTokenLogo(token.symbol);
-  if (symbolLogo) logos.push(symbolLogo);
   return [...new Set(logos)];
 }
 
