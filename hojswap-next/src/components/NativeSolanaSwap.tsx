@@ -313,7 +313,6 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
               ))}
             </div>
           </div>
-          <div className="mt-1 flex justify-between gap-3"><span>Tokens</span><span className="font-semibold text-white/65">{loadingTokens ? "Loading…" : `${tokens.length} verified`}</span></div>
         </div>
 
         {order && !order.feeReady && (
@@ -347,7 +346,6 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
             {swapping ? "Signing and swapping…" : !order?.feeReady && order ? "Referral setup required" : "Swap with Jupiter"}
           </button>
         )}
-        {wallet.connected && <p className="truncate px-2 text-center font-mono text-[10px] text-white/30">{wallet.publicKey?.toBase58()}</p>}
       </div>
       {networkOpen && typeof document !== "undefined" && createPortal(
         <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="presentation" onMouseDown={() => setNetworkOpen(false)}>
