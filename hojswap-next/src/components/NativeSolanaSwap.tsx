@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { PublicKey, VersionedTransaction } from "@solana/web3.js";
+import { getTransactionDecoder, getTransactionEncoder, isTransactionPartialSigner, partiallySignTransactionWithSigners, type Transaction, type TransactionWithLifetime, type TransactionWithinSizeLimit } from "@solana/kit";
+import { useConnectedWallet, useConnect, useDisconnect, useIsWalletReady, useWalletStatus, useWallets } from "@solana/kit-plugin-wallet/react";
+import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import { TokenLogo } from "@/components/TokenLogo";
 import { SOLANA_CORE_FALLBACK, SOL_MINT, type SolanaToken } from "@/lib/solana";
+import { solanaClient } from "@/lib/solana-client";
 import { saveTransaction } from "@/lib/transactions";
 
 type JupiterOrder = {
@@ -52,9 +53,13 @@ export type SolanaNetworkOption = {
 };
 
 export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: SolanaNetworkOption[]; onNetworkChange: (chainId: number) => void }) {
-  const wallet = useWallet();
-  const { connection } = useConnection();
-  const { setVisible } = useWalletModal();
+  const connectedWallet = useConnectedWallet(solanaClient);
+  const compatibleWallets = useWallets(solanaClient);
+  const walletStatus = useWalletStatus(solanaClient);
+  const walletReady = useIsWalletReady(solanaClient);
+  const connectWallet = useConnect(solanaClient);
+  const disconnectWallet = useDisconnect(solanaClient);
+  const connection = useMemo(() => new Connection(clusterApiUrl("mainnet-beta"), "confirmed"), []);
   const [tokens, setTokens] = useState<SolanaToken[]>(SOLANA_CORE_FALLBACK);
   const [sell, setSell] = useState<SolanaToken>(SOLANA_CORE_FALLBACK[0]!);
   const [buy, setBuy] = useState<SolanaToken>(SOLANA_CORE_FALLBACK[1]!);
@@ -67,6 +72,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
   const [error, setError] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
   const [networkOpen, setNetworkOpen] = useState(false);
+  const [walletOpen, setWalletOpen] = useState(false);
   const [balances, setBalances] = useState<Record<string, bigint>>({});
   const [loadingBalances, setLoadingBalances] = useState(false);
   const [slippageBps, setSlippageBps] = useState<number | null>(null);
@@ -111,7 +117,8 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
   }, [tokenSearch]);
 
   useEffect(() => {
-    if (!wallet.publicKey) {
+    const publicKey = connectedWallet?.account.address;
+    if (!publicKey) {
       setBalances({});
       return;
     }
@@ -119,10 +126,11 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
     setLoadingBalances(true);
 
     async function fetchBalance(token: SolanaToken) {
-      if (!wallet.publicKey) return 0n;
-      if (token.mint === SOL_MINT) return BigInt(await connection.getBalance(wallet.publicKey, "confirmed"));
+      if (!publicKey) return 0n;
+      const owner = new PublicKey(publicKey);
+      if (token.mint === SOL_MINT) return BigInt(await connection.getBalance(owner, "confirmed"));
       const accounts = await connection.getParsedTokenAccountsByOwner(
-        wallet.publicKey,
+        owner,
         { mint: new PublicKey(token.mint) },
         "confirmed",
       );
@@ -143,13 +151,13 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
         if (!cancelled) setLoadingBalances(false);
       });
     return () => { cancelled = true; };
-  }, [buy, connection, sell, signature, wallet.publicKey]);
+  }, [buy, connectedWallet?.account.address, connection, sell, signature]);
 
   useEffect(() => {
     setOrder(null);
     setError(null);
     const atomic = toAtomic(amount, sell.decimals);
-    if (!atomic || !wallet.publicKey || sell.mint === buy.mint) return;
+    if (!atomic || !connectedWallet || sell.mint === buy.mint) return;
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
       setQuoting(true);
@@ -161,7 +169,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
             inputMint: sell.mint,
             outputMint: buy.mint,
             amount: atomic,
-            taker: wallet.publicKey!.toBase58(),
+            taker: connectedWallet.account.address,
             ...(slippageBps == null ? {} : { slippageBps }),
           }),
           signal: controller.signal,
@@ -179,7 +187,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [amount, buy.mint, sell.decimals, sell.mint, slippageBps, wallet.publicKey]);
+  }, [amount, buy.mint, connectedWallet, sell.decimals, sell.mint, slippageBps]);
 
   const output = useMemo(() => fromAtomic(order?.outAmount, buy.decimals), [buy.decimals, order?.outAmount]);
   const sellBalance = balances[sell.mint];
@@ -205,18 +213,20 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
   }
 
   async function executeSwap() {
-    if (!order?.transaction || !order.requestId || !wallet.signTransaction || !order.feeReady) return;
+    if (!order?.transaction || !order.requestId || !connectedWallet?.signer || !order.feeReady) return;
     setSwapping(true);
     setError(null);
     setSignature(null);
     try {
       const bytes = Uint8Array.from(atob(order.transaction), (character) => character.charCodeAt(0));
-      const transaction = VersionedTransaction.deserialize(bytes);
-      const signed = await wallet.signTransaction(transaction);
+      const transaction = getTransactionDecoder().decode(bytes) as Transaction & TransactionWithinSizeLimit & TransactionWithLifetime;
+      if (!isTransactionPartialSigner(connectedWallet.signer)) throw new Error("This wallet cannot sign a Jupiter transaction without sending it directly");
+      const signed = await partiallySignTransactionWithSigners([connectedWallet.signer], transaction);
+      const signedBytes = getTransactionEncoder().encode(signed);
       const response = await fetch("/api/solana/execute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signedTransaction: bytesToBase64(signed.serialize()), requestId: order.requestId }),
+        body: JSON.stringify({ signedTransaction: bytesToBase64(Uint8Array.from(signedBytes)), requestId: order.requestId }),
       });
       const result = await response.json() as { signature?: string; status?: string; error?: string };
       if (!response.ok || result.error || result.status === "Failed") throw new Error(result.error ?? "Jupiter execution failed");
@@ -278,17 +288,17 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
           />
           <div className="mt-3 grid grid-cols-4 gap-1.5 sm:gap-2" aria-label="Choose percentage of Solana balance to swap">
             {[25, 50, 75, 100].map((percent) => (
-              <button key={percent} type="button" onClick={() => applyBalancePercentage(percent)} disabled={!wallet.connected || sellBalance == null || sellBalance === 0n} className="min-h-9 rounded-xl border border-white/10 bg-white/[0.04] px-1.5 py-1.5 text-[11px] font-semibold tabular-nums text-white/60 transition hover:border-[rgba(212,175,55,0.45)] hover:bg-[rgba(212,175,55,0.1)] hover:text-[rgba(255,222,85,0.95)] disabled:cursor-not-allowed disabled:opacity-30 sm:text-xs">{percent}%</button>
+              <button key={percent} type="button" onClick={() => applyBalancePercentage(percent)} disabled={!connectedWallet || sellBalance == null || sellBalance === 0n} className="min-h-9 rounded-xl border border-white/10 bg-white/[0.04] px-1.5 py-1.5 text-[11px] font-semibold tabular-nums text-white/60 transition hover:border-[rgba(212,175,55,0.45)] hover:bg-[rgba(212,175,55,0.1)] hover:text-[rgba(255,222,85,0.95)] disabled:cursor-not-allowed disabled:opacity-30 sm:text-xs">{percent}%</button>
             ))}
           </div>
           <div className="mt-2 flex items-center justify-between text-[11px] text-white/38">
             <span>Balance</span>
-            <span className="font-mono tabular-nums">{!wallet.connected ? "Connect wallet" : loadingBalances && sellBalance == null ? "Loading…" : `${fromAtomic((sellBalance ?? 0n).toString(), sell.decimals)} ${sell.symbol}`}</span>
+            <span className="font-mono tabular-nums">{!connectedWallet ? "Connect wallet" : loadingBalances && sellBalance == null ? "Loading…" : `${fromAtomic((sellBalance ?? 0n).toString(), sell.decimals)} ${sell.symbol}`}</span>
           </div>
           {insufficientBalance && <p className="mt-1 text-right text-[10px] text-rose-300/85">Insufficient {sell.symbol} balance</p>}
         </div>
 
-        <button type="button" onClick={flip} className="relative z-20 mx-auto -my-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-[3px] border-[#0d0d0f] bg-[#202023] text-xl text-[#f0cc61] opacity-100 shadow-[0_12px_24px_rgba(0,0,0,0.65)] transition hover:bg-[#29292c] sm:h-11 sm:w-11 sm:rounded-2xl" aria-label="Flip Solana tokens">↓</button>
+        <button type="button" onClick={flip} className="relative z-20 mx-auto -my-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[rgba(212,175,55,0.35)] bg-[rgba(212,175,55,0.12)] text-[#f0cc61] transition hover:border-[rgba(212,175,55,0.65)] hover:bg-[rgba(212,175,55,0.2)] sm:h-11 sm:w-11 sm:rounded-2xl" aria-label="Flip Solana tokens"><span aria-hidden="true">↓</span></button>
 
         <div className="hoj-panel rounded-[22px] p-3.5 pt-6 sm:p-4 sm:pt-7">
           <div className="flex items-start justify-between gap-3">
@@ -298,7 +308,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
           <p className="mt-3 truncate text-[2.25rem] font-semibold leading-none text-white/85 sm:text-[2.65rem]" title={output}>{quoting ? "…" : output}</p>
           <div className="mt-2 flex items-center justify-between text-[11px] text-white/38">
             <span>Balance</span>
-            <span className="font-mono tabular-nums">{!wallet.connected ? "Connect wallet" : loadingBalances && buyBalance == null ? "Loading…" : `${fromAtomic((buyBalance ?? 0n).toString(), buy.decimals)} ${buy.symbol}`}</span>
+            <span className="font-mono tabular-nums">{!connectedWallet ? "Connect wallet" : loadingBalances && buyBalance == null ? "Loading…" : `${fromAtomic((buyBalance ?? 0n).toString(), buy.decimals)} ${buy.symbol}`}</span>
           </div>
         </div>
 
@@ -325,18 +335,16 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
           <a href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noopener noreferrer" className="block rounded-2xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-3 text-xs text-emerald-200">Swap confirmed · View on Solscan ↗</a>
         )}
 
-        {!wallet.connected ? (
+        {!connectedWallet ? (
           <div className="space-y-2.5">
-            <button type="button" onClick={() => setVisible(true)} className="w-full rounded-2xl bg-[linear-gradient(135deg,#e7c45b,#b78312)] px-5 py-3.5 text-sm font-semibold text-black">Connect Solana wallet</button>
+            <button type="button" onClick={() => setWalletOpen(true)} disabled={!walletReady} className="w-full rounded-2xl bg-[linear-gradient(135deg,#e7c45b,#b78312)] px-5 py-3.5 text-sm font-semibold text-black disabled:opacity-50">{walletReady ? "Connect Solana wallet" : "Finding wallets…"}</button>
             <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 text-[10px] text-white/35">
-              <span>Phantom</span><span aria-hidden="true">·</span>
-              <span>Solflare</span><span aria-hidden="true">·</span>
-              <span>Backpack</span><span aria-hidden="true">·</span>
-              <span>Android mobile wallets</span>
+              <span>All Wallet Standard wallets</span><span aria-hidden="true">·</span><span>Desktop</span><span aria-hidden="true">·</span><span>Mobile</span>
             </div>
             <p className="px-4 text-center text-[10px] leading-4 text-white/28">Works with installed desktop extensions, iOS and Android wallet apps, wallet in-app browsers, phones, and tablets.</p>
           </div>
         ) : (
+          <div className="space-y-2">
           <button
             type="button"
             onClick={executeSwap}
@@ -345,6 +353,8 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
           >
             {swapping ? "Signing and swapping…" : !order?.feeReady && order ? "Referral setup required" : "Swap with Jupiter"}
           </button>
+          <button type="button" onClick={() => disconnectWallet.dispatch()} disabled={disconnectWallet.isRunning} className="w-full py-1 text-[11px] text-white/35 transition hover:text-white/60">{connectedWallet.wallet.name} · {connectedWallet.account.address.slice(0, 4)}…{connectedWallet.account.address.slice(-4)} · Disconnect</button>
+          </div>
         )}
       </div>
       {networkOpen && typeof document !== "undefined" && createPortal(
@@ -375,6 +385,17 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
           </div>
         </div>,
         document.body,
+      )}
+      {walletOpen && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="presentation" onMouseDown={() => setWalletOpen(false)}>
+          <div role="dialog" aria-modal="true" aria-label="Connect a Solana wallet" onMouseDown={(event) => event.stopPropagation()} className="w-full max-w-sm overflow-hidden rounded-[24px] border border-white/10 bg-[#111113] shadow-[0_28px_90px_rgba(0,0,0,0.8)]">
+            <div className="flex items-center justify-between border-b border-white/8 px-4 py-3.5"><div><p className="text-sm font-semibold text-white/90">Connect wallet</p><p className="mt-0.5 text-[10px] uppercase tracking-wider text-white/35">Solana Wallet Standard</p></div><button type="button" onClick={() => setWalletOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-sm text-white/55 hover:text-white" aria-label="Close wallet selector">×</button></div>
+            <div className="max-h-[min(68vh,32rem)] overflow-y-auto p-2">
+              {compatibleWallets.map((candidate) => <button key={candidate.name} type="button" disabled={connectWallet.isRunning} onClick={async () => { await connectWallet.dispatchAsync(candidate); setWalletOpen(false); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-white/[0.06] disabled:opacity-50"><img src={candidate.icon} alt="" className="h-9 w-9 rounded-xl" /><span className="text-sm font-semibold text-white/88">{candidate.name}</span></button>)}
+              {walletStatus !== "pending" && compatibleWallets.length === 0 && <p className="px-4 py-8 text-center text-xs leading-5 text-white/45">No compatible wallet was detected. Install or open a Solana Wallet Standard wallet, then refresh this page.</p>}
+            </div>
+          </div>
+        </div>, document.body,
       )}
     </div>
   );

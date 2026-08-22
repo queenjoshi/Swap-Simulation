@@ -3,7 +3,7 @@ import { SOLANA_CORE_FALLBACK, type SolanaToken } from "@/lib/solana";
 
 const JUPITER_TOKENS_URL = "https://api.jup.ag/tokens/v2/tag?query=verified";
 const JUPITER_SEARCH_URL = "https://api.jup.ag/tokens/v2/search";
-const CORE_SYMBOLS = new Set(["SOL", "USDC", "USDT", "JUP", "JITOSOL", "MSOL", "JTO", "RAY", "ORCA", "PYTH", "KMNO", "HNT"]);
+const CORE_SYMBOLS = new Set(["SOL", "USDC", "USDT", "JUP", "JITOSOL", "MSOL", "JTO", "RAY", "ORCA", "PYTH", "KMNO", "HNT", "WIF", "BONK", "PUMP", "PENGU", "POPCAT", "MEW", "FARTCOIN", "PNUT", "GOAT", "MOODENG", "DRIFT", "TNSR", "MNDE"]);
 const MIN_COMMUNITY_LIQUIDITY_USD = 25_000;
 
 type JupiterToken = {
@@ -63,7 +63,9 @@ export async function GET(request: Request) {
         liquidity: token.liquidity ?? 0,
       }));
 
-    return NextResponse.json({ tokens: tokens.length ? tokens : SOLANA_CORE_FALLBACK, source: "jupiter" });
+    const merged = new Map(SOLANA_CORE_FALLBACK.map((token) => [token.mint, token]));
+    for (const token of tokens) merged.set(token.mint, { ...merged.get(token.mint), ...token });
+    return NextResponse.json({ tokens: [...merged.values()], source: "jupiter" });
   } catch (error) {
     console.error("[SOLANA TOKENS]", error);
     return NextResponse.json({ tokens: SOLANA_CORE_FALLBACK, source: "fallback", warning: "Jupiter token registry is temporarily unavailable" });
