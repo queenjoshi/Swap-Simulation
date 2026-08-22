@@ -7,6 +7,10 @@ const MOBILE_WALLETS = [
   { name: "Phantom", logo: "https://assets.coingecko.com/coins/images/40752/standard/phantom-token.png", kind: "phantom" },
   { name: "Solflare", logo: "https://assets.coingecko.com/coins/images/28356/standard/solflare.png", kind: "solflare" },
   { name: "Backpack", logo: "https://backpack.app/favicon.ico", kind: "backpack" },
+  { name: "Coinbase Wallet", logo: "https://www.coinbase.com/favicon.ico", kind: "coinbase" },
+  { name: "Trust Wallet", logo: "https://trustwallet.com/favicon.ico", kind: "trust" },
+  { name: "OKX Wallet", logo: "https://www.okx.com/favicon.ico", kind: "okx" },
+  { name: "Glow", logo: "https://glow.app/favicon.ico", kind: "glow" },
 ] as const;
 
 function mobileWalletHref(kind: (typeof MOBILE_WALLETS)[number]["kind"]) {
@@ -15,7 +19,11 @@ function mobileWalletHref(kind: (typeof MOBILE_WALLETS)[number]["kind"]) {
   const ref = encodeURIComponent(window.location.origin);
   if (kind === "phantom") return `https://phantom.app/ul/browse/${appUrl}?ref=${ref}`;
   if (kind === "solflare") return `https://solflare.com/ul/v1/browse/${appUrl}?ref=${ref}`;
-  return "https://backpack.app/download";
+  if (kind === "backpack") return "https://backpack.app/download";
+  if (kind === "coinbase") return "https://www.coinbase.com/wallet/downloads";
+  if (kind === "trust") return "https://trustwallet.com/download";
+  if (kind === "okx") return "https://www.okx.com/web3";
+  return "https://glow.app/download";
 }
 
 export function SolanaWalletOptions({ onConnected }: { onConnected?: () => void }) {

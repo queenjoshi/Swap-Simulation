@@ -4,14 +4,16 @@ import { useState } from "react";
 
 type TokenLogoProps = {
   symbol: string;
-  logo?: string;
+  logo?: string | readonly string[];
   size?: "xs" | "sm" | "lg";
 };
 
 export function TokenLogo({ symbol, logo, size = "sm" }: TokenLogoProps) {
-  const [failedSrc, setFailedSrc] = useState<string | null>(null);
-  const preferredSrc = logo?.trim() || null;
-  const imageSrc = preferredSrc && failedSrc !== preferredSrc ? preferredSrc : null;
+  const [failedSources, setFailedSources] = useState<readonly string[]>([]);
+  const preferredSources = (Array.isArray(logo) ? logo : [logo])
+    .map((source) => source?.trim())
+    .filter((source): source is string => Boolean(source));
+  const imageSrc = preferredSources.find((source) => !failedSources.includes(source)) ?? null;
   const sizeClass =
     size === "lg"
       ? "h-14 w-14"
@@ -37,7 +39,7 @@ export function TokenLogo({ symbol, logo, size = "sm" }: TokenLogoProps) {
           className="h-full w-full rounded-full object-contain"
           loading="lazy"
           referrerPolicy="no-referrer"
-          onError={() => setFailedSrc(imageSrc)}
+          onError={() => setFailedSources((failed) => [...failed, imageSrc])}
         />
       ) : (
         <span

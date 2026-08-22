@@ -118,11 +118,26 @@ const TOKEN_LOGOS: Record<string, string> = {
   THE: "https://assets.coingecko.com/coins/images/28864/standard/thena.jpeg",
   ALPACA: "https://assets.coingecko.com/coins/images/14165/standard/Logo200.png",
   USDT0: "https://coin-images.coingecko.com/coins/images/53705/large/usdt0.jpg",
+  "USDC.E": "https://assets.coingecko.com/coins/images/6319/standard/usdc.png",
+  MNT: "https://www.mantle.xyz/favicon.ico",
+  S: "https://www.soniclabs.com/favicon.ico",
+  BERA: "https://www.berachain.com/favicon.ico",
+  MON: "https://www.monad.xyz/favicon.ico",
+  HYPE: "https://hyperfoundation.org/favicon.ico",
+  XPL: "https://www.plasma.to/favicon.ico",
   "QUICK OLD": "https://assets.coingecko.com/coins/images/13970/standard/1_pOU6pBMEmiL-ZJVb0CYRjQ.png",
   QUEENJOSHI: "/logo.png",
   KINGJOSHI: "/logo.png",
   KIND: "/logo.png",
   NBAA: "/logo.png",
+};
+
+const DEXSCREENER_CHAIN_SLUGS: Record<number, string> = {
+  1: "ethereum", 10: "optimism", 25: "cronos", 56: "bsc", 130: "unichain",
+  137: "polygon", 143: "monad", 146: "sonic", 480: "worldchain", 999: "hyperevm",
+  4663: "robinhood", 5000: "mantle", 8453: "base", 9745: "plasma",
+  42161: "arbitrum", 43114: "avalanche", 57073: "ink", 59144: "linea",
+  80094: "berachain", 534352: "scroll", 7777777: "zora",
 };
 
 // Keep House and creator listings visible at the top of the compact swap menu.
@@ -147,11 +162,18 @@ export function fallbackTokenLogo(symbol: string) {
 }
 
 function tokenLogo(token: Token) {
-  if (token.logo) return token.logo;
+  const logos: string[] = [];
+  if (token.logo) logos.push(token.logo);
   if (token.chainId === base.id && token.symbol.toUpperCase() === "SHIB") {
-    return "https://s2.coinmarketcap.com/static/img/coins/200x200/37553.png";
+    logos.push("https://s2.coinmarketcap.com/static/img/coins/200x200/37553.png");
   }
-  return fallbackTokenLogo(token.symbol);
+  const chainSlug = DEXSCREENER_CHAIN_SLUGS[token.chainId];
+  if (chainSlug && token.address) {
+    logos.push(`https://cdn.dexscreener.com/token-images/og/${chainSlug}/${token.address.toLowerCase()}`);
+  }
+  const symbolLogo = fallbackTokenLogo(token.symbol);
+  if (symbolLogo) logos.push(symbolLogo);
+  return [...new Set(logos)];
 }
 
 export function TokenSelect({
