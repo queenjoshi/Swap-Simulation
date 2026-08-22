@@ -12,7 +12,7 @@ import {
 } from "wagmi";
 import { encodeFunctionData, formatUnits, parseUnits, type Hex } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { cronos, robinhood, getChainName } from "@/lib/chains";
+import { CHAIN_OPTIONS, getChainName } from "@/lib/chains";
 import { clampToDecimals, formatCompactNumber, isValidNumberInput } from "@/lib/format";
 import { useToast } from "@/components/Toast";
 import {
@@ -40,12 +40,7 @@ import { calculateHouseFeeAmount, HOUSE_FEE_BPS } from "@/lib/quote";
 
 const SLIPPAGE_BPS = 50;
 
-const EVM_CHAINS = [
-  { id: mainnet.id, name: "Ethereum" },
-  { id: base.id, name: "Base" },
-  { id: cronos.id, name: "Cronos" },
-  { id: robinhood.id, name: "Robinhood Chain" },
-];
+const EVM_CHAINS = CHAIN_OPTIONS.map(({ id, label }) => ({ id, name: label }));
 const ALL_CHAINS = [...EVM_CHAINS, { id: LIFI_SOLANA_CHAIN_ID, name: "Solana" }];
 
 const TOKEN_DECIMALS: Record<string, number> = { USDC: 6, USDT: 6, ETH: 18 };
