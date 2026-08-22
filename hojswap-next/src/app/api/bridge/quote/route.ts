@@ -12,6 +12,7 @@ export async function GET(request: Request) {
     const toToken = searchParams.get("toToken");
     const fromAmount = searchParams.get("fromAmount");
     const fromAddress = searchParams.get("fromAddress");
+    const toAddress = searchParams.get("toAddress");
 
     if (!fromChain || !toChain || !fromToken || !toToken || !fromAmount || !fromAddress) {
       return NextResponse.json({ error: "Missing required query params" }, { status: 400 });
@@ -28,6 +29,7 @@ export async function GET(request: Request) {
       order: "CHEAPEST",
       integrator: "hojswap",
     });
+    if (toAddress) params.set("toAddress", toAddress);
 
     const headers: Record<string, string> = { Accept: "application/json" };
     if (LIFI_API_KEY) {

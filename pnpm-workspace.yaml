@@ -73,7 +73,14 @@ onlyBuiltDependencies:
 overrides:
   # drizzle-kit uses esbuild internally on an older version that's vulnerable, this overrides it
   "@esbuild-kit/esm-loader": "npm:tsx@^4.21.0"
+  # Security floors for transitive web and wallet dependencies.
+  axios: "1.18.0"
   esbuild: "0.27.3"
+  hono: "4.12.34"
+  postcss: "8.5.23"
+  sharp: "0.35.0"
+  socket.io-parser: "4.2.7"
+  ws: "8.21.0"
 
 allowBuilds:
   bufferutil: true

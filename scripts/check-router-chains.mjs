@@ -13,6 +13,16 @@ const declaredChainIds = new Map(
 );
 declaredChainIds.set("base", 8453);
 declaredChainIds.set("mainnet", 1);
+declaredChainIds.set("linea", 59144);
+declaredChainIds.set("scroll", 534352);
+declaredChainIds.set("mantle", 5000);
+declaredChainIds.set("worldchain", 480);
+declaredChainIds.set("sonic", 146);
+declaredChainIds.set("berachain", 80094);
+declaredChainIds.set("ink", 57073);
+declaredChainIds.set("monad", 143);
+declaredChainIds.set("hyperEvm", 999);
+declaredChainIds.set("plasma", 9745);
 
 const supportedListMatch = appChainsSource.match(
   /export const SUPPORTED_CHAIN_IDS\s*=\s*\[([^\]]+)\]/s,

@@ -1,7 +1,8 @@
 {
   "name": "House of Joshi - Swap & Bridge",
   "short_name": "House of Joshi",
-  "description": "Swap and bridge HOJ community tokens across supported EVM chains.",
+  "description": "Non-custodial swaps and bridges across EVM networks, Solana, and the native XRP Ledger.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

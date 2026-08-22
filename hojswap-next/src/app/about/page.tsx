@@ -3,10 +3,14 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { TokenLogo } from "@/components/TokenLogo";
+import { fallbackTokenLogo } from "@/components/TokenSelect";
 import { CHAIN_OPTIONS } from "@/lib/chains";
 import { TOKENS } from "@/lib/tokens";
+import { XRPL_ASSETS } from "@/lib/xrpl-native";
+import { SOLANA_CORE_FALLBACK, type SolanaToken } from "@/lib/solana";
 
 type Token = {
+  id?: string;
   address?: `0x${string}`;
   chainId?: number;
   symbol: string;
@@ -37,7 +41,7 @@ const curatedTokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[
       { symbol: "VIRTUAL", name: "Virtuals Protocol", logo: "https://assets.coingecko.com/coins/images/34057/standard/LOGOMARK.png" },
       { symbol: "MORPHO", name: "Morpho", logo: "https://assets.coingecko.com/coins/images/29837/standard/Morpho-token-icon.png" },
       { symbol: "DEGEN", name: "Degen", logo: "https://assets.coingecko.com/coins/images/34515/standard/android-chrome-512x512.png" },
-      { symbol: "mr_lightspeed", name: "Mr. Lightspeed Creator Coin", logo: "https://scontent-iad4-1.choicecdn.com/-/rs:fit:600:600/f:best/aHR0cHM6Ly9tYWdpYy5kZWNlbnRyYWxpemVkLWNvbnRlbnQuY29tL2lwZnMvYmFmeWJlaWEzZXVpN29tamNmaG41enIyNDIzdGdtbG9kYm5kcm03bWQ0aWJ2bTVueGticnlpZmlzNjQ=" },
+      { symbol: "mr_lightspeed", name: "Mr. Lightspeed Creator Coin", logo: "/tokens/mr-lightspeed.jpg" },
       { symbol: "SPX", name: "SPX6900", logo: "https://coin-images.coingecko.com/coins/images/31401/large/centeredcoin_%281%29.png" },
       { symbol: "SYRUP", name: "Maple Finance", logo: "https://coin-images.coingecko.com/coins/images/51232/large/_syrup_token_logo.png" },
       { symbol: "FLUID", name: "Fluid", logo: "https://coin-images.coingecko.com/coins/images/14688/large/Frame_1686566116_%281%29_%281%29.png" },
@@ -49,6 +53,10 @@ const curatedTokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[
       { symbol: "SUSHI", name: "Sushi", logo: "https://assets.coingecko.com/coins/images/12271/standard/512x512_Logo_no_chop.png" },
       { symbol: "NPC", name: "Non-Playable Coin", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0xb166e8b140d35d9d8226e40c09f757bac5a4d87d/logo.png" },
       { symbol: "TIBBIR", name: "Ribbita by Virtuals", logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0xa4a2e2ca3fbfe21aed83471d28b6f65a233c6e00/logo.png" },
+      { symbol: "DOGINME", name: "doginme", logo: "https://coin-images.coingecko.com/coins/images/35123/large/doginme-logo1-transparent200.png" },
+      { symbol: "SKI", name: "Ski Mask Dog", logo: "https://coin-images.coingecko.com/coins/images/37195/large/32992128-F52F-4346-84CA-8E0C48F43606.jpeg" },
+      { symbol: "KEYCAT", name: "Keyboard Cat", logo: "https://coin-images.coingecko.com/coins/images/36608/large/IMG_9500.jpeg" },
+      { symbol: "BENJI", name: "Basenji", logo: "https://coin-images.coingecko.com/coins/images/36416/large/photo_2025-12-04_22.13.35.png" },
     ],
   },
   {
@@ -210,37 +218,77 @@ const curatedLogos = new Map(
 
 // Keep this page in sync with the swap registry instead of maintaining a
 // second, incomplete token list by hand.
-const tokenGroups = CHAIN_OPTIONS.map((chain) => ({
-  title: `${chain.label} Tokens`,
-  eyebrow: chain.label,
-  tokens: TOKENS
-    .filter((token) => token.chainId === chain.id)
-    .map((token) => ({
+const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = [
+  ...CHAIN_OPTIONS.map((chain) => ({
+    title: `${chain.label} Tokens`,
+    eyebrow: chain.label,
+    tokens: TOKENS
+      .filter((token) => token.chainId === chain.id)
+      .map((token) => ({
+        symbol: token.symbol,
+        name: token.name,
+        logo:
+          token.logo
+          ?? curatedLogos.get(token.symbol.toUpperCase())
+          ?? fallbackTokenLogo(token.symbol),
+        address: token.address,
+        chainId: token.chainId,
+      })),
+  })).filter((group) => group.tokens.length > 0),
+  {
+    title: "Solana Tokens",
+    eyebrow: "Native Solana",
+    tokens: SOLANA_CORE_FALLBACK.map((token) => ({
       symbol: token.symbol,
       name: token.name,
-      logo: token.logo ?? curatedLogos.get(token.symbol.toUpperCase()),
-      address: token.address,
-      chainId: token.chainId,
+      logo: token.logo,
+      id: token.mint,
+      address: undefined,
+      chainId: undefined,
     })),
-})).filter((group) => group.tokens.length > 0);
+  },
+  {
+    title: "XRP Ledger Tokens",
+    eyebrow: "Native XRP Ledger",
+    tokens: XRPL_ASSETS.map((token) => ({
+      symbol: token.symbol,
+      name: token.name,
+      logo: token.logo,
+      address: undefined,
+      chainId: undefined,
+    })),
+  },
+];
 
 const networks = [
+  { name: "XRP Ledger", badge: "Native Swap", desc: "XRP pairs for RLUSD, native USDC, SOLO, CasinoCoin, XRdoge, ARMY, DROP, FUZZY, PHNIX, SIGMA, SEAL, XRPH, and XPM through XRPL order-book and AMM liquidity using r-address wallets." },
+  { name: "Solana", badge: "Jupiter Swap", desc: "Native SOL, stablecoins, ecosystem assets, and Jupiter-verified community and meme coins routed through Jupiter Ultra using Solana wallets." },
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity including ONDO, ENA, USDe, PENDLE, LDO, EIGEN, PYUSD, blue chips, community tokens, and stablecoins." },
   { name: "Base", badge: "Swap + Bridge", desc: "Home for mr_lightspeed and its live Zora post-coin catalog, MORPHO, DEGEN, VIRTUAL, AERO, House of Joshi tokens, and core assets." },
   { name: "Zora", badge: "Token Catalog", desc: "Chain-aware discovery for creator and content coins deployed on Zora Network. Modern Zora coins deployed on Base remain listed under Base." },
   { name: "Polygon", badge: "Swap", desc: "POL, WETH, WBTC, USDC, USDT, AAVE, LINK, and DAI routed through 0x liquidity." },
-  { name: "BNB Chain", badge: "Swap", desc: "BNB, USDT, USDC, DOGE, FDUSD, CAKE, and BabyDoge through 0x liquidity." },
+  { name: "BNB Chain", badge: "Swap", desc: "BNB-native crypto assets routed through available 0x and PancakeSwap liquidity." },
   { name: "Arbitrum", badge: "Swap", desc: "ARB, PENDLE, ETH, stablecoins, GMX, MAGIC, and wrapped assets across Ethereum L2 liquidity." },
   { name: "Optimism", badge: "Swap", desc: "OP, WLD, ETH, stablecoins, SNX, and VELO across Ethereum L2 liquidity." },
   { name: "Avalanche", badge: "Swap", desc: "AVAX, JOE, stablecoins, WETH, and WBTC on Avalanche C-Chain." },
   { name: "Unichain", badge: "Swap", desc: "ETH, WETH, and USDC on Unichain for new Uniswap-native liquidity." },
   { name: "Robinhood Chain", badge: "Swap", desc: "ETH, WETH, USDG, CASHCAT, VEX, HOODRAT, JUGGERNAUT, MYSTERY, ARROW, VIBE CAT, ROBIN, CashDog, and BOW through 0x liquidity." },
+  { name: "Linea", badge: "Swap", desc: "ETH and USDC swaps through 0x liquidity on Linea mainnet." },
+  { name: "Scroll", badge: "Swap", desc: "ETH and USDC swaps through 0x liquidity on Scroll mainnet." },
+  { name: "Mantle", badge: "Swap", desc: "MNT and USDC swaps through 0x liquidity on Mantle mainnet." },
+  { name: "World Chain", badge: "Swap", desc: "ETH and bridged USDC swaps through 0x liquidity on World Chain." },
+  { name: "Sonic", badge: "Swap", desc: "S and USDC swaps through 0x liquidity on Sonic mainnet." },
+  { name: "Berachain", badge: "Swap", desc: "BERA and bridged USDC swaps through 0x liquidity on Berachain." },
+  { name: "Ink", badge: "Swap", desc: "ETH and USDC swaps through 0x liquidity on Ink mainnet." },
+  { name: "Monad", badge: "Swap", desc: "MON and USDC swaps through 0x liquidity on Monad mainnet." },
+  { name: "HyperEVM", badge: "Swap", desc: "HYPE and USDC swaps through 0x liquidity on HyperEVM." },
+  { name: "Plasma", badge: "Swap", desc: "XPL and USDT0 swaps through 0x liquidity on Plasma mainnet." },
   { name: "Cronos", badge: "Bridge", desc: "USDC, USDT, and ETH routes via Li.Fi between Ethereum, Base, and Cronos." },
-  { name: "XRP Ledger EVM", badge: "Coming Soon", desc: "Listed for network continuity while swap and bridge routes mature." },
 ];
 
 export default function About() {
   const [lightspeedTokens, setLightspeedTokens] = useState<Token[]>([]);
+  const [solanaTokens, setSolanaTokens] = useState<SolanaToken[]>(SOLANA_CORE_FALLBACK);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -272,7 +320,33 @@ export default function About() {
     return () => controller.abort();
   }, []);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/solana/tokens", { cache: "no-store", signal: controller.signal })
+      .then(async (response) => {
+        const payload = await response.json() as { tokens?: SolanaToken[] };
+        if (response.ok && payload.tokens?.length) setSolanaTokens(payload.tokens);
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) console.error("Error loading Solana tokens on About:", error);
+      });
+    return () => controller.abort();
+  }, []);
+
   const displayedTokenGroups = useMemo(() => tokenGroups.map((group) => {
+    if (group.eyebrow === "Native Solana") {
+      return {
+        ...group,
+        tokens: solanaTokens.map((token) => ({
+          symbol: token.symbol,
+          name: token.name,
+          logo: token.logo,
+          id: token.mint,
+          address: undefined,
+          chainId: undefined,
+        })),
+      };
+    }
     if (group.eyebrow !== "Base" || lightspeedTokens.length === 0) return group;
     const tokensById = new Map<string, Token>(
       group.tokens.map((token) => [token.address?.toLowerCase() ?? token.symbol.toLowerCase(), token]),
@@ -282,10 +356,10 @@ export default function About() {
       if (!tokensById.has(id)) tokensById.set(id, token);
     }
     return { ...group, tokens: Array.from(tokensById.values()) };
-  }), [lightspeedTokens]);
+  }), [lightspeedTokens, solanaTokens]);
 
   const highlights = useMemo(() => [
-    { value: String(CHAIN_OPTIONS.length), label: "Supported chains" },
+    { value: String(CHAIN_OPTIONS.length + 2), label: "Networks shown" },
     {
       value: String(displayedTokenGroups.reduce((total, group) => total + group.tokens.length, 0)),
       label: "Shown assets",
@@ -304,7 +378,7 @@ export default function About() {
             House of Joshi across every chain that matters.
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-white/66 sm:text-base">
-            Trade and discover community tokens, blue-chip assets, stablecoins, and chain-native coins across 12 supported networks from one non-custodial interface.
+            Trade and discover community tokens, blue-chip assets, stablecoins, and chain-native coins across {CHAIN_OPTIONS.length + 2} network catalogs from one non-custodial interface.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
@@ -357,24 +431,35 @@ export default function About() {
       <section className="mb-10">
         <SectionHeading
           eyebrow="Supported tokens"
-          title="Logo-first token coverage"
+          title="Browse tokens by network"
+          desc="Open a network to view its configured assets. Solana listings are sourced from Jupiter's verified token registry."
         />
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="space-y-3">
           {displayedTokenGroups.map((group) => (
-            <div key={group.title} className="hoj-panel rounded-2xl p-5">
-              <div className="mb-4 flex items-end justify-between gap-3">
-                <div>
+            <details key={group.title} className="group hoj-panel overflow-hidden rounded-2xl">
+              <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 marker:content-none sm:px-5">
+                <div className="min-w-0 flex-1">
                   <div className="text-[10px] font-semibold uppercase tracking-widest text-[rgba(212,175,55,0.65)]">{group.eyebrow}</div>
-                  <h3 className="mt-1 text-base font-semibold text-white/90">{group.title}</h3>
+                  <h3 className="mt-1 truncate text-sm font-semibold text-white/90 sm:text-base">{group.title}</h3>
                 </div>
-                <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] text-white/45">{group.tokens.length} assets</span>
+                <div className="hidden -space-x-2 sm:flex" aria-hidden="true">
+                  {group.tokens.slice(0, 4).map((token) => (
+                    <span key={`${group.title}-preview-${token.id ?? token.address ?? token.symbol}`} className="rounded-full border-2 border-[#111113] bg-[#171719]">
+                      <TokenLogo symbol={token.symbol} logo={token.logo} size="xs" />
+                    </span>
+                  ))}
+                </div>
+                <span className="shrink-0 rounded-full border border-white/10 px-2.5 py-1 text-[10px] text-white/45">{group.tokens.length} assets</span>
+                <span className="text-sm text-[rgba(212,175,55,0.8)] transition group-open:rotate-180" aria-hidden="true">▾</span>
+              </summary>
+              <div className="border-t border-white/8 px-4 py-4 sm:px-5">
+                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                  {group.tokens.map((token) => (
+                    <TokenTile key={`${group.title}-${token.id ?? token.address ?? token.symbol}`} {...token} />
+                  ))}
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {group.tokens.map((token) => (
-                  <TokenTile key={`${group.title}-${token.address ?? token.symbol}`} {...token} />
-                ))}
-              </div>
-            </div>
+            </details>
           ))}
         </div>
       </section>
@@ -384,15 +469,16 @@ export default function About() {
           eyebrow="Supported networks"
           title="Clear routes by chain"
         />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {networks.map((network) => (
-            <div key={network.name} className="hoj-panel rounded-2xl p-4">
-              <div className="mb-3 flex items-start justify-between gap-2">
+            <details key={network.name} className="group hoj-panel overflow-hidden rounded-2xl">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-4 marker:content-none">
                 <h3 className="text-sm font-semibold text-white/90">{network.name}</h3>
-                <span className="shrink-0 rounded-full border border-[rgba(212,175,55,0.3)] px-2 py-0.5 text-[9px] uppercase tracking-wider text-[rgba(212,175,55,0.75)]">{network.badge}</span>
-              </div>
-              <p className="text-xs leading-6 text-white/54">{network.desc}</p>
-            </div>
+                <span className="ml-auto shrink-0 rounded-full border border-[rgba(212,175,55,0.3)] px-2 py-0.5 text-[9px] uppercase tracking-wider text-[rgba(212,175,55,0.75)]">{network.badge}</span>
+                <span className="text-xs text-[rgba(212,175,55,0.8)] transition group-open:rotate-180" aria-hidden="true">▾</span>
+              </summary>
+              <p className="border-t border-white/8 px-4 py-4 text-xs leading-6 text-white/54">{network.desc}</p>
+            </details>
           ))}
         </div>
       </section>
@@ -407,7 +493,7 @@ export default function About() {
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
           {[
-            { step: "1", title: "Connect", desc: "Use MetaMask, Rabby, Coinbase Wallet, Trust Wallet, or WalletConnect." },
+            { step: "1", title: "Connect", desc: "Use an EVM wallet, Phantom, Solflare, Backpack, Xaman, or another wallet offered for the selected network." },
             { step: "2", title: "Route", desc: "Pick a swap or bridge path and review slippage, fees, and outputs." },
             { step: "3", title: "Confirm", desc: "Sign from your wallet and track the transaction in-app." },
           ].map((item) => (
@@ -462,10 +548,12 @@ function SectionHeading({ eyebrow, title, desc }: { eyebrow: string; title: stri
 
 function TokenTile({ symbol, name, logo }: Token) {
   return (
-    <div className="flex min-h-28 flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-center">
-      <TokenLogo symbol={symbol} logo={logo} size="lg" />
-      <div className="mt-3 w-full truncate text-sm font-semibold text-white/90" title={symbol}>{symbol}</div>
-      <div className="mt-1 w-full truncate text-[11px] text-white/45" title={name}>{name}</div>
+    <div className="flex min-w-0 items-center gap-2.5 rounded-xl border border-white/8 bg-white/[0.025] p-2.5">
+      <TokenLogo symbol={symbol} logo={logo} size="sm" />
+      <div className="min-w-0 text-left">
+        <div className="truncate text-xs font-semibold text-white/90" title={symbol}>{symbol}</div>
+        <div className="mt-0.5 truncate text-[10px] text-white/42" title={name}>{name}</div>
+      </div>
     </div>
   );
 }

@@ -14,7 +14,7 @@ import {
 } from "wagmi";
 import { concat, decodeEventLog, encodeFunctionData, formatUnits, numberToHex, parseUnits, size, type Hex } from "viem";
 import { base } from "wagmi/chains";
-import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, explorerAddressUrl, getChainName, xrp, zora } from "@/lib/chains";
+import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, explorerAddressUrl, getChainName, zora } from "@/lib/chains";
 import { clampToDecimals, formatSwapAmountDisplay, isValidNumberInput } from "@/lib/format";
 import { calculateHouseFeeAmount, tokenTo0xParam, type QuoteResponse, type PriceResponse } from "@/lib/quote";
 import { erc20Abi } from "@/lib/erc20";
@@ -34,9 +34,13 @@ import { saveTransaction } from "@/lib/transactions";
 import { useNativeTokenPrice, getNativeSymbol, formatNetworkFee } from "@/lib/gas";
 import { hojswapRouterAbi, tokenToRouterAddress } from "@/lib/hojswap-router";
 import { HOUSE_WALLET } from "@/lib/swap-fee";
+import { NativeXrplSwap } from "@/components/NativeXrplSwap";
+import { NativeSolanaSwap } from "@/components/NativeSolanaSwap";
 
 const DEBOUNCE_MS = 750;
 const BALANCE_PERCENTAGES = [25, 50, 75, 100] as const;
+const XRPL_NATIVE_ID = -1;
+const SOLANA_NATIVE_ID = -2;
 const CHAIN_LOGOS: Record<number, string> = {
     1: "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
     10: "https://assets.coingecko.com/coins/images/25244/standard/Optimism.png",
@@ -49,7 +53,16 @@ const CHAIN_LOGOS: Record<number, string> = {
     7777777: "https://zora.co/favicon.ico",
     43114: "https://assets.coingecko.com/coins/images/12559/standard/Avalanche_Circle_RedWhite_Trans.png",
     42161: "https://assets.coingecko.com/coins/images/16547/standard/arb.jpg",
-    1440000: "/tokens/xrp.png",
+    143: "https://www.monad.xyz/favicon.ico",
+    146: "https://www.soniclabs.com/favicon.ico",
+    480: "https://world.org/favicon.ico",
+    999: "https://hyperfoundation.org/favicon.ico",
+    5000: "https://www.mantle.xyz/favicon.ico",
+    9745: "https://www.plasma.to/favicon.ico",
+    57073: "https://inkonchain.com/favicon.ico",
+    59144: "https://linea.build/favicon.ico",
+    80094: "https://www.berachain.com/favicon.ico",
+    534352: "https://scroll.io/favicon.ico",
 };
 
 type ActiveTab = "swap" | "bridge";
@@ -140,28 +153,9 @@ function SwapCardInner() {
     const [activeTab, setActiveTab] = useState<ActiveTab>("swap");
     const [apiKeyError, setApiKeyError] = useState<ApiKeyError>(null);
     const [chainMenuOpen, setChainMenuOpen] = useState(false);
+    const [nativeXrplMode, setNativeXrplMode] = useState(false);
+    const [nativeSolanaMode, setNativeSolanaMode] = useState(false);
     const [zoraProfileTokens, setZoraProfileTokens] = useState<Token[]>([]);
-    const [importedXrpTokens, setImportedXrpTokens] = useState<Token[]>([]);
-
-    useEffect(() => {
-        queueMicrotask(() => {
-            try {
-                const parsed = JSON.parse(localStorage.getItem("hojswap-xrp-imported-tokens") ?? "[]") as Token[];
-                setImportedXrpTokens(parsed.filter((token) => token.chainId === xrp.id && !!token.address));
-            } catch {
-                setImportedXrpTokens([]);
-            }
-        });
-    }, []);
-
-    const rememberImportedXrpToken = useCallback((token: Token) => {
-        setImportedXrpTokens((current) => {
-            const next = [...current.filter((item) => item.address?.toLowerCase() !== token.address?.toLowerCase()), token];
-            localStorage.setItem("hojswap-xrp-imported-tokens", JSON.stringify(next));
-            return next;
-        });
-    }, []);
-
     const availableTokens = useMemo(() => {
         const staticTokens = tokensForChain(selectedChainId);
         if (selectedChainId !== base.id && selectedChainId !== zora.id) return staticTokens;
@@ -176,16 +170,11 @@ function SwapCardInner() {
                 byAddress.set(token.address.toLowerCase(), token);
             }
         }
-        for (const token of importedXrpTokens.filter((token) => token.chainId === selectedChainId)) {
-            if (token.address && !byAddress.has(token.address.toLowerCase())) {
-                byAddress.set(token.address.toLowerCase(), token);
-            }
-        }
         return [
             ...staticTokens.filter((token) => !token.address),
             ...byAddress.values(),
         ];
-    }, [selectedChainId, zoraProfileTokens, importedXrpTokens]);
+    }, [selectedChainId, zoraProfileTokens]);
 
     const [sellToken, setSellToken] = useState<Token>(() => {
         const sellSymbol = searchParams.get("sell");
@@ -232,6 +221,18 @@ function SwapCardInner() {
     function pickChain(newChainId: number) {
         setChainMenuOpen(false);
         setChainMenuRect(null);
+        if (newChainId === XRPL_NATIVE_ID) {
+            setNativeXrplMode(true);
+            setNativeSolanaMode(false);
+            return;
+        }
+        if (newChainId === SOLANA_NATIVE_ID) {
+            setNativeSolanaMode(true);
+            setNativeXrplMode(false);
+            return;
+        }
+        setNativeXrplMode(false);
+        setNativeSolanaMode(false);
         setSelectedChainId(newChainId);
         setSellToken(defaultSellForChain(newChainId));
         setBuyToken(defaultBuyForChain(newChainId));
@@ -1122,22 +1123,47 @@ function SwapCardInner() {
     ), [quote, price, nativeUsdPrice, nativeSymbol]);
     const hasNativeGas = !isConnected ? null : nativeBalanceData ? nativeBalanceData.value > 0n : null;
 
-    const CHAINS = CHAIN_OPTIONS.map((chain) => ({
-        id: chain.id,
-        name: chain.label,
-        ticker: chain.shortLabel,
-        mode: chain.swap ? "Swap" : "Catalog",
-        logo: CHAIN_LOGOS[chain.id],
-    }));
-    const selectedChainOption = CHAINS.find((chain) => chain.id === selectedChainId) ?? CHAINS[0];
+    const CHAINS = [
+        {
+            id: SOLANA_NATIVE_ID,
+            name: "Solana",
+            ticker: "SOL",
+            mode: "Jupiter",
+            logo: "https://assets.coingecko.com/coins/images/4128/standard/solana.png",
+        },
+        {
+            id: XRPL_NATIVE_ID,
+            name: "XRP Ledger",
+            ticker: "XRP",
+            mode: "Native DEX",
+            logo: "/tokens/xrp.png",
+        },
+        ...CHAIN_OPTIONS.map(({ id, label, shortLabel, swap }) => ({
+            id,
+            name: label,
+            ticker: shortLabel,
+            mode: swap ? "Swap" : "Catalog",
+            logo: CHAIN_LOGOS[id],
+        })),
+    ];
+    const activeChainId = nativeSolanaMode ? SOLANA_NATIVE_ID : nativeXrplMode ? XRPL_NATIVE_ID : selectedChainId;
+    const selectedChainOption = CHAINS.find((chain) => chain.id === activeChainId) ?? CHAINS[0];
 
     const TABS: { id: ActiveTab; label: string }[] = [
         { id: "swap", label: "Swap" },
         { id: "bridge", label: "Bridge" },
     ];
 
+    if (nativeXrplMode) {
+        return <NativeXrplSwap onBack={() => setNativeXrplMode(false)} />;
+    }
+
+    if (nativeSolanaMode) {
+        return <NativeSolanaSwap networks={CHAINS} onNetworkChange={pickChain} />;
+    }
+
     return (
-        <div className="w-full max-w-[480px]">
+        <div className="w-full max-w-[450px]">
             {apiKeyError && (
                 <div className="mb-4 flex items-start gap-3 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3">
                     <span className="mt-0.5 shrink-0 text-amber-300">⚠</span>
@@ -1163,7 +1189,7 @@ function SwapCardInner() {
                 </div>
             )}
 
-            <div className="hoj-card space-y-2.5 rounded-[28px] p-2.5 sm:p-3">
+            <div className="hoj-card space-y-2 rounded-[24px] p-2 sm:rounded-[26px] sm:p-2.5">
                 <div className="relative z-[90] flex items-center justify-between gap-2 px-1 pb-1">
                     <div className="min-w-0">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Trade</p>
@@ -1177,7 +1203,7 @@ function SwapCardInner() {
                                 updateChainMenuRect();
                                 setChainMenuOpen((next) => !next);
                             }}
-                            className="flex min-w-[8.75rem] items-center justify-between gap-2 rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-2 text-left outline-none transition hover:border-[rgba(212,175,55,0.3)] focus:border-[rgba(212,175,55,0.55)]"
+                            className="flex min-w-[8.25rem] items-center justify-between gap-2 rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-1.5 text-left outline-none transition hover:border-[rgba(212,175,55,0.3)] focus:border-[rgba(212,175,55,0.55)] sm:min-w-[8.75rem] sm:py-2"
                             aria-haspopup="listbox"
                             aria-expanded={chainMenuOpen}
                             aria-label="Select network"
@@ -1210,7 +1236,7 @@ function SwapCardInner() {
                         className="fixed z-[9999] overflow-y-auto rounded-2xl border border-white/10 bg-[#111113] p-1.5 shadow-[0_24px_70px_rgba(0,0,0,0.82)] ring-1 ring-black/50"
                     >
                         {CHAINS.map((chain) => {
-                            const selected = chain.id === selectedChainId;
+                            const selected = chain.id === activeChainId;
                             return (
                                 <button
                                     key={chain.id}
@@ -1250,7 +1276,7 @@ function SwapCardInner() {
                             key={id}
                             type="button"
                             onClick={() => setActiveTab(id)}
-                            className={`min-w-0 flex-1 rounded-full px-2 py-2 text-[12px] font-semibold capitalize transition sm:px-3 ${activeTab === id
+                                className={`min-w-0 flex-1 rounded-full px-2 py-1.5 text-[12px] font-semibold capitalize transition sm:px-3 sm:py-2 ${activeTab === id
                                 ? "bg-[rgba(212,175,55,0.95)] text-black"
                                 : "bg-transparent text-white/70 hover:bg-white/5"
                                 }`}
@@ -1286,8 +1312,6 @@ function SwapCardInner() {
                                         tokens={availableTokens}
                                         value={buyToken}
                                         onChange={setBuyToken}
-                                        allowAddressImport={selectedChainId === xrp.id}
-                                        onTokenImported={rememberImportedXrpToken}
                                     />
                                 </div>
                             </div>
@@ -1308,17 +1332,15 @@ function SwapCardInner() {
                     </div>
                 ) : isSwapSupported && activeTab === "swap" ? (
                     <>
-                        <div className="relative !z-30 space-y-1">
-                            <div className="hoj-panel rounded-[26px] p-4 sm:p-5">
-                                <div className="mb-3 flex items-start justify-between gap-3">
+                        <div className="relative !z-30">
+                            <div className="hoj-panel rounded-[22px] p-3.5 sm:rounded-[24px] sm:p-4">
+                                <div className="mb-2 flex items-start justify-between gap-3 sm:mb-2.5">
                                     <div className="text-[15px] font-semibold text-white/55">Sell</div>
                                     <div className="w-[8.5rem] shrink-0 sm:w-[9.25rem]">
                                         <TokenSelect
                                             tokens={availableTokens}
                                             value={sellToken}
                                             onChange={onSellTokenChange}
-                                            allowAddressImport={selectedChainId === xrp.id}
-                                            onTokenImported={rememberImportedXrpToken}
                                         />
                                     </div>
                                 </div>
@@ -1333,17 +1355,17 @@ function SwapCardInner() {
                                             const next = sellDecimals != null ? clampToDecimals(nextRaw, sellDecimals) : nextRaw;
                                             setSellAmountInput(next);
                                         }}
-                                        className="hoj-input w-full min-w-0 bg-transparent text-5xl font-semibold leading-none text-white outline-none placeholder:text-white/25 sm:text-6xl"
+                                        className="hoj-input w-full min-w-0 bg-transparent text-[2.65rem] font-semibold leading-none text-white outline-none placeholder:text-white/25 sm:text-5xl"
                                     />
                                 </div>
-                                <div className="mt-4 grid grid-cols-4 gap-2" aria-label="Choose percentage of balance to swap">
+                                <div className="mt-3 grid grid-cols-4 gap-1.5 sm:gap-2" aria-label="Choose percentage of balance to swap">
                                     {BALANCE_PERCENTAGES.map((percent) => (
                                         <button
                                             key={percent}
                                             type="button"
                                             onClick={() => amountForBalancePercentage(percent)}
                                             disabled={!sellBalanceData || sellBalanceData.value === 0n || !walletOnSelectedChain}
-                                            className="rounded-xl border border-white/10 bg-white/[0.04] px-2 py-2 text-xs font-semibold tabular-nums text-white/60 transition hover:border-[rgba(212,175,55,0.45)] hover:bg-[rgba(212,175,55,0.1)] hover:text-[rgba(255,222,85,0.95)] disabled:cursor-not-allowed disabled:opacity-30"
+                                            className="min-h-9 rounded-xl border border-white/10 bg-white/[0.04] px-1.5 py-1.5 text-[11px] font-semibold tabular-nums text-white/60 transition hover:border-[rgba(212,175,55,0.45)] hover:bg-[rgba(212,175,55,0.1)] hover:text-[rgba(255,222,85,0.95)] disabled:cursor-not-allowed disabled:opacity-30 sm:px-2 sm:text-xs"
                                             aria-label={`Swap ${percent}% of ${sellToken.symbol} balance`}
                                         >
                                             {percent}%
@@ -1356,27 +1378,25 @@ function SwapCardInner() {
                             <button
                                 type="button"
                                 onClick={flipTokens}
-                                className="absolute left-1/2 top-1/2 z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl border-4 border-[#101012] bg-[#19191b] text-2xl text-[rgba(212,175,55,0.95)] shadow-[0_14px_28px_rgba(0,0,0,0.45)] transition hover:bg-[#202022] hover:text-[rgba(255,222,85,1)]"
+                                className="relative z-10 mx-auto -my-2.5 flex h-10 w-10 items-center justify-center rounded-xl border-[3px] border-[#101012] bg-[#19191b] text-xl text-[rgba(212,175,55,0.95)] shadow-[0_12px_24px_rgba(0,0,0,0.45)] transition hover:bg-[#202022] hover:text-[rgba(255,222,85,1)] sm:h-11 sm:w-11 sm:rounded-2xl sm:text-2xl"
                                 aria-label="Flip tokens"
                             >
                                 ↓
                             </button>
 
-                            <div className="hoj-panel rounded-[26px] p-4 pt-7 sm:p-5 sm:pt-8">
-                                <div className="mb-3 flex items-start justify-between gap-3">
+                            <div className="hoj-panel rounded-[22px] p-3.5 pt-6 sm:rounded-[24px] sm:p-4 sm:pt-7">
+                                <div className="mb-2 flex items-start justify-between gap-3 sm:mb-2.5">
                                     <div className="text-[15px] font-semibold text-white/55">Buy</div>
                                     <div className="w-[8.5rem] shrink-0 sm:w-[9.25rem]">
                                         <TokenSelect
                                             tokens={availableTokens}
                                             value={buyToken}
                                             onChange={onBuyTokenChange}
-                                            allowAddressImport={selectedChainId === xrp.id}
-                                            onTokenImported={rememberImportedXrpToken}
                                         />
                                     </div>
                                 </div>
                                 <div className="min-w-0 overflow-hidden">
-                                    <div className="truncate text-4xl font-semibold leading-none tabular-nums text-white/90 sm:text-5xl" title={buyAmountRaw ?? undefined}>
+                                    <div className="truncate text-[2.25rem] font-semibold leading-none tabular-nums text-white/90 sm:text-[2.65rem]" title={buyAmountRaw ?? undefined}>
                                         {(() => {
                                             if (isQuoting) return "…";
                                             if (!sellAmountInput) return "—";
@@ -1462,7 +1482,7 @@ function SwapCardInner() {
                                 type="button"
                                 onClick={() => switchChainAsync({ chainId: selectedChainId })}
                                 disabled={isSwitching}
-                                className="w-full rounded-[22px] bg-[rgba(212,175,55,0.95)] px-4 py-4 text-base font-semibold text-black transition hover:bg-[rgba(212,175,55,0.85)] disabled:opacity-60"
+                                className="w-full min-h-12 rounded-[20px] bg-[rgba(212,175,55,0.95)] px-4 py-3 text-sm font-semibold text-black transition hover:bg-[rgba(212,175,55,0.85)] disabled:opacity-60 sm:text-base"
                             >
                                 {isSwitching ? "Switching…" : `Switch to ${selectedChainName}`}
                             </button>
@@ -1475,7 +1495,7 @@ function SwapCardInner() {
                                 type="button"
                                 onClick={needsApproval ? approveAndSwap : () => swap()}
                                 disabled={primaryDisabled}
-                                className="w-full rounded-[24px] bg-[rgba(255,222,85,0.98)] px-4 py-4 text-base font-bold text-black shadow-[0_14px_28px_-18px_rgba(255,222,85,0.9)] transition hover:bg-[rgba(255,210,65,0.98)] disabled:opacity-60"
+                                className="w-full min-h-12 rounded-[20px] bg-[rgba(255,222,85,0.98)] px-4 py-3 text-sm font-bold text-black shadow-[0_14px_28px_-18px_rgba(255,222,85,0.9)] transition hover:bg-[rgba(255,210,65,0.98)] disabled:opacity-60 sm:text-base"
                             >
                                 {primaryLabel}
                             </button>

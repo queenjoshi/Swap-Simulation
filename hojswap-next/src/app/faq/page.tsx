@@ -5,7 +5,7 @@ const faqs = [
   {
     question: "What is Hojswap?",
     answer:
-      "Hojswap is a House of Joshi swap, bridge, and token-discovery interface across Ethereum, Base, Zora, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Cronos, and XRP EVM.",
+      "Hojswap is a House of Joshi swap, bridge, and token-discovery interface across supported EVM networks, Solana, and the native XRP Ledger.",
   },
   {
     question: "Do I need to create an account?",
@@ -15,7 +15,7 @@ const faqs = [
   {
     question: "Which chains are supported?",
     answer:
-      "The app lists Ethereum, Base, Zora, Cronos, XRP EVM, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Robinhood Chain, and Unichain. Swap availability depends on routing support and liquidity for each chain; Zora Network is currently discovery-only.",
+      "The app lists Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Linea, Scroll, Mantle, World Chain, Sonic, Berachain, Ink, Monad, HyperEVM, Plasma, Cronos, Zora, Solana, and the native XRP Ledger. Swap availability depends on routing support and liquidity; Cronos and Zora are not currently enabled for same-chain swaps.",
   },
   {
     question: "How do I swap a token?",
@@ -35,7 +35,7 @@ const faqs = [
   {
     question: "Where do the swap prices come from?",
     answer:
-      "Swap quotes are routed through 0x where supported. Bridge routes use integrated bridge providers such as Stargate and Li.Fi where available.",
+      "EVM swap quotes are routed through 0x where supported, Solana swaps use Jupiter, and native XRP Ledger swaps use XRPL liquidity. Bridge routes use Stargate and Li.Fi where available.",
   },
   {
     question: "Why do I need to approve a token?",

@@ -48,6 +48,8 @@ function toDisplayFromOnChain(item: ExplorerHistoryItem): DisplayTx {
 
 const CHAIN_FILTERS = [
   { id: 0, label: "All" },
+  { id: -2, label: "Solana" },
+  { id: -1, label: "XRP Ledger" },
   ...CHAIN_OPTIONS.map(({ id, shortLabel }) => ({ id, label: shortLabel })),
 ] as const;
 

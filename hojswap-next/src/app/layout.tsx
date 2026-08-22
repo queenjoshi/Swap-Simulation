@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   applicationName: "House of Joshi",
   title: "House of Joshi — Swap & Bridge",
   description:
-    "Swap and bridge assets across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Cronos, and XRP EVM.",
+    "Swap and bridge assets across 21 EVM networks—including Linea, Scroll, Mantle, World Chain, Sonic, Berachain, Ink, Monad, HyperEVM, and Plasma—plus Solana and the XRP Ledger.",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     siteName: "House of Joshi",
     title: "House of Joshi — Swap & Bridge",
     description:
-      "Swap and bridge assets across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Cronos, and XRP EVM.",
+      "Swap and bridge assets across 21 EVM networks—including Linea, Scroll, Mantle, World Chain, Sonic, Berachain, Ink, Monad, HyperEVM, and Plasma—plus Solana and the XRP Ledger.",
     images: [
       {
         url: "/social/hojswap-share-cover.png",
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "House of Joshi — Swap & Bridge",
     description:
-      "Swap and bridge assets across Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Cronos, and XRP EVM.",
+      "Swap and bridge assets across 21 EVM networks—including Linea, Scroll, Mantle, World Chain, Sonic, Berachain, Ink, Monad, HyperEVM, and Plasma—plus Solana and the XRP Ledger.",
     images: ["/social/hojswap-share-cover.png"],
   },
 };
@@ -70,6 +70,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${displayFont.variable} ${bodyFont.variable} antialiased`}>
       <head>
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8905064413166970"
+          crossOrigin="anonymous"
+        />
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-2QDL68W4EG"
@@ -85,12 +90,6 @@ export default function RootLayout({
         </Script>
       </head>
       <body className="flex min-h-dvh flex-col bg-[#0b0b0d] text-[#f5f1e6]">
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8905064413166970"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
         <Providers>
           <Header />
           <main className="flex-1">

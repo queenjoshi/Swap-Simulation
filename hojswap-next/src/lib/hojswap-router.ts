@@ -1,4 +1,4 @@
-import { arbitrum, avalanche, bsc, cronos, optimism, polygon, robinhood, unichain, xrp } from "@/lib/chains";
+import { arbitrum, avalanche, berachain, bsc, cronos, hyperEvm, ink, linea, mantle, monad, optimism, plasma, polygon, robinhood, scroll, sonic, unichain, worldchain } from "@/lib/chains";
 import { NATIVE_ETH_ADDRESS } from "@/lib/quote";
 import { isNative, type Token } from "@/lib/tokens";
 import { base, mainnet } from "wagmi/chains";
@@ -83,7 +83,16 @@ const ROUTER_ENV_BY_CHAIN_ID: Record<number, `0x${string}` | undefined> = {
   [polygon.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_POLYGON, SHARED_ROUTER),
   [robinhood.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_ROBINHOOD, SHARED_ROUTER),
   [unichain.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_UNICHAIN, SHARED_ROUTER),
-  [xrp.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_XRP),
+  [linea.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_LINEA, SHARED_ROUTER),
+  [scroll.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_SCROLL, SHARED_ROUTER),
+  [mantle.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_MANTLE, SHARED_ROUTER),
+  [worldchain.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_WORLDCHAIN, SHARED_ROUTER),
+  [sonic.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_SONIC, SHARED_ROUTER),
+  [berachain.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_BERACHAIN, SHARED_ROUTER),
+  [ink.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_INK, SHARED_ROUTER),
+  [monad.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_MONAD, SHARED_ROUTER),
+  [hyperEvm.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_HYPEREVM, SHARED_ROUTER),
+  [plasma.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_PLASMA, SHARED_ROUTER),
 };
 
 export function getHojswapRouterAddress(chainId: number): `0x${string}` | null {

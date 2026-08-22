@@ -44,6 +44,10 @@ function normalizeSymbol(symbol: string) {
   return symbol.toUpperCase().replace(/\s+/g, "");
 }
 
+function marketChainName(chainId: number) {
+  return getChainName(chainId);
+}
+
 function preferredLogo(tokens: Token[], market?: MarketRow) {
   const tokenWithLogo = tokens.find(
     (token): token is Token & { logo: string } =>
@@ -216,7 +220,7 @@ export default function PricesPage() {
             </div>
             <h1 className="hoj-display text-3xl font-semibold sm:text-4xl">Token prices</h1>
             <p className="mt-2 max-w-2xl text-sm text-white/50">
-              Explore market data for tokens available in the HOJSwap selector.
+              Explore market data for swap-enabled assets and tracked native-network coins.
             </p>
           </div>
           <div className="flex w-full gap-2 lg:w-auto">
@@ -351,7 +355,7 @@ export default function PricesPage() {
                             <div className="mt-1 flex max-w-64 gap-1 overflow-hidden">
                               {row.chains.slice(0, 3).map((chainId) => (
                                 <span key={chainId} className="rounded bg-white/[0.05] px-1.5 py-0.5 text-[9px] text-white/35">
-                                  {getChainName(chainId)}
+                                  {marketChainName(chainId)}
                                 </span>
                               ))}
                               {row.chains.length > 3 && <span className="text-[9px] text-white/30">+{row.chains.length - 3}</span>}

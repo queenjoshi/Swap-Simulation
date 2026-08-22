@@ -2,12 +2,12 @@ const steps = [
   {
     number: "01",
     title: "Connect your wallet",
-    description: "Open HOJSwap and connect the wallet that holds the tokens you want to use.",
+    description: "Connect an EVM wallet, a Solana wallet such as Phantom or Solflare, or a native XRP Ledger wallet such as Xaman.",
   },
   {
     number: "02",
     title: "Choose the network",
-    description: "Select the token’s real network, such as Base, Ethereum, BNB Chain, Polygon, Arbitrum, Optimism, or Avalanche.",
+    description: "Select the token’s real network, including supported EVM chains, Solana, or the native XRP Ledger.",
   },
   {
     number: "03",
@@ -22,7 +22,7 @@ const steps = [
   {
     number: "05",
     title: "Approve and swap",
-    description: "Approve the token if your wallet asks, press Swap, and confirm the transaction in your wallet.",
+    description: "Approve the token if required, press Swap, and confirm every requested transaction in your wallet. Keep ETH, BNB, SOL, XRP, or the relevant native gas asset available.",
   },
   {
     number: "06",
@@ -69,7 +69,7 @@ export function HowToSwap({ expanded = false }: { expanded?: boolean }) {
 
           <div className="mt-4 rounded-2xl border border-amber-400/15 bg-amber-400/[0.06] px-4 py-3">
             <p className="text-xs leading-5 text-amber-100/65">
-              Keep a little native currency for gas—such as ETH, BNB, POL, or AVAX. Always verify the network and contract address. Swap availability depends on live liquidity; Zora Network tokens are currently discovery-only.
+              Keep a little native currency for gas—such as ETH, BNB, POL, AVAX, MNT, S, BERA, MON, HYPE, or XPL. Always verify the network and contract address. Swap availability depends on live liquidity; Zora Network tokens are currently discovery-only.
             </p>
           </div>
         </div>

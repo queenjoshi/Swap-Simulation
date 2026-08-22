@@ -128,11 +128,20 @@ contract HojswapRouterV2 {
         _setDestinationChainSupport(56, true); // BNB Chain
         _setDestinationChainSupport(130, true); // Unichain
         _setDestinationChainSupport(137, true); // Polygon
+        _setDestinationChainSupport(143, true); // Monad
+        _setDestinationChainSupport(146, true); // Sonic
+        _setDestinationChainSupport(480, true); // World Chain
+        _setDestinationChainSupport(999, true); // HyperEVM
         _setDestinationChainSupport(4663, true); // Robinhood Chain
+        _setDestinationChainSupport(5000, true); // Mantle
         _setDestinationChainSupport(8453, true); // Base
+        _setDestinationChainSupport(9745, true); // Plasma
         _setDestinationChainSupport(42161, true); // Arbitrum
         _setDestinationChainSupport(43114, true); // Avalanche
-        _setDestinationChainSupport(1440000, true); // XRP EVM
+        _setDestinationChainSupport(57073, true); // Ink
+        _setDestinationChainSupport(59144, true); // Linea
+        _setDestinationChainSupport(80094, true); // Berachain
+        _setDestinationChainSupport(534352, true); // Scroll
         _setDestinationChainSupport(7777777, true); // Zora
     }
 

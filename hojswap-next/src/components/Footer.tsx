@@ -43,6 +43,8 @@ const SOCIAL_LINKS = [
 
 const PROTOCOL_LINKS = [
   { label: "0x Protocol", href: "https://0x.org/" },
+  { label: "Jupiter", href: "https://jup.ag/" },
+  { label: "XRP Ledger", href: "https://xrpl.org/" },
   { label: "Stargate V2 (LayerZero)", href: "https://stargate.finance/" },
   { label: "Li.Fi Bridge", href: "https://li.fi/" },
   { label: "RainbowKit", href: "https://rainbowkit.com/" },
@@ -51,6 +53,8 @@ const PROTOCOL_LINKS = [
 
 const PRODUCT_LINKS = [
   { label: "Dreamweaver", href: "https://dreamweaver.thehouseofjoshi.com/" },
+  { label: "Kingdom Within", href: "https://kingdomwithin.thehouseofjoshi.com/" },
+  { label: "NFT Marketplace", href: "https://nftmarketplace.thehouseofjoshi.com/" },
 ];
 
 const HOUSE_LINKS = [
@@ -58,6 +62,10 @@ const HOUSE_LINKS = [
   { label: "About", href: "/about" },
   { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },
+  { label: "Whitepaper", href: "/whitepaper" },
+  { label: "Burn Counter", href: "/burn-counter" },
+  { label: "Terms", href: "/terms" },
+  { label: "Privacy", href: "/privacy" },
 ];
 
 export function Footer() {
@@ -167,9 +175,13 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 border-t border-white/8 pt-4 text-xs leading-relaxed text-white/35 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-t border-white/8 pt-4 text-xs leading-relaxed text-white/35 sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} The House of Joshi. All rights reserved.</p>
-          <p>Verify tokens before swapping. Not financial advice.</p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Link href="/terms" className="transition hover:text-[rgba(226,190,72,0.95)]">Terms of Service</Link>
+            <Link href="/privacy" className="transition hover:text-[rgba(226,190,72,0.95)]">Privacy Policy</Link>
+            <span>Verify tokens before swapping. Not financial advice.</span>
+          </div>
         </div>
       </div>
     </footer>

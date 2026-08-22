@@ -6,7 +6,8 @@ const COINGECKO_IDS = [
   "mog-coin", "toshi", "virtual-protocol", "morpho", "degen-base", "zora", "coinbase-wrapped-staked-eth",
   "euro-coin", "moonwell-artemis", "aixbt", "kaito", "tokenbot", "spx6900", "syrup", "instadapp",
   "cow-protocol", "euler", "layerzero", "wormhole", "axelar", "sushi", "non-playable-coin",
-  "ribbita-by-virtuals", "aave", "1inch", "yearn-finance", "balancer", "convex-finance", "gnosis",
+  "ribbita-by-virtuals", "doginme", "ski-mask-dog", "keyboard-cat-base", "basenji",
+  "aave", "1inch", "yearn-finance", "balancer", "convex-finance", "gnosis",
   "dai", "bridged-usd-coin-base", "gho", "usds", "echelon-prime",
   "wrapped-steth", "rocket-pool-eth", "shiba-inu", "bone-shibaswap", "treat", "wrapped-bitcoin",
   "chainlink", "uniswap", "pepe", "floki", "ondo-finance", "ethena", "ethena-usde", "pendle",
@@ -18,6 +19,8 @@ const COINGECKO_IDS = [
   "velodrome-finance", "worldcoin-wld", "connect-token-wct", "avalanche-2", "joe", "pangolin",
   "benqi", "coq-inu", "benqi-liquid-staked-avax", "wrapped-avax", "bitcoin-avalanche-bridged-btc-b",
   "yield-yak", "arena-token", "global-dollar",
+  "turbo", "apu-s-club", "wojak", "milady-meme-coin", "toby-toadgod", "mister-miggles",
+  "russell", "moew", "dino-2", "cheems-token", "why", "polydoge", "arbdoge-ai", "boop-4",
 ];
 
 const DEXSCREENER_CHAINS: Record<number, string> = {
@@ -30,7 +33,6 @@ const DEXSCREENER_CHAINS: Record<number, string> = {
   4663: "robinhood",
   42161: "arbitrum",
   43114: "avalanche",
-  1440000: "xrplevm",
   7777777: "zora",
   8453: "base",
 };

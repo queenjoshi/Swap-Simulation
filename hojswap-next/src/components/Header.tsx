@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { label: "How to Swap", href: "/how-to-swap" },
   { label: "Prices", href: "/prices" },
   { label: "Transactions", href: "/transactions" },
+  { label: "Burn Counter", href: "/burn-counter" },
   { label: "FAQ", href: "/faq" },
   { label: "About", href: "/about" },
   { label: "Community", href: "https://thehouseofjoshi.com", external: true },
@@ -23,6 +24,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/how-to-swap": "How to Swap",
   "/prices": "Prices",
   "/transactions": "Transactions",
+  "/burn-counter": "Burn Counter",
 };
 
 function getPageTitle(location: string): string {
@@ -136,7 +138,7 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-0.5 md:flex">
+        <nav className="hidden items-center gap-0.5 xl:flex">
           {NAV_LINKS.map((link) =>
             link.external ? (
               <a
@@ -164,7 +166,7 @@ export function Header() {
           )}
         </nav>
 
-        <div className="ml-auto flex items-center gap-3 md:hidden">
+        <div className="ml-auto flex items-center gap-3 xl:hidden">
           <span className="hidden text-[13px] text-white/40 min-[380px]:inline">{getPageTitle(location)}</span>
         </div>
 
@@ -173,7 +175,7 @@ export function Header() {
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/60 hover:border-[rgba(212,175,55,0.3)] hover:text-white md:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/60 hover:border-[rgba(212,175,55,0.3)] hover:text-white xl:hidden"
             aria-label="Toggle menu"
           >
             {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -182,7 +184,7 @@ export function Header() {
       </div>
 
       {menuOpen && (
-        <div className="border-t border-white/8 bg-[rgba(11,11,13,0.98)] px-4 pb-4 pt-2 md:hidden">
+        <div className="max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-t border-white/8 bg-[rgba(11,11,13,0.98)] px-4 pb-4 pt-2 xl:hidden">
           {NAV_LINKS.map((link) =>
             link.external ? (
               <a
