@@ -298,9 +298,11 @@ export function TokenSelect({
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-semibold leading-tight">{option.symbol}</span>
                   <span className="block truncate text-xs leading-tight text-white/40">{option.name}</span>
-                  {option.token.imported && (
+                  {option.token.trending ? (
+                    <span className="block text-[10px] font-semibold uppercase tracking-wide text-amber-300/80">Trending · unverified</span>
+                  ) : option.token.imported ? (
                     <span className="block text-[10px] font-semibold uppercase tracking-wide text-amber-300/80">Unverified import</span>
-                  )}
+                  ) : null}
                 </span>
               </button>
             );

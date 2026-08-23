@@ -156,10 +156,9 @@ function SwapCardInner() {
     const [nativeXrplMode, setNativeXrplMode] = useState(false);
     const [nativeSolanaMode, setNativeSolanaMode] = useState(false);
     const [zoraProfileTokens, setZoraProfileTokens] = useState<Token[]>([]);
+    const [trendingTokens, setTrendingTokens] = useState<Token[]>([]);
     const availableTokens = useMemo(() => {
         const staticTokens = tokensForChain(selectedChainId);
-        if (selectedChainId !== base.id && selectedChainId !== zora.id) return staticTokens;
-
         const byAddress = new Map(
             staticTokens
                 .filter((token) => token.address)
@@ -170,11 +169,16 @@ function SwapCardInner() {
                 byAddress.set(token.address.toLowerCase(), token);
             }
         }
+        for (const token of trendingTokens.filter((token) => token.chainId === selectedChainId)) {
+            if (token.address && !byAddress.has(token.address.toLowerCase())) {
+                byAddress.set(token.address.toLowerCase(), token);
+            }
+        }
         return [
             ...staticTokens.filter((token) => !token.address),
             ...byAddress.values(),
         ];
-    }, [selectedChainId, zoraProfileTokens]);
+    }, [selectedChainId, trendingTokens, zoraProfileTokens]);
 
     const [sellToken, setSellToken] = useState<Token>(() => {
         const sellSymbol = searchParams.get("sell");
@@ -277,6 +281,23 @@ function SwapCardInner() {
         void loadProfileTokens();
         return () => controller.abort();
     }, []);
+
+    useEffect(() => {
+        const controller = new AbortController();
+        setTrendingTokens([]);
+        fetch(`/api/trending-tokens?chainId=${selectedChainId}`, {
+            cache: "no-store",
+            signal: controller.signal,
+        })
+            .then(async (response) => response.ok ? await response.json() as Token[] : [])
+            .then((tokens) => {
+                if (!controller.signal.aborted && Array.isArray(tokens)) setTrendingTokens(tokens);
+            })
+            .catch((error) => {
+                if (!controller.signal.aborted) console.error("Error loading trending tokens:", error);
+            });
+        return () => controller.abort();
+    }, [selectedChainId]);
 
     // Auto-switch to bridge tab if swap is not supported on the selected chain
     useEffect(() => {
