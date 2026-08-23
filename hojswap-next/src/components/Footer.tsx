@@ -63,7 +63,6 @@ const HOUSE_LINKS = [
   { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },
   { label: "Whitepaper", href: "/whitepaper" },
-  { label: "Burn Counter", href: "/burn-counter" },
   { label: "Terms", href: "/terms" },
   { label: "Privacy", href: "/privacy" },
 ];

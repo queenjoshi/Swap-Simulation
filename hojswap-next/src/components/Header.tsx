@@ -10,7 +10,6 @@ const NAV_LINKS = [
   { label: "How to Swap", href: "/how-to-swap" },
   { label: "Prices", href: "/prices" },
   { label: "Transactions", href: "/transactions" },
-  { label: "Burn Counter", href: "/burn-counter" },
   { label: "FAQ", href: "/faq" },
   { label: "About", href: "/about" },
   { label: "Community", href: "https://thehouseofjoshi.com", external: true },
@@ -24,7 +23,6 @@ const PAGE_TITLES: Record<string, string> = {
   "/how-to-swap": "How to Swap",
   "/prices": "Prices",
   "/transactions": "Transactions",
-  "/burn-counter": "Burn Counter",
 };
 
 function getPageTitle(location: string): string {
