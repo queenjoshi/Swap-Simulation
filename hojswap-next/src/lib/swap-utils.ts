@@ -1,7 +1,20 @@
 import { Token, isNative } from "@/lib/tokens";
 import { NATIVE_ETH_ADDRESS, tokenTo0xParam } from "@/lib/quote";
 
-const MEME_SYMBOLS = new Set(["QUEENJOSHI", "KINGJOSHI", "BONE", "TREAT", "OSCAR", "SHIB"]);
+const MEME_SYMBOLS = new Set([
+  "QUEENJOSHI",
+  "KINGJOSHI",
+  "BONE",
+  "TREAT",
+  "OSCAR",
+  "SHIB",
+  "BASECAT",
+  "BICAT",
+  "CATE",
+  "PENGU",
+  "BOME",
+  "USELESS",
+]);
 
 function liquidRank(t: Token): number {
   if (isNative(t)) return 0;

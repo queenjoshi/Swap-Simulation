@@ -1374,6 +1374,7 @@ export const TOKENS: Token[] = [
   { symbol: "WOJAK", name: "Wojak", address: getAddress("0x5026f006b85729a8b14553fae6af249ad16c9aab"), chainId: mainnet.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/29856/large/wojak.png" },
   { symbol: "LADYS", name: "Milady Meme Coin", address: getAddress("0x12970e6868f88f6557b76120662c1b3e50a646bf"), chainId: mainnet.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/30194/large/LADYS_Clean.png" },
   // Base
+  { symbol: "BASECAT", name: "Basecat", address: getAddress("0xb2000000000000000000004c27f6523082f41d01"), chainId: base.id, decimals: 18, logo: "https://cdn.dexscreener.com/token-images/og/base/0xb2000000000000000000004c27f6523082f41d01" },
   { symbol: "TOBY", name: "Toby ToadGod", address: getAddress("0xb8d98a102b0079b69ffbc760c8d857a31653e56e"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/36615/large/toby1.png" },
   { symbol: "DRB", name: "DebtReliefBot", address: getAddress("0x3ec2156d4c0a9cbdab4a016633b7bcf6a8d68ea2"), chainId: base.id, decimals: 18, logo: "https://cdn.dexscreener.com/cms/images/933f90e3132e6bf22153efc75938b732f0f1dc3a2fc2d9dbff614fe60ddf95b6" },
   { symbol: "MIGGLES", name: "Mr. Miggles", address: getAddress("0xb1a03eda10342529bbf8eb700a06c60441fef25d"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/39251/large/New_LOGO.png" },
@@ -1381,6 +1382,7 @@ export const TOKENS: Token[] = [
   { symbol: "MOEW", name: "MOEW", address: getAddress("0x15ac90165f8b45a80534228bdcb124a011f62fee"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/36737/large/moewnewlogo.jpg" },
   { symbol: "DINO", name: "DINO", address: getAddress("0x85e90a5430af45776548adb82ee4cd9e33b08077"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/53533/large/coin_pfp.png" },
   // BNB Smart Chain
+  { symbol: "BICAT", name: "Bicat", address: getAddress("0xDBc6333a7D8bCd95f96641EDA4D095E69F207777"), chainId: bsc.id, decimals: 18, logo: "https://bicatonbnb.life/opengraph-image?456df9a478b2297a" },
   { symbol: "CHEEMS", name: "Cheems", address: getAddress("0x0df0587216a4a1bb7d5082fdc491d93d2dd4b413"), chainId: bsc.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/30376/large/Hg4_Lhbg_400x400.jpg" },
   { symbol: "CAW", name: "crow with knife", address: getAddress("0xdfbea88c4842d30c26669602888d746d30f9d60d"), chainId: bsc.id, decimals: 18 },
   { symbol: "WHY", name: "WHY", address: getAddress("0x9ec02756a559700d8d9e79ece56809f7bcc5dc27"), chainId: bsc.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/36812/large/output-onlinepngtools.png" },

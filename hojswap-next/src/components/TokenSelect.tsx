@@ -66,6 +66,8 @@ const TOKEN_LOGOS: Record<string, string> = {
   CASHDOG: "https://cdn.dexscreener.com/cms/images/ZCcTasJqsozOQ5zI?width=800&height=800&quality=95&format=auto",
   BOW: "https://cdn.dexscreener.com/cms/images/4Xon0TNmgTw8pn76?width=800&height=800&quality=95&format=auto",
   BABYDOGE: "https://assets.coingecko.com/coins/images/16125/standard/babydoge.jpg",
+  BASECAT: "https://cdn.dexscreener.com/token-images/og/base/0xb2000000000000000000004c27f6523082f41d01",
+  BICAT: "https://bicatonbnb.life/opengraph-image?456df9a478b2297a",
   ZORA: "https://coin-images.coingecko.com/coins/images/54693/large/zora.jpg",
   CBETH: "https://assets.coingecko.com/coins/images/27008/large/cbeth.png",
   EURC: "https://assets.coingecko.com/coins/images/26045/standard/euro.png",
