@@ -17,6 +17,12 @@ const MEME_SYMBOLS = new Set([
   "MEW",
   "FARTCOIN",
   "PNUT",
+  "ANSEM",
+  "DINGER",
+  "CATLIST",
+  "CHATON",
+  "YOURSELF",
+  "CHIHUAHUA",
 ]);
 
 function liquidRank(t: Token): number {

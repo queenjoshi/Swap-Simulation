@@ -3,7 +3,7 @@ import { SOLANA_CORE_FALLBACK, type SolanaToken } from "@/lib/solana";
 
 const JUPITER_TOKENS_URL = "https://api.jup.ag/tokens/v2/tag?query=verified";
 const JUPITER_SEARCH_URL = "https://api.jup.ag/tokens/v2/search";
-const CORE_SYMBOLS = new Set(["SOL", "USDC", "USDT", "JUP", "JITOSOL", "MSOL", "JTO", "RAY", "ORCA", "PYTH", "KMNO", "HNT", "WIF", "BONK", "PUMP", "PENGU", "POPCAT", "MEW", "FARTCOIN", "PNUT", "GOAT", "MOODENG", "DRIFT", "TNSR", "MNDE"]);
+const CORE_SYMBOLS = new Set(["SOL", "USDC", "USDT", "JUP", "JITOSOL", "MSOL", "JTO", "RAY", "ORCA", "PYTH", "KMNO", "HNT", "WIF", "BONK", "PUMP", "PENGU", "POPCAT", "MEW", "FARTCOIN", "PNUT", "GOAT", "MOODENG", "DRIFT", "TNSR", "MNDE", "BIRB", "MET", "MPLX", "DOOD"]);
 const MIN_COMMUNITY_LIQUIDITY_USD = 25_000;
 
 type JupiterToken = {
