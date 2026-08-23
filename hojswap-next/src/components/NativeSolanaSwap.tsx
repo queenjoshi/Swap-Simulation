@@ -2,13 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { getTransactionDecoder, getTransactionEncoder, isTransactionPartialSigner, partiallySignTransactionWithSigners, type Transaction, type TransactionWithLifetime, type TransactionWithinSizeLimit } from "@solana/kit";
-import { useConnectedWallet, useDisconnect, useIsWalletReady } from "@solana/kit-plugin-wallet/react";
-import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { Connection, PublicKey, VersionedTransaction, clusterApiUrl } from "@solana/web3.js";
 import { TokenLogo } from "@/components/TokenLogo";
 import { SOLANA_CORE_FALLBACK, SOL_MINT, type SolanaToken } from "@/lib/solana";
-import { solanaClient } from "@/lib/solana-client";
-import { SolanaWalletOptions } from "@/components/SolanaWalletOptions";
 import { saveTransaction } from "@/lib/transactions";
 
 type JupiterOrder = {
@@ -54,9 +52,12 @@ export type SolanaNetworkOption = {
 };
 
 export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: SolanaNetworkOption[]; onNetworkChange: (chainId: number) => void }) {
-  const connectedWallet = useConnectedWallet(solanaClient);
-  const walletReady = useIsWalletReady(solanaClient);
-  const disconnectWallet = useDisconnect(solanaClient);
+  const { publicKey, wallet, connected, connecting, disconnect, signTransaction } = useWallet();
+  const { setVisible: setWalletModalVisible } = useWalletModal();
+  const connectedWallet = publicKey && connected ? {
+    account: { address: publicKey.toBase58() },
+    wallet: { name: wallet?.adapter.name ?? "Solana wallet" },
+  } : null;
   const connection = useMemo(() => new Connection(clusterApiUrl("mainnet-beta"), "confirmed"), []);
   const [tokens, setTokens] = useState<SolanaToken[]>(SOLANA_CORE_FALLBACK);
   const [sell, setSell] = useState<SolanaToken>(SOLANA_CORE_FALLBACK[0]!);
@@ -70,7 +71,6 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
   const [error, setError] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
   const [networkOpen, setNetworkOpen] = useState(false);
-  const [walletOpen, setWalletOpen] = useState(false);
   const [balances, setBalances] = useState<Record<string, bigint>>({});
   const [loadingBalances, setLoadingBalances] = useState(false);
   const [slippageBps, setSlippageBps] = useState<number | null>(null);
@@ -211,16 +211,15 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
   }
 
   async function executeSwap() {
-    if (!order?.transaction || !order.requestId || !connectedWallet?.signer || !order.feeReady) return;
+    if (!order?.transaction || !order.requestId || !connectedWallet || !signTransaction || !order.feeReady) return;
     setSwapping(true);
     setError(null);
     setSignature(null);
     try {
       const bytes = Uint8Array.from(atob(order.transaction), (character) => character.charCodeAt(0));
-      const transaction = getTransactionDecoder().decode(bytes) as Transaction & TransactionWithinSizeLimit & TransactionWithLifetime;
-      if (!isTransactionPartialSigner(connectedWallet.signer)) throw new Error("This wallet cannot sign a Jupiter transaction without sending it directly");
-      const signed = await partiallySignTransactionWithSigners([connectedWallet.signer], transaction);
-      const signedBytes = getTransactionEncoder().encode(signed);
+      const transaction = VersionedTransaction.deserialize(bytes);
+      const signed = await signTransaction(transaction);
+      const signedBytes = signed.serialize();
       const response = await fetch("/api/solana/execute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -335,7 +334,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
 
         {!connectedWallet ? (
           <div className="space-y-2.5">
-            <button type="button" onClick={() => setWalletOpen(true)} disabled={!walletReady} className="w-full rounded-2xl bg-[linear-gradient(135deg,#e7c45b,#b78312)] px-5 py-3.5 text-sm font-semibold text-black disabled:opacity-50">{walletReady ? "Connect Solana wallet" : "Finding wallets…"}</button>
+            <button type="button" onClick={() => setWalletModalVisible(true)} disabled={connecting} className="w-full rounded-2xl bg-[linear-gradient(135deg,#e7c45b,#b78312)] px-5 py-3.5 text-sm font-semibold text-black disabled:opacity-50">{connecting ? "Connecting…" : "Connect Solana wallet"}</button>
             <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 text-[10px] text-white/35">
               <span>All Wallet Standard wallets</span><span aria-hidden="true">·</span><span>Desktop</span><span aria-hidden="true">·</span><span>Mobile</span>
             </div>
@@ -351,7 +350,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
           >
             {swapping ? "Signing and swapping…" : !order?.feeReady && order ? "Referral setup required" : "Swap with Jupiter"}
           </button>
-          <button type="button" onClick={() => disconnectWallet.dispatch()} disabled={disconnectWallet.isRunning} className="w-full py-1 text-[11px] text-white/35 transition hover:text-white/60">{connectedWallet.wallet.name} · {connectedWallet.account.address.slice(0, 4)}…{connectedWallet.account.address.slice(-4)} · Disconnect</button>
+          <button type="button" onClick={() => void disconnect()} className="w-full py-1 text-[11px] text-white/35 transition hover:text-white/60">{connectedWallet.wallet.name} · {connectedWallet.account.address.slice(0, 4)}…{connectedWallet.account.address.slice(-4)} · Disconnect</button>
           </div>
         )}
       </div>
@@ -383,16 +382,6 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
           </div>
         </div>,
         document.body,
-      )}
-      {walletOpen && typeof document !== "undefined" && createPortal(
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="presentation" onMouseDown={() => setWalletOpen(false)}>
-          <div role="dialog" aria-modal="true" aria-label="Connect a Solana wallet" onMouseDown={(event) => event.stopPropagation()} className="w-full max-w-sm overflow-hidden rounded-[24px] border border-white/10 bg-[#111113] shadow-[0_28px_90px_rgba(0,0,0,0.8)]">
-            <div className="flex items-center justify-between border-b border-white/8 px-4 py-3.5"><div><p className="text-sm font-semibold text-white/90">Connect wallet</p><p className="mt-0.5 text-[10px] uppercase tracking-wider text-white/35">Solana Wallet Standard</p></div><button type="button" onClick={() => setWalletOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-sm text-white/55 hover:text-white" aria-label="Close wallet selector">×</button></div>
-            <div className="max-h-[min(68vh,32rem)] overflow-y-auto p-2">
-              <SolanaWalletOptions onConnected={() => setWalletOpen(false)} />
-            </div>
-          </div>
-        </div>, document.body,
       )}
     </div>
   );
