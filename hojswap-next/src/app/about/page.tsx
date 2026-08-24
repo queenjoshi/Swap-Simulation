@@ -262,7 +262,7 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
 
 const networks = [
   { name: "XRP Ledger", badge: "Native Swap", desc: "XRP pairs for RLUSD, native USDC, SOLO, CasinoCoin, XRdoge, ARMY, DROP, FUZZY, PHNIX, SIGMA, SEAL, XRPH, and XPM through XRPL order-book and AMM liquidity using r-address wallets." },
-  { name: "Solana", badge: "Jupiter Swap", desc: "Native SOL, stablecoins, ecosystem assets, and Jupiter-verified community and meme coins routed through Jupiter Ultra using Solana wallets." },
+  { name: "Solana", badge: "OpenSea + Jupiter", desc: "Native SOL, stablecoins, NFT ecosystem assets, and community tokens discovered from OpenSea's top and trending feeds plus Jupiter's verified registry, then routed through Jupiter Ultra." },
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity including ONDO, ENA, USDe, PENDLE, LDO, EIGEN, PYUSD, blue chips, community tokens, and stablecoins." },
   { name: "Base", badge: "Swap + Bridge", desc: "Home for mr_lightspeed and its live Zora post-coin catalog, MORPHO, DEGEN, VIRTUAL, AERO, House of Joshi tokens, and core assets." },
   { name: "Zora", badge: "Token Catalog", desc: "Chain-aware discovery for creator and content coins deployed on Zora Network. Modern Zora coins deployed on Base remain listed under Base." },
@@ -417,8 +417,8 @@ export default function About() {
 
       <section className="mb-10 grid gap-3 sm:grid-cols-3">
         {[
-          { title: "Best route", desc: "0x aggregates swap liquidity across major DEX sources." },
-          { title: "Bridge inside the app", desc: "Stargate and Li.Fi routes keep transfers in one flow." },
+          { title: "Automatic discovery", desc: "OpenSea and Jupiter continuously surface verified, top, and trending Solana assets with original token artwork." },
+          { title: "Safety filtered", desc: "Tokens are validated, deduplicated by mint, and filtered by verification or meaningful market activity." },
           { title: "Wallet-first", desc: "You sign every transaction directly from your own wallet." },
         ].map((item) => (
           <div key={item.title} className="hoj-panel rounded-2xl p-4">
@@ -432,7 +432,7 @@ export default function About() {
         <SectionHeading
           eyebrow="Supported tokens"
           title="Browse tokens by network"
-          desc="Open a network to view its configured assets. Solana listings are sourced from Jupiter's verified token registry."
+          desc="Open a network to view its configured assets. Solana listings merge the permanent HOJSwap catalog with OpenSea top and trending tokens and Jupiter's verified registry."
         />
         <div className="space-y-3">
           {displayedTokenGroups.map((group) => (
