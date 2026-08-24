@@ -157,6 +157,7 @@ function SwapCardInner() {
     const [nativeSolanaMode, setNativeSolanaMode] = useState(false);
     const [zoraProfileTokens, setZoraProfileTokens] = useState<Token[]>([]);
     const [trendingTokens, setTrendingTokens] = useState<Token[]>([]);
+    const [providerTokens, setProviderTokens] = useState<Token[]>([]);
     const availableTokens = useMemo(() => {
         const staticTokens = tokensForChain(selectedChainId);
         const byAddress = new Map(
@@ -174,11 +175,16 @@ function SwapCardInner() {
                 byAddress.set(token.address.toLowerCase(), token);
             }
         }
+        for (const token of providerTokens.filter((token) => token.chainId === selectedChainId)) {
+            if (token.address && !byAddress.has(token.address.toLowerCase())) {
+                byAddress.set(token.address.toLowerCase(), token);
+            }
+        }
         return [
             ...staticTokens.filter((token) => !token.address),
             ...byAddress.values(),
         ];
-    }, [selectedChainId, trendingTokens, zoraProfileTokens]);
+    }, [providerTokens, selectedChainId, trendingTokens, zoraProfileTokens]);
 
     const [sellToken, setSellToken] = useState<Token>(() => {
         const sellSymbol = searchParams.get("sell");
@@ -295,6 +301,27 @@ function SwapCardInner() {
             })
             .catch((error) => {
                 if (!controller.signal.aborted) console.error("Error loading trending tokens:", error);
+            });
+        return () => controller.abort();
+    }, [selectedChainId]);
+
+    useEffect(() => {
+        const controller = new AbortController();
+        setProviderTokens([]);
+        fetch(`/api/token-catalog?chainId=${selectedChainId}`, {
+            cache: "no-store",
+            signal: controller.signal,
+        })
+            .then(async (response) => response.ok
+                ? await response.json() as { tokens?: Token[] }
+                : { tokens: [] })
+            .then((payload) => {
+                if (!controller.signal.aborted && Array.isArray(payload.tokens)) {
+                    setProviderTokens(payload.tokens);
+                }
+            })
+            .catch((error) => {
+                if (!controller.signal.aborted) console.error("Error loading provider token catalog:", error);
             });
         return () => controller.abort();
     }, [selectedChainId]);

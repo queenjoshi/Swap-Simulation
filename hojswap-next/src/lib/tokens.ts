@@ -31,6 +31,7 @@ export type Token = {
   logo?: string;
   imported?: boolean;
   trending?: boolean;
+  providerListed?: boolean;
 };
 
 export const HOUSE_WALLET: `0x${string}` = getAddress(

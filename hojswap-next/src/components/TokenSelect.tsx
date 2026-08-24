@@ -302,6 +302,8 @@ export function TokenSelect({
                   <span className="block truncate text-xs leading-tight text-white/40">{option.name}</span>
                   {option.token.trending ? (
                     <span className="block text-[10px] font-semibold uppercase tracking-wide text-amber-300/80">Trending · unverified</span>
+                  ) : option.token.providerListed ? (
+                    <span className="block text-[10px] font-semibold uppercase tracking-wide text-emerald-300/70">Provider listed</span>
                   ) : option.token.imported ? (
                     <span className="block text-[10px] font-semibold uppercase tracking-wide text-amber-300/80">Unverified import</span>
                   ) : null}
