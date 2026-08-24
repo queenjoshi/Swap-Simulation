@@ -432,7 +432,6 @@ export default function About() {
         <SectionHeading
           eyebrow="Supported tokens"
           title="Browse tokens by network"
-          desc="Open a network to view its configured assets. Solana listings merge the permanent HOJSwap catalog with OpenSea top and trending tokens and Jupiter's verified registry."
         />
         <div className="space-y-3">
           {displayedTokenGroups.map((group) => (
