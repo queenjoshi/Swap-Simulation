@@ -1373,6 +1373,10 @@ export const TOKENS: Token[] = [
   { symbol: "APU", name: "Apu Apustaja", address: getAddress("0x594daad7d77592a2b97b725a7ad59d7e188b5bfa"), chainId: mainnet.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/35986/large/200x200.png" },
   { symbol: "WOJAK", name: "Wojak", address: getAddress("0x5026f006b85729a8b14553fae6af249ad16c9aab"), chainId: mainnet.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/29856/large/wojak.png" },
   { symbol: "LADYS", name: "Milady Meme Coin", address: getAddress("0x12970e6868f88f6557b76120662c1b3e50a646bf"), chainId: mainnet.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/30194/large/LADYS_Clean.png" },
+  { symbol: "MOG", name: "Mog Coin", address: getAddress("0xaaee1a9723aadb7afa2810263653a34ba2c21c7a"), chainId: mainnet.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/31059/large/MOG_LOGO_200x200.png" },
+  { symbol: "NEIRO", name: "Neiro", address: getAddress("0x812ba41e071c7b7fa4ebcfb62df5f45f6fa853ee"), chainId: mainnet.id, decimals: 9, logo: "https://coin-images.coingecko.com/coins/images/39488/large/neiro.jpg" },
+  { symbol: "MEME", name: "Memecoin", address: getAddress("0xb131f4a55907b10d1f0a50d8ab8fa09ec342cd74"), chainId: mainnet.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/32528/large/memecoin_%282%29.png" },
+  { symbol: "SPX", name: "SPX6900", address: getAddress("0xe0f63a424a4439cbe457d80e4f4b51ad25b2c56c"), chainId: mainnet.id, decimals: 8, logo: "https://coin-images.coingecko.com/coins/images/31401/large/centeredcoin_%281%29.png" },
   // Base
   { symbol: "BASECAT", name: "Basecat", address: getAddress("0xb2000000000000000000004c27f6523082f41d01"), chainId: base.id, decimals: 18, logo: "https://cdn.dexscreener.com/cms/images/c1GM37sU6jS_D7Cq?width=800&height=800&quality=95&format=auto" },
   { symbol: "TOBY", name: "Toby ToadGod", address: getAddress("0xb8d98a102b0079b69ffbc760c8d857a31653e56e"), chainId: base.id, decimals: 18, logo: "https://coin-images.coingecko.com/coins/images/36615/large/toby1.png" },
