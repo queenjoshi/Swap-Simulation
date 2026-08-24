@@ -262,7 +262,7 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
 
 const networks = [
   { name: "XRP Ledger", badge: "Native Swap", desc: "XRP pairs for RLUSD, native USDC, SOLO, CasinoCoin, XRdoge, ARMY, DROP, FUZZY, PHNIX, SIGMA, SEAL, XRPH, and XPM through XRPL order-book and AMM liquidity using r-address wallets." },
-  { name: "Solana", badge: "OpenSea + Jupiter", desc: "Native SOL, stablecoins, NFT ecosystem assets, and community tokens discovered from OpenSea's top and trending feeds plus Jupiter's verified registry, then routed through Jupiter Ultra." },
+  { name: "Solana", badge: "Live Discovery", desc: "Native SOL, stablecoins, NFT ecosystem assets, and verified community tokens discovered automatically, then routed through Jupiter Ultra." },
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity including ONDO, ENA, USDe, PENDLE, LDO, EIGEN, PYUSD, blue chips, community tokens, and stablecoins." },
   { name: "Base", badge: "Swap + Bridge", desc: "Home for mr_lightspeed and its live Zora post-coin catalog, MORPHO, DEGEN, VIRTUAL, AERO, House of Joshi tokens, and core assets." },
   { name: "Zora", badge: "Token Catalog", desc: "Chain-aware discovery for creator and content coins deployed on Zora Network. Modern Zora coins deployed on Base remain listed under Base." },
@@ -417,7 +417,7 @@ export default function About() {
 
       <section className="mb-10 grid gap-3 sm:grid-cols-3">
         {[
-          { title: "Automatic discovery", desc: "OpenSea and Jupiter continuously surface verified, top, and trending Solana assets with original token artwork." },
+          { title: "Automatic discovery", desc: "Trusted token registries continuously surface active Solana assets with original token artwork." },
           { title: "Safety filtered", desc: "Tokens are validated, deduplicated by mint, and filtered by verification or meaningful market activity." },
           { title: "Wallet-first", desc: "You sign every transaction directly from your own wallet." },
         ].map((item) => (
