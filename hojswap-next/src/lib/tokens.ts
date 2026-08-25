@@ -1233,6 +1233,7 @@ export const TOKENS: Token[] = [
   { symbol: "TIG", name: "The Innovation Game", address: getAddress("0x0C03Ce270B4826Ec62e7DD007f0B716068639F7B"), chainId: base.id, decimals: 18 },
   { symbol: "TRUST", name: "Intuition", address: getAddress("0x6cd905dF2Ed214b22e0d48FF17CD4200C1C6d8A3"), chainId: base.id, decimals: 18 },
   { symbol: "weETH", name: "Wrapped eETH", address: getAddress("0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A"), chainId: base.id, decimals: 18 },
+  { symbol: "openhuman", name: "openhuman", address: getAddress("0x38298138DD4389013962d8492FEAa5879408DBA3"), chainId: base.id, decimals: 18 },
 
   // ─── Additional verified Ethereum assets ────────────────
   { symbol: "MKR", name: "Maker", address: getAddress("0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2"), chainId: mainnet.id, decimals: 18 },
@@ -1256,6 +1257,7 @@ export const TOKENS: Token[] = [
   { symbol: "sato", name: "sato", address: getAddress("0x829f4B62EEBE12Af653b4dD4fFc480966F7d7f09"), chainId: mainnet.id, decimals: 18 },
   { symbol: "SNT", name: "Status Network Token", address: getAddress("0x744d70FDBE2Ba4CF95131626614a1763DF805B9E"), chainId: mainnet.id, decimals: 18 },
   { symbol: "ZIPCAT", name: "ZIP CAT", address: getAddress("0x4C5FC2EFd7F9fBA2c6a9227aBd9d1C3eeFd6bDD7"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "LBTC", name: "Lombard Staked Bitcoin", address: getAddress("0x8236a87084f8B84306f72007F36F2618A5634494"), chainId: mainnet.id, decimals: 8 },
 
   // ─── Additional verified Arbitrum assets ─────────────────
   { symbol: "LINK", name: "Chainlink", address: getAddress("0xf97f4df75117a78c1A5a0DBb814Af92458539FB4"), chainId: arbitrum.id, decimals: 18 },
@@ -1436,6 +1438,14 @@ export const TOKENS: Token[] = [
   { symbol: "CASHDOG", name: "Cash Dog", address: getAddress("0x9e93ea35be23ab0e1e20ed6b62d3b1cbd5234a83"), chainId: robinhood.id, decimals: 18, logo: "https://cdn.dexscreener.com/token-images/og/robinhood/0x9e93ea35be23ab0e1e20ed6b62d3b1cbd5234a83" },
   { symbol: "TENDIES", name: "TENDIES", address: getAddress("0x45242320dbb855eea8fd36804c6487e10e97fcf9"), chainId: robinhood.id, decimals: 18, logo: "https://cdn.dexscreener.com/cms/images/j8K5uOi-9TVXuWFJ" },
   { symbol: "BYCOCKET", name: "Bycocket", address: getAddress("0xc79d46d716b33b463b3a6574d6ee26009abf4e9a"), chainId: robinhood.id, decimals: 18, logo: "https://cdn.dexscreener.com/cms/images/9B-Y8-fr8vI-RPNO" },
+  { symbol: "APOLUNE", name: "Apolune Fun", address: getAddress("0x1478D04EF6CA3FD249ec67936aFd9fdd87710565"), chainId: robinhood.id, decimals: 18 },
+  { symbol: "BARBELL", name: "Barbell", address: getAddress("0x0A713a88e05787D455954DaBDba3B69a92518505"), chainId: robinhood.id, decimals: 18 },
+  { symbol: "BROW", name: "eyebrow", address: getAddress("0x2142d4816E259fd7C119f61c772e39AE0CdAAFde"), chainId: robinhood.id, decimals: 18 },
+  { symbol: "Doge-1", name: "DOGE-1", address: getAddress("0xcBf02F42B8b9c12AbEFebd64fD46cC2C17eC727F"), chainId: robinhood.id, decimals: 18 },
+  { symbol: "PMF", name: "Product Meme Fit by Virtuals", address: getAddress("0x9d05b9CEf884FEd0273377FC635C6b248f0A1b45"), chainId: robinhood.id, decimals: 18 },
+  { symbol: "ROB", name: "Robacha", address: getAddress("0x2ceeb8aCB7bc427B3de905E5Ce77a5D4c961F3b0"), chainId: robinhood.id, decimals: 18 },
+  { symbol: "SNOW", name: "SnowOn", address: getAddress("0xb851CeBcBcf1Dc5F07D9F0a8276caE8D953B3713"), chainId: robinhood.id, decimals: 18 },
+  { symbol: "TACO", name: "TrumpAlwaysChickensOut", address: getAddress("0x9e5e02F5C9ea48931d4e8f488089103e93F925fF"), chainId: robinhood.id, decimals: 18 },
   { symbol: "STONKBROKER", name: "StonkBroker", address: getAddress("0xe934e36a439c94017b64a3fece66af12099abf50"), chainId: robinhood.id, decimals: 18 },
   { symbol: "WIF", name: "RobinWifHat", address: getAddress("0xe49a1c3033ecc6b804bc423021d3f71f1a3e0f9b"), chainId: robinhood.id, decimals: 18 },
 
@@ -1454,10 +1464,13 @@ export const TOKENS: Token[] = [
   { symbol: "USDC.e", name: "Bridged USD Coin", address: getAddress("0x549943e04f40284185054145c6E4e9568C1D3241"), chainId: berachain.id, decimals: 6, logo: "https://assets.coingecko.com/coins/images/6319/standard/usdc.png" },
   { symbol: "ETH", name: "Ether", chainId: ink.id, decimals: 18, logo: "https://assets.coingecko.com/coins/images/279/standard/ethereum.png" },
   { symbol: "USDC", name: "USD Coin", address: getAddress("0x2D270e6886d130D724215A266106e6832161EAEd"), chainId: ink.id, decimals: 6, logo: "https://assets.coingecko.com/coins/images/6319/standard/usdc.png" },
+  { symbol: "PURPLE", name: "Purple", address: getAddress("0xD642B49d10cc6e1BC1c6945725667c35e0875f22"), chainId: ink.id, decimals: 18 },
   { symbol: "MON", name: "Monad", chainId: monad.id, decimals: 18, logo: "https://www.monad.xyz/favicon.ico" },
   { symbol: "USDC", name: "USD Coin", address: getAddress("0x754704Bc059F8C67012fEd69BC8A327a5aafb603"), chainId: monad.id, decimals: 6, logo: "https://assets.coingecko.com/coins/images/6319/standard/usdc.png" },
+  { symbol: "NADS", name: "NADS", address: getAddress("0x39B9E06f226FF6D7500c870B82333AACbD2F7777"), chainId: monad.id, decimals: 18 },
   { symbol: "HYPE", name: "Hyperliquid", chainId: hyperEvm.id, decimals: 18, logo: "https://hyperfoundation.org/favicon.ico" },
   { symbol: "USDC", name: "USD Coin", address: getAddress("0xb88339CB7199b77E23DB6E890353E22632Ba630f"), chainId: hyperEvm.id, decimals: 6, logo: "https://assets.coingecko.com/coins/images/6319/standard/usdc.png" },
+  { symbol: "1HYPE", name: "1 HYPE and a Dream", address: getAddress("0xd621102f3e2cd93C77264e665926F4f17A3d80fe"), chainId: hyperEvm.id, decimals: 18 },
   { symbol: "XPL", name: "Plasma", chainId: plasma.id, decimals: 18, logo: "https://www.plasma.to/favicon.ico" },
   { symbol: "USDT0", name: "Tether USD0", address: getAddress("0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb"), chainId: plasma.id, decimals: 6, logo: "https://coin-images.coingecko.com/coins/images/53705/large/usdt0.jpg" },
 ];

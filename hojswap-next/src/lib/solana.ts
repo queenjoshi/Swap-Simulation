@@ -418,4 +418,5 @@ export const SOLANA_CORE_FALLBACK: SolanaToken[] = [
   { mint: "23e4CNuJxvBQ7RjNLc8Bh3yN3pQq6jeiTbyzJGXYPgme", symbol: "REMUS", name: "Official Fomo Mascot", decimals: 6, verified: false, tags: ["community", "meme", "trending"], liquidity: 65_920 },
   { mint: "5hiLgyybrAYPpUwNFa38agfZ8iEtnahWKAPixcfspump", symbol: "RICH", name: "I choose rich everytime", decimals: 6, verified: false, tags: ["community", "meme", "trending"], liquidity: 54_192 },
   { mint: "GBEVt9gVY7t6PkWPz21thH3wMSvTMppyyVi87qSHpump", symbol: "STARTED", name: "just getting started", decimals: 6, verified: false, tags: ["community", "meme", "trending"], liquidity: 11_727 },
+  { mint: "7yRGNTiDTNtSXTHKoidHuDR1ocefkmytJ6hd2qAJ2XNA", symbol: "CC", name: "Canton Network", decimals: 9, verified: false, tags: ["community", "trending"], liquidity: 111_901_541 },
 ];
