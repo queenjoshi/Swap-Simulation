@@ -12,6 +12,33 @@ export type SolanaToken = {
   liquidity: number;
 };
 
+export function dedupeSolanaTokens(tokens: SolanaToken[]) {
+  const canonicalMintBySymbol = new Map(
+    SOLANA_CORE_FALLBACK.map((token) => [token.symbol.trim().toUpperCase(), token.mint]),
+  );
+  const byMint = new Map<string, SolanaToken>();
+  for (const token of tokens) {
+    const mintKey = token.mint.trim();
+    const current = byMint.get(mintKey);
+    if (!current || token.liquidity > current.liquidity) byMint.set(mintKey, token);
+  }
+
+  const ranked = [...byMint.values()].sort((a, b) => {
+    const aCanonical = canonicalMintBySymbol.get(a.symbol.trim().toUpperCase()) === a.mint;
+    const bCanonical = canonicalMintBySymbol.get(b.symbol.trim().toUpperCase()) === b.mint;
+    if (aCanonical !== bCanonical) return aCanonical ? -1 : 1;
+    if (a.verified !== b.verified) return a.verified ? -1 : 1;
+    return b.liquidity - a.liquidity;
+  });
+
+  const bySymbol = new Map<string, SolanaToken>();
+  for (const token of ranked) {
+    const symbolKey = token.symbol.trim().toUpperCase();
+    if (!bySymbol.has(symbolKey)) bySymbol.set(symbolKey, token);
+  }
+  return [...bySymbol.values()];
+}
+
 export const SOLANA_CORE_FALLBACK: SolanaToken[] = [
   {
     mint: SOL_MINT,

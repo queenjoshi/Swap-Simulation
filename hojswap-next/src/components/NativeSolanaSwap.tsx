@@ -6,7 +6,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Connection, PublicKey, VersionedTransaction, clusterApiUrl } from "@solana/web3.js";
 import { TokenLogo } from "@/components/TokenLogo";
-import { SOLANA_CORE_FALLBACK, SOL_MINT, type SolanaToken } from "@/lib/solana";
+import { dedupeSolanaTokens, SOLANA_CORE_FALLBACK, SOL_MINT, type SolanaToken } from "@/lib/solana";
 import { saveTransaction } from "@/lib/transactions";
 
 type JupiterOrder = {
@@ -101,7 +101,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
           setTokens((current) => {
             const merged = new Map(current.map((token) => [token.mint, token]));
             for (const token of payload.tokens!) merged.set(token.mint, token);
-            return [...merged.values()];
+            return dedupeSolanaTokens([...merged.values()]);
           });
         })
         .catch((reason) => {

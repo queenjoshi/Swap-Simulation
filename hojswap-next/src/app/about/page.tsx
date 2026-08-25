@@ -7,7 +7,7 @@ import { fallbackTokenLogo } from "@/components/TokenSelect";
 import { CHAIN_OPTIONS } from "@/lib/chains";
 import { dedupeTokens, TOKENS } from "@/lib/tokens";
 import { XRPL_ASSETS } from "@/lib/xrpl-native";
-import { SOLANA_CORE_FALLBACK, type SolanaToken } from "@/lib/solana";
+import { dedupeSolanaTokens, SOLANA_CORE_FALLBACK, type SolanaToken } from "@/lib/solana";
 
 type Token = {
   id?: string;
@@ -216,6 +216,13 @@ const curatedLogos = new Map(
   ),
 );
 
+function sortTokensAlphabetically(tokens: Token[]) {
+  return [...tokens].sort((a, b) =>
+    a.symbol.localeCompare(b.symbol, undefined, { sensitivity: "base" })
+    || a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+  );
+}
+
 // Keep this page in sync with the swap registry instead of maintaining a
 // second, incomplete token list by hand.
 const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = [
@@ -336,17 +343,19 @@ export default function About() {
     if (group.eyebrow === "Native Solana") {
       return {
         ...group,
-        tokens: solanaTokens.map((token) => ({
+        tokens: sortTokensAlphabetically(dedupeSolanaTokens(solanaTokens).map((token) => ({
           symbol: token.symbol,
           name: token.name,
           logo: token.logo,
           id: token.mint,
           address: undefined,
           chainId: undefined,
-        })),
+        }))),
       };
     }
-    if (group.eyebrow !== "Base" || lightspeedTokens.length === 0) return group;
+    if (group.eyebrow !== "Base" || lightspeedTokens.length === 0) {
+      return { ...group, tokens: sortTokensAlphabetically(group.tokens) };
+    }
     const tokensById = new Map<string, Token>(
       group.tokens.map((token) => [token.address?.toLowerCase() ?? token.symbol.toLowerCase(), token]),
     );
@@ -354,7 +363,7 @@ export default function About() {
       const id = token.address?.toLowerCase() ?? token.symbol.toLowerCase();
       if (!tokensById.has(id)) tokensById.set(id, token);
     }
-    return { ...group, tokens: Array.from(tokensById.values()) };
+    return { ...group, tokens: sortTokensAlphabetically(Array.from(tokensById.values())) };
   }), [lightspeedTokens, solanaTokens]);
 
   const highlights = useMemo(() => [

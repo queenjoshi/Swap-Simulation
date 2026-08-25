@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { SOLANA_CORE_FALLBACK, type SolanaToken } from "@/lib/solana";
+import { dedupeSolanaTokens, SOLANA_CORE_FALLBACK, type SolanaToken } from "@/lib/solana";
 
 const JUPITER_TOKENS_URL = "https://api.jup.ag/tokens/v2/tag?query=verified";
 const JUPITER_SEARCH_URL = "https://api.jup.ag/tokens/v2/search";
@@ -145,7 +145,7 @@ export async function GET(request: Request) {
   const sources = [openSeaTokens.length > 0 && "opensea", jupiterTokens.length > 0 && "jupiter"].filter(Boolean);
   return NextResponse.json(
     {
-      tokens: [...merged.values()],
+      tokens: dedupeSolanaTokens([...merged.values()]),
       source: sources.length > 0 ? sources.join("+") : "fallback",
       ...(warnings.length > 0 ? { warning: warnings.join("; ") } : {}),
     },
