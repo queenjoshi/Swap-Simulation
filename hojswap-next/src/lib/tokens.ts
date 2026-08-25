@@ -1430,7 +1430,16 @@ export const TOKENS: Token[] = [
 ];
 
 export function tokensForChain(chainId: number) {
-  return TOKENS.filter((t) => t.chainId === chainId);
+  return dedupeTokens(TOKENS.filter((t) => t.chainId === chainId));
+}
+
+export function dedupeTokens(tokens: Token[]) {
+  const byId = new Map<string, Token>();
+  for (const token of tokens) {
+    const id = `${token.chainId}:${token.address?.toLowerCase() ?? "native"}`;
+    if (!byId.has(id)) byId.set(id, token);
+  }
+  return [...byId.values()];
 }
 
 export function defaultSellForChain(chainId: number) {

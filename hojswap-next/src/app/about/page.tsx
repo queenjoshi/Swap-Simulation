@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { TokenLogo } from "@/components/TokenLogo";
 import { fallbackTokenLogo } from "@/components/TokenSelect";
 import { CHAIN_OPTIONS } from "@/lib/chains";
-import { TOKENS } from "@/lib/tokens";
+import { dedupeTokens, TOKENS } from "@/lib/tokens";
 import { XRPL_ASSETS } from "@/lib/xrpl-native";
 import { SOLANA_CORE_FALLBACK, type SolanaToken } from "@/lib/solana";
 
@@ -222,8 +222,7 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
   ...CHAIN_OPTIONS.map((chain) => ({
     title: `${chain.label} Tokens`,
     eyebrow: chain.label,
-    tokens: TOKENS
-      .filter((token) => token.chainId === chain.id)
+    tokens: dedupeTokens(TOKENS.filter((token) => token.chainId === chain.id))
       .map((token) => ({
         symbol: token.symbol,
         name: token.name,
