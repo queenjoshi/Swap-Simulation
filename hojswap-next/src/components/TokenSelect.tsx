@@ -143,23 +143,6 @@ const DEXSCREENER_CHAIN_SLUGS: Record<number, string> = {
   80094: "berachain", 534352: "scroll", 7777777: "zora",
 };
 
-// Keep House and creator listings visible at the top of the compact swap menu.
-// The remaining assets retain their registry order below these featured tokens.
-const FEATURED_TOKEN_ORDER = [
-  "MR_LIGHTSPEED",
-  "QUEENJOSHI",
-  "KINGJOSHI",
-  "KIND",
-  "NBAA",
-  "MAME",
-  "TREAT",
-  "OSCAR",
-] as const;
-
-const FEATURED_TOKEN_RANK = new Map<string, number>(
-  FEATURED_TOKEN_ORDER.map((symbol, index) => [symbol, index]),
-);
-
 export function fallbackTokenLogo(symbol: string) {
   return TOKEN_LOGOS[symbol.trim().toUpperCase()];
 }
@@ -203,14 +186,11 @@ export function TokenSelect({
           logo: tokenLogo(t),
           registryIndex,
         }))
-        .sort((a, b) => {
-          const aRank = FEATURED_TOKEN_RANK.get(a.symbol.toUpperCase());
-          const bRank = FEATURED_TOKEN_RANK.get(b.symbol.toUpperCase());
-          if (aRank !== undefined || bRank !== undefined) {
-            return (aRank ?? Number.MAX_SAFE_INTEGER) - (bRank ?? Number.MAX_SAFE_INTEGER);
-          }
-          return a.registryIndex - b.registryIndex;
-        }),
+        .sort((a, b) =>
+          a.symbol.localeCompare(b.symbol, undefined, { sensitivity: "base" })
+          || a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+          || a.registryIndex - b.registryIndex,
+        ),
     [tokens],
   );
   const filteredOptions = useMemo(() => {

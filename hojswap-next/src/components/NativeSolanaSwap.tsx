@@ -59,7 +59,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
     wallet: { name: wallet?.adapter.name ?? "Solana wallet" },
   } : null;
   const connection = useMemo(() => new Connection(clusterApiUrl("mainnet-beta"), "confirmed"), []);
-  const [tokens, setTokens] = useState<SolanaToken[]>(SOLANA_CORE_FALLBACK);
+  const [tokens, setTokens] = useState<SolanaToken[]>(() => dedupeSolanaTokens(SOLANA_CORE_FALLBACK));
   const [sell, setSell] = useState<SolanaToken>(SOLANA_CORE_FALLBACK[0]!);
   const [buy, setBuy] = useState<SolanaToken>(SOLANA_CORE_FALLBACK[1]!);
   const [amount, setAmount] = useState("");

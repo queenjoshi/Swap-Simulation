@@ -36,7 +36,10 @@ export function dedupeSolanaTokens(tokens: SolanaToken[]) {
     const symbolKey = token.symbol.trim().toUpperCase();
     if (!bySymbol.has(symbolKey)) bySymbol.set(symbolKey, token);
   }
-  return [...bySymbol.values()];
+  return [...bySymbol.values()].sort((a, b) =>
+    a.symbol.localeCompare(b.symbol, undefined, { sensitivity: "base" })
+    || a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+  );
 }
 
 export const SOLANA_CORE_FALLBACK: SolanaToken[] = [

@@ -359,9 +359,13 @@ function AssetSelector({ selected, onChoose }: { selected: XrplAsset; onChoose: 
       seen.add(id);
       return true;
     });
+    const ordered = combined.sort((a, b) =>
+      a.symbol.localeCompare(b.symbol, undefined, { sensitivity: "base" })
+      || a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+    );
     const needle = query.trim().toLowerCase();
-    if (!needle) return combined;
-    return combined.filter((asset) =>
+    if (!needle) return ordered;
+    return ordered.filter((asset) =>
       asset.symbol.toLowerCase().includes(needle)
       || asset.name.toLowerCase().includes(needle)
       || asset.issuer?.toLowerCase().includes(needle)

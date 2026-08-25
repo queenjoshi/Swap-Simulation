@@ -1430,7 +1430,10 @@ export const TOKENS: Token[] = [
 ];
 
 export function tokensForChain(chainId: number) {
-  return dedupeTokens(TOKENS.filter((t) => t.chainId === chainId));
+  return dedupeTokens(TOKENS.filter((t) => t.chainId === chainId)).sort((a, b) =>
+    a.symbol.localeCompare(b.symbol, undefined, { sensitivity: "base" })
+    || a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+  );
 }
 
 export function dedupeTokens(tokens: Token[]) {
