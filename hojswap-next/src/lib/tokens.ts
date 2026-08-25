@@ -1244,6 +1244,18 @@ export const TOKENS: Token[] = [
   { symbol: "FRAX", name: "Legacy Frax Dollar", address: getAddress("0x853d955aCEf822Db058eb8505911ED77F175b99e"), chainId: mainnet.id, decimals: 18 },
   { symbol: "LUSD", name: "Liquity USD", address: getAddress("0x5f98805A4E8be255a32880FDeC7F6728C6568bA0"), chainId: mainnet.id, decimals: 18 },
   { symbol: "cbETH", name: "Coinbase Wrapped Staked ETH", address: getAddress("0xBe9895146f7AF43049ca1c1AE358B0541Ea49704"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "ACN", name: "AITECH Cloud Network", address: getAddress("0x3e76dd57E649A263a532cC9bcC58b32A065fB2a4"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "ANYONE", name: "ANyONe Protocol", address: getAddress("0xFeAc2Eae96899709a43E252B6B92971D32F9C0F9"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "BLZ", name: "Bluzelle Token", address: getAddress("0x5732046A883704404F284Ce41FfADd5b007FD668"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "ETHFI", name: "ether.fi governance token", address: getAddress("0xFe0c30065B384F05761f15d0CC899D4F9F9Cc0eB"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "FLUID", name: "Fluid", address: getAddress("0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "Prometheus", name: "Prometheus", address: getAddress("0x3cdB41027D61C413e064E84D9c21812b6Ef004F1"), chainId: mainnet.id, decimals: 9 },
+  { symbol: "RIO", name: "Realio Network", address: getAddress("0x94a8b4EE5CD64C79D0Ee816f467EA73009f51aA0"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "RLB", name: "Rollbit Coin", address: getAddress("0x046EeE2cc3188071C02BfC1745A6b17c656e3f3d"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "RSR", name: "Reserve Rights", address: getAddress("0x320623b8E4fF03373931769A31Fc52A4E78B5d70"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "sato", name: "sato", address: getAddress("0x829f4B62EEBE12Af653b4dD4fFc480966F7d7f09"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "SNT", name: "Status Network Token", address: getAddress("0x744d70FDBE2Ba4CF95131626614a1763DF805B9E"), chainId: mainnet.id, decimals: 18 },
+  { symbol: "ZIPCAT", name: "ZIP CAT", address: getAddress("0x4C5FC2EFd7F9fBA2c6a9227aBd9d1C3eeFd6bDD7"), chainId: mainnet.id, decimals: 18 },
 
   // ─── Additional verified Arbitrum assets ─────────────────
   { symbol: "LINK", name: "Chainlink", address: getAddress("0xf97f4df75117a78c1A5a0DBb814Af92458539FB4"), chainId: arbitrum.id, decimals: 18 },
