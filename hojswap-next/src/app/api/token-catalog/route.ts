@@ -35,8 +35,8 @@ export async function GET(request: Request) {
     if (apiKey) headers["x-lifi-api-key"] = apiKey;
 
     const response = await fetch(`${LIFI_TOKENS_API}?chains=${chainId}`, {
+      cache: "no-store",
       headers,
-      next: { revalidate: 900 },
       signal: AbortSignal.timeout(15_000),
     });
     if (!response.ok) throw new Error(`LI.FI tokens ${response.status}`);
