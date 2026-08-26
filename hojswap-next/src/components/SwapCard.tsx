@@ -18,7 +18,7 @@ import { CHAIN_OPTIONS, SWAP_SUPPORTED_CHAIN_IDS, explorerAddressUrl, getChainNa
 import { clampToDecimals, formatSwapAmountDisplay, isValidNumberInput } from "@/lib/format";
 import { calculateHouseFeeAmount, tokenTo0xParam, type QuoteResponse, type PriceResponse } from "@/lib/quote";
 import { erc20Abi } from "@/lib/erc20";
-import { defaultBuyForChain, defaultSellForChain, isNative, tokenDecimals, tokensForChain, type Token } from "@/lib/tokens";
+import { defaultBuyForChain, defaultSellForChain, isNative, mergeTokenCatalogs, tokenDecimals, tokensForChain, type Token } from "@/lib/tokens";
 import { effectiveSlippageBps, isSameToken, otherToken } from "@/lib/swap-utils";
 import { loadSlippageBps } from "@/components/SlippageSettings";
 import { SwapShowMore } from "@/components/SwapShowMore";
@@ -158,33 +158,13 @@ function SwapCardInner() {
     const [zoraProfileTokens, setZoraProfileTokens] = useState<Token[]>([]);
     const [trendingTokens, setTrendingTokens] = useState<Token[]>([]);
     const [providerTokens, setProviderTokens] = useState<Token[]>([]);
-    const availableTokens = useMemo(() => {
-        const staticTokens = tokensForChain(selectedChainId);
-        const byAddress = new Map(
-            staticTokens
-                .filter((token) => token.address)
-                .map((token) => [token.address!.toLowerCase(), token]),
-        );
-        for (const token of zoraProfileTokens.filter((token) => token.chainId === selectedChainId)) {
-            if (token.address && !byAddress.has(token.address.toLowerCase())) {
-                byAddress.set(token.address.toLowerCase(), token);
-            }
-        }
-        for (const token of trendingTokens.filter((token) => token.chainId === selectedChainId)) {
-            if (token.address && !byAddress.has(token.address.toLowerCase())) {
-                byAddress.set(token.address.toLowerCase(), token);
-            }
-        }
-        for (const token of providerTokens.filter((token) => token.chainId === selectedChainId)) {
-            if (token.address && !byAddress.has(token.address.toLowerCase())) {
-                byAddress.set(token.address.toLowerCase(), token);
-            }
-        }
-        return [
-            ...staticTokens.filter((token) => !token.address),
-            ...byAddress.values(),
-        ];
-    }, [providerTokens, selectedChainId, trendingTokens, zoraProfileTokens]);
+    const availableTokens = useMemo(() => mergeTokenCatalogs(
+        selectedChainId,
+        tokensForChain(selectedChainId),
+        zoraProfileTokens,
+        trendingTokens,
+        providerTokens,
+    ), [providerTokens, selectedChainId, trendingTokens, zoraProfileTokens]);
 
     const [sellToken, setSellToken] = useState<Token>(() => {
         const sellSymbol = searchParams.get("sell");

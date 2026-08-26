@@ -1491,6 +1491,42 @@ export function dedupeTokens(tokens: Token[]) {
   return [...byId.values()];
 }
 
+/**
+ * Merge chain-specific registries by contract address. Earlier catalogs have
+ * metadata priority, while later automatic providers can fill missing logos
+ * and decimals. Symbols are never used to merge contract tokens because the
+ * same symbol can legitimately belong to multiple addresses.
+ */
+export function mergeTokenCatalogs(chainId: number, ...catalogs: Token[][]) {
+  const byId = new Map<string, Token>();
+  for (const catalog of catalogs) {
+    for (const token of catalog) {
+      if (token.chainId !== chainId) continue;
+      const id = token.address
+        ? `address:${token.address.toLowerCase()}`
+        : `native:${token.symbol.trim().toUpperCase()}`;
+      const current = byId.get(id);
+      if (!current) {
+        byId.set(id, token);
+        continue;
+      }
+      byId.set(id, {
+        ...token,
+        ...current,
+        decimals: current.decimals ?? token.decimals,
+        logo: current.logo ?? token.logo,
+        imported: current.imported || token.imported || undefined,
+        trending: current.trending || token.trending || undefined,
+        providerListed: current.providerListed || token.providerListed || undefined,
+      });
+    }
+  }
+  return [...byId.values()].sort((a, b) =>
+    a.symbol.localeCompare(b.symbol, undefined, { sensitivity: "base" })
+    || a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+  );
+}
+
 export function defaultSellForChain(chainId: number) {
   const list = tokensForChain(chainId);
   if (chainId === mainnet.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;

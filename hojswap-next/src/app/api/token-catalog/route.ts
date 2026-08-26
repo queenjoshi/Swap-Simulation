@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import { SUPPORTED_CHAIN_IDS } from "@/lib/chains";
 
 const LIFI_TOKENS_API = "https://li.quest/v1/tokens";
@@ -21,6 +21,17 @@ type LiFiTokensResponse = { tokens?: Record<string, LiFiToken[]> };
 
 function cleanText(value: string | undefined, maxLength: number) {
   return value?.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, maxLength) ?? "";
+}
+
+function cleanLogoUrl(value: string | undefined) {
+  if (!value) return undefined;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" || url.username || url.password) return undefined;
+    return url.toString();
+  } catch {
+    return undefined;
+  }
 }
 
 export async function GET(request: Request) {
@@ -47,7 +58,7 @@ export async function GET(request: Request) {
     const tokens = upstreamTokens
       .filter((token) => {
         const address = token.address?.toLowerCase();
-        if (!address || address === ZERO_ADDRESS || !isAddress(address) || seen.has(address)) return false;
+        if (!address || !isAddress(address) || seen.has(address)) return false;
         if (token.chainId !== chainId || !token.symbol || !token.name) return false;
         if (!Number.isInteger(token.decimals) || token.decimals! < 0 || token.decimals! > 255) return false;
         seen.add(address);
@@ -57,10 +68,10 @@ export async function GET(request: Request) {
       .map((token) => ({
         symbol: cleanText(token.symbol, 24),
         name: cleanText(token.name, 80),
-        address: token.address!.toLowerCase(),
+        address: token.address!.toLowerCase() === ZERO_ADDRESS ? undefined : getAddress(token.address!),
         decimals: token.decimals!,
         chainId,
-        logo: token.logoURI?.startsWith("https://") ? token.logoURI : undefined,
+        logo: cleanLogoUrl(token.logoURI),
         providerListed: true,
       }));
 
