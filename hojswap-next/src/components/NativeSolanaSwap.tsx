@@ -6,7 +6,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Connection, PublicKey, VersionedTransaction, clusterApiUrl } from "@solana/web3.js";
 import { TokenLogo } from "@/components/TokenLogo";
-import { dedupeSolanaTokens, SOLANA_CORE_FALLBACK, SOL_MINT, type SolanaToken } from "@/lib/solana";
+import { dedupeSolanaTokens, solanaTokenLogoCandidates, SOLANA_CORE_FALLBACK, SOL_MINT, type SolanaToken } from "@/lib/solana";
 import { saveTransaction } from "@/lib/transactions";
 
 type JupiterOrder = {
@@ -421,7 +421,7 @@ function SolanaTokenSelect({ tokens, value, onChange, onSearch }: { tokens: Sola
         aria-expanded={open}
       >
         <span className="flex min-w-0 items-center gap-2">
-          <TokenLogo symbol={value.symbol} logo={value.logo} size="xs" />
+          <TokenLogo symbol={value.symbol} logo={solanaTokenLogoCandidates(value)} size="xs" />
           <span className="truncate text-sm font-semibold">{value.symbol}</span>
         </span>
         <span className={`text-xs text-[rgba(212,175,55,0.9)] transition ${open ? "rotate-180" : ""}`}>▾</span>
@@ -466,7 +466,7 @@ function SolanaTokenSelect({ tokens, value, onChange, onSearch }: { tokens: Sola
                 }}
                 className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition ${selected ? "bg-[rgba(212,175,55,0.12)]" : "hover:bg-white/[0.055]"}`}
               >
-                <TokenLogo symbol={token.symbol} logo={token.logo} size="sm" />
+                <TokenLogo symbol={token.symbol} logo={solanaTokenLogoCandidates(token)} size="sm" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-semibold text-white/90">{token.symbol}</span>
                   <span className="block truncate text-[11px] text-white/40">{token.name}</span>

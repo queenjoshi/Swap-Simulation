@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { TokenLogo } from "@/components/TokenLogo";
-import { fallbackTokenLogo } from "@/components/TokenSelect";
+import { tokenLogoCandidates } from "@/components/TokenSelect";
 import { CHAIN_OPTIONS } from "@/lib/chains";
 import { dedupeTokens, TOKENS } from "@/lib/tokens";
 import { XRPL_ASSETS } from "@/lib/xrpl-native";
-import { dedupeSolanaTokens, SOLANA_CORE_FALLBACK, type SolanaToken } from "@/lib/solana";
+import { dedupeSolanaTokens, solanaTokenLogoCandidates, SOLANA_CORE_FALLBACK, type SolanaToken } from "@/lib/solana";
 
 type Token = {
   id?: string;
@@ -15,7 +15,7 @@ type Token = {
   chainId?: number;
   symbol: string;
   name: string;
-  logo?: string;
+  logo?: string | readonly string[];
 };
 
 const HOUSE_LOGO = "/logo.png";
@@ -233,10 +233,10 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       .map((token) => ({
         symbol: token.symbol,
         name: token.name,
-        logo:
-          token.logo
-          ?? curatedLogos.get(token.symbol.toUpperCase())
-          ?? fallbackTokenLogo(token.symbol),
+        logo: tokenLogoCandidates({
+          ...token,
+          logo: token.logo ?? curatedLogos.get(token.symbol.toUpperCase()),
+        }),
         address: token.address,
         chainId: token.chainId,
       })),
@@ -247,7 +247,7 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
     tokens: SOLANA_CORE_FALLBACK.map((token) => ({
       symbol: token.symbol,
       name: token.name,
-      logo: token.logo,
+      logo: solanaTokenLogoCandidates(token),
       id: token.mint,
       address: undefined,
       chainId: undefined,
@@ -346,7 +346,7 @@ export default function About() {
         tokens: sortTokensAlphabetically(dedupeSolanaTokens(solanaTokens).map((token) => ({
           symbol: token.symbol,
           name: token.name,
-          logo: token.logo,
+          logo: solanaTokenLogoCandidates(token),
           id: token.mint,
           address: undefined,
           chainId: undefined,

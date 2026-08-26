@@ -28,7 +28,7 @@ export type Token = {
   address?: `0x${string}`;
   decimals?: number;
   chainId: number;
-  logo?: string;
+  logo?: string | readonly string[];
   imported?: boolean;
   trending?: boolean;
   providerListed?: boolean;

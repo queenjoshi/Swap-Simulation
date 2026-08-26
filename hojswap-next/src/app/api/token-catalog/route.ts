@@ -3,7 +3,7 @@ import { getAddress, isAddress } from "viem";
 import { SUPPORTED_CHAIN_IDS } from "@/lib/chains";
 
 const LIFI_TOKENS_API = "https://li.quest/v1/tokens";
-const MAX_TOKENS_PER_CHAIN = 1_500;
+const MAX_TOKENS_PER_CHAIN = 2_500;
 const SUPPORTED_CHAINS = new Set<number>(SUPPORTED_CHAIN_IDS);
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 

@@ -147,18 +147,19 @@ export function fallbackTokenLogo(symbol: string) {
   return TOKEN_LOGOS[symbol.trim().toUpperCase()];
 }
 
-function tokenLogo(token: Token) {
+export function tokenLogoCandidates(token: Token) {
   const logos: string[] = [];
-  if (token.logo) logos.push(token.logo);
+  if (typeof token.logo === "string") logos.push(token.logo);
+  else if (token.logo) logos.push(...token.logo);
   if (token.chainId === base.id && token.symbol.toUpperCase() === "SHIB") {
     logos.push("https://s2.coinmarketcap.com/static/img/coins/200x200/37553.png");
   }
-  const symbolLogo = fallbackTokenLogo(token.symbol);
-  if (symbolLogo) logos.push(symbolLogo);
   const chainSlug = DEXSCREENER_CHAIN_SLUGS[token.chainId];
   if (chainSlug && token.address) {
     logos.push(`https://cdn.dexscreener.com/token-images/og/${chainSlug}/${token.address.toLowerCase()}`);
   }
+  const symbolLogo = fallbackTokenLogo(token.symbol);
+  if (symbolLogo) logos.push(symbolLogo);
   return [...new Set(logos)];
 }
 
@@ -183,7 +184,7 @@ export function TokenSelect({
           symbol: t.symbol,
           name: t.name,
           token: t,
-          logo: tokenLogo(t),
+          logo: tokenLogoCandidates(t),
           registryIndex,
         }))
         .sort((a, b) =>
@@ -232,7 +233,7 @@ export function TokenSelect({
         aria-expanded={open}
       >
         <span className="flex min-w-0 items-center gap-2">
-          <TokenLogo symbol={value.symbol} logo={tokenLogo(value)} size="xs" />
+          <TokenLogo symbol={value.symbol} logo={tokenLogoCandidates(value)} size="xs" />
           <span className="truncate text-sm font-semibold">{value.symbol}</span>
         </span>
         <span className={`text-xs text-[rgba(212,175,55,0.9)] transition ${open ? "rotate-180" : ""}`}>▾</span>

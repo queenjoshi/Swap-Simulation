@@ -12,6 +12,13 @@ export type SolanaToken = {
   liquidity: number;
 };
 
+export function solanaTokenLogoCandidates(token: SolanaToken) {
+  return [...new Set([
+    token.logo,
+    `https://cdn.dexscreener.com/token-images/og/solana/${token.mint}`,
+  ].filter((logo): logo is string => Boolean(logo)))];
+}
+
 export function dedupeSolanaTokens(tokens: SolanaToken[]) {
   const canonicalMintBySymbol = new Map(
     SOLANA_CORE_FALLBACK.map((token) => [token.symbol.trim().toUpperCase(), token.mint]),
