@@ -32,6 +32,7 @@ export type Token = {
   imported?: boolean;
   trending?: boolean;
   providerListed?: boolean;
+  priceUsd?: number | null;
 };
 
 /** Only use issuer or token-list artwork; market-charting CDN images are not token logos. */
@@ -1524,6 +1525,7 @@ export function mergeTokenCatalogs(chainId: number, ...catalogs: Token[][]) {
         imported: current.imported || token.imported || undefined,
         trending: current.trending || token.trending || undefined,
         providerListed: current.providerListed || token.providerListed || undefined,
+        priceUsd: current.priceUsd ?? token.priceUsd,
       });
     }
   }

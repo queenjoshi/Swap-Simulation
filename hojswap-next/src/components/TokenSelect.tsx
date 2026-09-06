@@ -192,6 +192,16 @@ export function TokenSelect({
     );
   }, [options, query]);
 
+  const formatTokenPrice = (value: number | null | undefined) => {
+    if (value == null || !Number.isFinite(value)) return "Price unavailable";
+    const digits = value >= 1 ? 2 : value >= 0.01 ? 4 : value >= 0.0001 ? 6 : 8;
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: digits,
+    }).format(value);
+  };
+
   useEffect(() => {
     if (!open) return;
 
@@ -266,7 +276,7 @@ export function TokenSelect({
                 }`}
               >
                 <TokenLogo symbol={option.symbol} logo={option.logo} size="sm" />
-                <span className="min-w-0">
+                <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-semibold leading-tight">{option.symbol}</span>
                   <span className="block truncate text-xs leading-tight text-white/40">{option.name}</span>
                   {option.token.trending ? (
@@ -277,6 +287,11 @@ export function TokenSelect({
                     <span className="block text-[10px] font-semibold uppercase tracking-wide text-amber-300/80">Unverified import</span>
                   ) : null}
                 </span>
+                {option.token.providerListed && (
+                  <span className="shrink-0 text-xs font-medium text-white/55">
+                    {formatTokenPrice(option.token.priceUsd)}
+                  </span>
+                )}
               </button>
             );
           })}

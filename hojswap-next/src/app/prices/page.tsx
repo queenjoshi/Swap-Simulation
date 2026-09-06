@@ -113,7 +113,8 @@ export default function PricesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [selectedChain, setSelectedChain] = useState<number | "all">("all");
+  const [selectedChain, setSelectedChain] = useState<number | "all">(8453);
+  const [providerTokens, setProviderTokens] = useState<Token[]>([]);
   const [view, setView] = useState<ViewMode>("trending");
   const [watchlist, setWatchlist] = useState<string[]>([]);
   const [sort, setSort] = useState<{ key: SortKey; direction: "asc" | "desc" }>({
@@ -128,6 +129,28 @@ export default function PricesPage() {
       setWatchlist([]);
     }
   }, []);
+
+  useEffect(() => {
+    if (selectedChain === "all") {
+      setProviderTokens([]);
+      return;
+    }
+    const controller = new AbortController();
+    void fetch(`/api/token-catalog?chainId=${selectedChain}`, {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then(async (response) => response.ok
+        ? await response.json() as { tokens?: Token[] }
+        : { tokens: [] })
+      .then((payload) => {
+        if (!controller.signal.aborted) setProviderTokens(Array.isArray(payload.tokens) ? payload.tokens : []);
+      })
+      .catch((reason) => {
+        if (!controller.signal.aborted) console.error("Error loading priced token catalog:", reason);
+      });
+    return () => controller.abort();
+  }, [selectedChain]);
 
   async function loadMarket() {
     setLoading(true);
@@ -151,16 +174,35 @@ export default function PricesPage() {
 
   const rows = useMemo(() => {
     const marketBySymbol = new Map(market.map((row) => [normalizeSymbol(row.symbol), row]));
+    const catalog = selectedChain === "all"
+      ? supportedTokens
+      : [...supportedTokens.filter((token) => token.chainId === selectedChain), ...providerTokens];
     const grouped = new Map<string, Token[]>();
-    for (const token of supportedTokens) {
-      const key = normalizeSymbol(token.symbol);
+    for (const token of catalog) {
+      const key = `${token.chainId}:${token.address?.toLowerCase() ?? token.symbol.toUpperCase()}`;
       const list = grouped.get(key) ?? [];
-      list.push(token);
+      if (!list.some((existing) => existing.address?.toLowerCase() === token.address?.toLowerCase())) list.push(token);
       grouped.set(key, list);
     }
 
     let result = [...grouped.entries()].map(([key, tokens]) => {
-      const price = marketBySymbol.get(key);
+      const providerPrice = tokens.find((token) => token.priceUsd != null)?.priceUsd ?? null;
+      const market = marketBySymbol.get(normalizeSymbol(tokens[0].symbol));
+      const price = providerPrice == null ? market : {
+        ...market,
+        id: `provider:${key}`,
+        symbol: tokens[0].symbol,
+        name: tokens[0].name,
+        price: providerPrice,
+        change1h: null,
+        change24h: null,
+        change7d: null,
+        change30d: null,
+        volume24h: null,
+        fdv: null,
+        marketCap: null,
+        sparkline: [],
+      } as MarketRow;
       return {
         key,
         tokens,
@@ -193,7 +235,7 @@ export default function PricesPage() {
       return sort.direction === "asc" ? difference : -difference;
     });
     return result;
-  }, [market, query, selectedChain, sort, view, watchlist]);
+  }, [market, providerTokens, query, selectedChain, sort, view, watchlist]);
 
   function toggleWatchlist(key: string) {
     setWatchlist((current) => {
@@ -220,7 +262,7 @@ export default function PricesPage() {
             </div>
             <h1 className="hoj-display text-3xl font-semibold sm:text-4xl">Token prices</h1>
             <p className="mt-2 max-w-2xl text-sm text-white/50">
-              Explore market data for swap-enabled assets and tracked native-network coins.
+              Explore the live token catalog for each supported chain. Tokens without a provider price are marked unavailable rather than estimated.
             </p>
           </div>
           <div className="flex w-full gap-2 lg:w-auto">
@@ -229,7 +271,7 @@ export default function PricesPage() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search supported tokens"
+                placeholder="Search tokens or addresses"
                 className="h-11 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-white/30"
               />
             </label>
@@ -299,7 +341,7 @@ export default function PricesPage() {
             </div>
             <div className="flex items-center gap-2 text-xs text-white/35">
               <span className={`h-2 w-2 rounded-full ${error ? "bg-rose-400" : "bg-emerald-400"}`} />
-              {error ? "Price feed unavailable" : `${rows.length} supported tokens`}
+              {error ? "Price feed unavailable" : `${rows.length} tokens shown`}
               <LayoutList className="ml-2 h-4 w-4" />
             </div>
           </div>

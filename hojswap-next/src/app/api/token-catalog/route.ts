@@ -34,6 +34,11 @@ function cleanLogoUrl(value: string | undefined) {
   }
 }
 
+function priceUsd(value: string | undefined) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const chainId = Number(requestUrl.searchParams.get("chainId"));
@@ -75,6 +80,7 @@ export async function GET(request: Request) {
         chainId,
         logo: cleanLogoUrl(token.logoURI),
         providerListed: true,
+        priceUsd: priceUsd(token.priceUSD),
       }));
 
     if (summaryOnly) {

@@ -461,43 +461,9 @@ export default function About() {
 
       <section className="mb-10">
         <SectionHeading
-          eyebrow="Supported tokens"
-          title="Browse tokens by network"
-        />
-        <div className="space-y-3">
-          {displayedTokenGroups.map((group) => (
-            <details key={group.title} className="group hoj-panel overflow-hidden rounded-2xl">
-              <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 marker:content-none sm:px-5">
-                <div className="min-w-0 flex-1">
-                  <div className="text-[10px] font-semibold uppercase tracking-widest text-[rgba(212,175,55,0.65)]">{group.eyebrow}</div>
-                  <h3 className="mt-1 truncate text-sm font-semibold text-white/90 sm:text-base">{group.title}</h3>
-                </div>
-                <div className="hidden -space-x-2 sm:flex" aria-hidden="true">
-                  {group.tokens.slice(0, 4).map((token) => (
-                    <span key={`${group.title}-preview-${token.id ?? token.address ?? token.symbol}`} className="rounded-full border-2 border-[#111113] bg-[#171719]">
-                      <TokenLogo symbol={token.symbol} logo={token.logo} size="xs" />
-                    </span>
-                  ))}
-                </div>
-                <span className="shrink-0 rounded-full border border-white/10 px-2.5 py-1 text-[10px] text-white/45">{group.tokens.length} assets</span>
-                <span className="text-sm text-[rgba(212,175,55,0.8)] transition group-open:rotate-180" aria-hidden="true">▾</span>
-              </summary>
-              <div className="border-t border-white/8 px-4 py-4 sm:px-5">
-                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                  {group.tokens.map((token) => (
-                    <TokenTile key={`${group.title}-${token.id ?? token.address ?? token.symbol}`} {...token} />
-                  ))}
-                </div>
-              </div>
-            </details>
-          ))}
-        </div>
-      </section>
-
-      <section className="mb-10">
-        <SectionHeading
-          eyebrow="Supported networks"
-          title="Clear routes by chain"
+          eyebrow="Supported chains"
+          title="Every network available in HOJ Swap"
+          desc="Choose a chain in the swap interface to discover its current token catalog, pricing, and available routes."
         />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {networks.map((network) => (
