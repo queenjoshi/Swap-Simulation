@@ -35,7 +35,9 @@ function cleanLogoUrl(value: string | undefined) {
 }
 
 export async function GET(request: Request) {
-  const chainId = Number(new URL(request.url).searchParams.get("chainId"));
+  const requestUrl = new URL(request.url);
+  const chainId = Number(requestUrl.searchParams.get("chainId"));
+  const summaryOnly = requestUrl.searchParams.get("summary") === "1";
   if (!Number.isInteger(chainId) || !SUPPORTED_CHAINS.has(chainId)) {
     return NextResponse.json({ error: "Unsupported chain" }, { status: 400 });
   }
@@ -74,6 +76,13 @@ export async function GET(request: Request) {
         logo: cleanLogoUrl(token.logoURI),
         providerListed: true,
       }));
+
+    if (summaryOnly) {
+      return NextResponse.json(
+        { count: tokens.length, source: "lifi" },
+        { headers: { "Cache-Control": "public, max-age=300, stale-while-revalidate=900" } },
+      );
+    }
 
     return NextResponse.json(
       { tokens, count: tokens.length, source: "lifi" },

@@ -295,6 +295,7 @@ const networks = [
 export default function About() {
   const [lightspeedTokens, setLightspeedTokens] = useState<Token[]>([]);
   const [solanaTokens, setSolanaTokens] = useState<SolanaToken[]>(SOLANA_CORE_FALLBACK);
+  const [automaticCatalogCount, setAutomaticCatalogCount] = useState<number | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -323,6 +324,28 @@ export default function About() {
       }
     };
     void loadLightspeedTokens();
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void Promise.allSettled(CHAIN_OPTIONS.map(async (chain) => {
+      const response = await fetch(`/api/token-catalog?chainId=${chain.id}&summary=1`, {
+        cache: "no-store",
+        signal: controller.signal,
+      });
+      if (!response.ok) throw new Error(`Token catalog ${chain.id}: ${response.status}`);
+      const payload = await response.json() as { count?: number };
+      return Number.isSafeInteger(payload.count) && payload.count! >= 0 ? payload.count! : 0;
+    })).then((results) => {
+      if (controller.signal.aborted) return;
+      const counts = results
+        .filter((result): result is PromiseFulfilledResult<number> => result.status === "fulfilled")
+        .map((result) => result.value);
+      if (counts.length > 0) setAutomaticCatalogCount(counts.reduce((total, count) => total + count, 0));
+    }).catch((error) => {
+      if (!controller.signal.aborted) console.error("Error loading automatic token catalog counts:", error);
+    });
     return () => controller.abort();
   }, []);
 
@@ -369,11 +392,11 @@ export default function About() {
   const highlights = useMemo(() => [
     { value: String(CHAIN_OPTIONS.length + 2), label: "Networks shown" },
     {
-      value: String(displayedTokenGroups.reduce((total, group) => total + group.tokens.length, 0)),
-      label: "Shown assets",
+      value: String(automaticCatalogCount ?? displayedTokenGroups.reduce((total, group) => total + group.tokens.length, 0)),
+      label: automaticCatalogCount == null ? "Shown assets" : "Live assets",
     },
     { value: "1%", label: "House fee" },
-  ], [displayedTokenGroups]);
+  ], [automaticCatalogCount, displayedTokenGroups]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
