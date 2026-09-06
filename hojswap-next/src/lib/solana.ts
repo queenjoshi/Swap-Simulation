@@ -13,10 +13,7 @@ export type SolanaToken = {
 };
 
 export function solanaTokenLogoCandidates(token: SolanaToken) {
-  return [...new Set([
-    token.logo,
-    `https://cdn.dexscreener.com/token-images/og/solana/${token.mint}`,
-  ].filter((logo): logo is string => Boolean(logo)))];
+  return token.logo && !/dexscreener\.com/i.test(token.logo) ? [token.logo] : [];
 }
 
 export function dedupeSolanaTokens(tokens: SolanaToken[]) {

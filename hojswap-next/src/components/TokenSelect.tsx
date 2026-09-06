@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { base } from "wagmi/chains";
-import { Token, tokenId } from "@/lib/tokens";
+import { originalTokenLogo, Token, tokenId } from "@/lib/tokens";
 import { TokenLogo } from "@/components/TokenLogo";
 
 const TOKEN_LOGOS: Record<string, string> = {
@@ -135,28 +135,16 @@ const TOKEN_LOGOS: Record<string, string> = {
   NBAA: "/logo.png",
 };
 
-const DEXSCREENER_CHAIN_SLUGS: Record<number, string> = {
-  1: "ethereum", 10: "optimism", 25: "cronos", 56: "bsc", 130: "unichain",
-  137: "polygon", 143: "monad", 146: "sonic", 480: "worldchain", 999: "hyperevm",
-  4663: "robinhood", 5000: "mantle", 8453: "base", 9745: "plasma",
-  42161: "arbitrum", 43114: "avalanche", 57073: "ink", 59144: "linea",
-  80094: "berachain", 534352: "scroll", 7777777: "zora",
-};
-
 export function fallbackTokenLogo(symbol: string) {
   return TOKEN_LOGOS[symbol.trim().toUpperCase()];
 }
 
 export function tokenLogoCandidates(token: Token) {
   const logos: string[] = [];
-  if (typeof token.logo === "string") logos.push(token.logo);
-  else if (token.logo) logos.push(...token.logo);
+  const originalLogo = originalTokenLogo(token.logo);
+  if (originalLogo) logos.push(originalLogo);
   if (token.chainId === base.id && token.symbol.toUpperCase() === "SHIB") {
     logos.push("https://s2.coinmarketcap.com/static/img/coins/200x200/37553.png");
-  }
-  const chainSlug = DEXSCREENER_CHAIN_SLUGS[token.chainId];
-  if (chainSlug && token.address) {
-    logos.push(`https://cdn.dexscreener.com/token-images/og/${chainSlug}/${token.address.toLowerCase()}`);
   }
   const symbolLogo = fallbackTokenLogo(token.symbol);
   if (symbolLogo) logos.push(symbolLogo);

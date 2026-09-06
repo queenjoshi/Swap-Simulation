@@ -27,7 +27,7 @@ function cleanLogoUrl(value: string | undefined) {
   if (!value) return undefined;
   try {
     const url = new URL(value);
-    if (url.protocol !== "https:" || url.username || url.password) return undefined;
+    if (url.protocol !== "https:" || url.username || url.password || /dexscreener\.com$/i.test(url.hostname)) return undefined;
     return url.toString();
   } catch {
     return undefined;

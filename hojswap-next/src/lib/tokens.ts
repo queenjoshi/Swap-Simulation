@@ -34,6 +34,12 @@ export type Token = {
   providerListed?: boolean;
 };
 
+/** Only use issuer or token-list artwork; market-charting CDN images are not token logos. */
+export function originalTokenLogo(logo: Token["logo"]) {
+  const candidates = typeof logo === "string" ? [logo] : logo ?? [];
+  return candidates.find((candidate) => !/dexscreener\.com/i.test(candidate));
+}
+
 export const HOUSE_WALLET: `0x${string}` = getAddress(
   "0x6736d2eA9807297F0e56967361B9410854B86a5f",
 );
@@ -1514,7 +1520,7 @@ export function mergeTokenCatalogs(chainId: number, ...catalogs: Token[][]) {
         ...token,
         ...current,
         decimals: current.decimals ?? token.decimals,
-        logo: current.logo ?? token.logo,
+        logo: originalTokenLogo(current.logo) ?? originalTokenLogo(token.logo),
         imported: current.imported || token.imported || undefined,
         trending: current.trending || token.trending || undefined,
         providerListed: current.providerListed || token.providerListed || undefined,
