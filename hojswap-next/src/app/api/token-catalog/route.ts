@@ -15,6 +15,7 @@ type LiFiToken = {
   decimals?: number;
   logoURI?: string;
   priceUSD?: string;
+  tags?: string[];
 };
 
 type LiFiTokensResponse = { tokens?: Record<string, LiFiToken[]> };
@@ -37,6 +38,19 @@ function cleanLogoUrl(value: string | undefined) {
 function priceUsd(value: string | undefined) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
+// Tokenized equities are financial securities, not crypto assets supported by
+// HOJ Swap. Prefer provider classifications, with naming checks as a fallback
+// for providers that omit tags on individual listings.
+const TOKENIZED_EQUITY_TERMS = /\b(?:stock|stocks|equity|equities|share|shares|xstock|tokenized\s+(?:stock|equity|share))\b/i;
+const EQUITY_ISSUER_TERMS = /\b(?:apple|tesla|nvidia|microsoft|amazon|alphabet|google|meta\s+platforms|netflix|coinbase|strategy|microstrategy|berkshire|spdr|vanguard|invesco|nasdaq|s&p\s*500|dow\s+jones)\b/i;
+
+function isTokenizedEquity(token: LiFiToken) {
+  const tags = token.tags?.map((tag) => tag.toLowerCase()) ?? [];
+  if (tags.some((tag) => /^(?:stock|stocks|equity|equities|share|shares|xstock)$/.test(tag))) return true;
+  const description = `${token.symbol ?? ""} ${token.name ?? ""}`;
+  return TOKENIZED_EQUITY_TERMS.test(description) || EQUITY_ISSUER_TERMS.test(description);
 }
 
 export async function GET(request: Request) {
@@ -67,6 +81,7 @@ export async function GET(request: Request) {
         const address = token.address?.toLowerCase();
         if (!address || !isAddress(address) || seen.has(address)) return false;
         if (token.chainId !== chainId || !token.symbol || !token.name) return false;
+        if (isTokenizedEquity(token)) return false;
         if (!Number.isInteger(token.decimals) || token.decimals! < 0 || token.decimals! > 255) return false;
         seen.add(address);
         return true;
