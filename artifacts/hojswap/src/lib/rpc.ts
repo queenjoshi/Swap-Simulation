@@ -1,5 +1,5 @@
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, bsc, cronos, optimism, polygon, xrp } from "@/lib/chains";
+import { arc, arbitrum, bsc, cronos, optimism, polygon, xrp } from "@/lib/chains";
 import type { Chain } from "viem";
 import { fallback, http } from "viem";
 
@@ -42,6 +42,7 @@ export const RPC_URLS: Record<number, readonly string[]> = {
     "https://optimism-rpc.publicnode.com",
     "https://optimism.llamarpc.com",
   ],
+  [arc.id]: ["https://rpc.mainnet.arc.io"],
 };
 
 export function getRpcUrl(chainId: number) {
@@ -61,5 +62,6 @@ export function getViemChain(chainId: number) {
   if (chainId === bsc.id) return bsc as Chain;
   if (chainId === arbitrum.id) return arbitrum as Chain;
   if (chainId === optimism.id) return optimism as Chain;
+  if (chainId === arc.id) return arc as Chain;
   return base;
 }

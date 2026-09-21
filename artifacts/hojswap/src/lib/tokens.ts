@@ -1,6 +1,6 @@
 import { getAddress } from "viem";
 import { base, mainnet } from "wagmi/chains";
-import { cronos, xrp, polygon, bsc, arbitrum, optimism } from "@/lib/chains";
+import { arc, cronos, xrp, polygon, bsc, arbitrum, optimism } from "@/lib/chains";
 
 export type Token = {
   symbol: string;
@@ -22,6 +22,10 @@ export const USDC_ETHEREUM: `0x${string}` = getAddress(
   "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
 );
 
+export const USDC_ARC: `0x${string}` = getAddress(
+  "0x3600000000000000000000000000000000000000",
+);
+
 export const USDT_ETHEREUM: `0x${string}` = getAddress(
   "0xdAC17F958D2ee523a2206206994597C13D831ec7",
 );
@@ -31,6 +35,21 @@ export const SHIB_ETHEREUM: `0x${string}` = getAddress(
 );
 
 export const TOKENS: Token[] = [
+  // ─── Arc ─────────────────────────────────────────────────
+  {
+    symbol: "USDC",
+    name: "USDC (native gas)",
+    chainId: arc.id,
+    decimals: 18,
+  },
+  {
+    symbol: "USDC",
+    name: "USD Coin (Arc ERC-20)",
+    address: USDC_ARC,
+    chainId: arc.id,
+    decimals: 6,
+  },
+
   // ─── Base ────────────────────────────────────────────────
   {
     symbol: "ETH",
@@ -383,6 +402,7 @@ export function defaultSellForChain(chainId: number) {
   if (chainId === bsc.id) return list.find((t) => t.symbol === "BNB") ?? list[0]!;
   if (chainId === arbitrum.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
   if (chainId === optimism.id) return list.find((t) => t.symbol === "ETH") ?? list[0]!;
+  if (chainId === arc.id) return list.find((t) => !t.address) ?? list[0]!;
   return list.find((t) => t.symbol === "ETH") ?? list[0]!;
 }
 
@@ -396,6 +416,7 @@ export function defaultBuyForChain(chainId: number) {
   if (chainId === bsc.id) return list.find((t) => t.symbol === "USDT") ?? list[1] ?? list[0]!;
   if (chainId === arbitrum.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
   if (chainId === optimism.id) return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
+  if (chainId === arc.id) return list.find((t) => !!t.address) ?? list[1] ?? list[0]!;
   return list.find((t) => t.symbol === "USDC") ?? list[1] ?? list[0]!;
 }
 

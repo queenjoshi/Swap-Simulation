@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base, mainnet } from "wagmi/chains";
-import { cronos } from "@/lib/chains";
+import { arc, cronos } from "@/lib/chains";
 import { formatCompactNumber } from "@/lib/format";
 import { apiUrl } from "@/lib/api";
 
@@ -15,6 +15,7 @@ const USDC_BY_CHAIN: Record<number, string> = {
 
 export function getNativeSymbol(chainId: number): string {
   if (chainId === cronos.id) return "CRO";
+  if (chainId === arc.id) return "USDC";
   return "ETH";
 }
 
@@ -22,6 +23,10 @@ export function useNativeTokenPrice(chainId: number): number | null {
   const [price, setPrice] = useState<number | null>(null);
 
   useEffect(() => {
+    if (chainId === arc.id) {
+      setPrice(1);
+      return;
+    }
     const usdcAddr = USDC_BY_CHAIN[chainId];
     if (!usdcAddr) { setPrice(null); return; }
 
