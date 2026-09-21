@@ -14,6 +14,8 @@
     "compile:contracts": "node scripts/check-router-chains.mjs && node scripts/compile-contracts.mjs",
     "deploy:router": "node scripts/deploy-hojswap-router-v2.mjs",
     "router:approve-pair": "node scripts/set-router-spender-approval.mjs",
+    "deploy:token-registry": "node scripts/deploy-hojswap-token-registry.mjs",
+    "token-registry:manage": "node scripts/manage-hojswap-token-registry.mjs",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },

@@ -134,6 +134,7 @@ contract HojswapRouterV2 {
         _setDestinationChainSupport(999, true); // HyperEVM
         _setDestinationChainSupport(4663, true); // Robinhood Chain
         _setDestinationChainSupport(5000, true); // Mantle
+        _setDestinationChainSupport(5042, true); // Arc
         _setDestinationChainSupport(8453, true); // Base
         _setDestinationChainSupport(9745, true); // Plasma
         _setDestinationChainSupport(42161, true); // Arbitrum

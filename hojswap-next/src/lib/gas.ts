@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base, mainnet } from "wagmi/chains";
 import {
-  arbitrum, avalanche, berachain, bsc, cronos, hyperEvm, ink, linea, mantle,
+  arc, arbitrum, avalanche, berachain, bsc, cronos, hyperEvm, ink, linea, mantle,
   monad, optimism, plasma, polygon, robinhood, scroll, sonic, unichain, worldchain,
 } from "@/lib/chains";
 import { formatCompactNumber } from "@/lib/format";
@@ -34,6 +34,7 @@ const USDC_BY_CHAIN: Record<number, string> = {
 };
 
 export function getNativeSymbol(chainId: number): string {
+  if (chainId === arc.id) return "USDC";
   if (chainId === cronos.id) return "CRO";
   if (chainId === polygon.id) return "POL";
   if (chainId === bsc.id) return "BNB";
@@ -51,6 +52,8 @@ export function useNativeTokenPrice(chainId: number): number | null {
   const [price, setPrice] = useState<number | null>(null);
 
   useEffect(() => {
+    // No self-swap quote is needed for the USDC-denominated gas asset.
+    if (chainId === arc.id) { setPrice(1); return; }
     const usdcAddr = USDC_BY_CHAIN[chainId];
     if (!usdcAddr) { setPrice(null); return; }
 
@@ -75,7 +78,7 @@ export function useNativeTokenPrice(chainId: number): number | null {
     return () => { cancelled = true; clearInterval(id); };
   }, [chainId]);
 
-  return price;
+  return chainId === arc.id ? 1 : price;
 }
 
 export type GasFeeDisplay = { eth: string; usd: string | null };

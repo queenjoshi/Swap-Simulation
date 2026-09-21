@@ -4,6 +4,8 @@
 
 `HojswapRouterV2.sol` is the recommended next version for the app. It keeps the 1% fee behavior, adds pause control, approves router/spender pairs together, and can emit bridge route metadata for cross-chain swaps.
 
+`HojswapTokenRegistry.sol` is the owner-managed verified-token registry. Deploy one registry per chain and have the application read `getVerifiedTokens()` for the token picker. It deliberately does not execute swaps or determine 0x liquidity; the app must request a price/quote before enabling a verified token pair.
+
 ## What It Does
 
 - Pulls the full sell amount from the user.
@@ -81,11 +83,30 @@ New deployments register every chain currently exposed by the app as a bridge-me
 - Polygon (`137`)
 - Robinhood Chain (`4663`)
 - Base (`8453`)
+- Arc (`5042`)
 - Arbitrum (`42161`)
 - Avalanche (`43114`)
 - Zora (`7777777`)
 
 Call `getDestinationChainIds()` to enumerate the configured chain IDs. The owner can still add, disable, or re-enable a destination with `setDestinationChainSupport(destinationChainId, supported)`.
+
+## Verified Token Registry
+
+Deploy `HojswapTokenRegistry.sol` separately on each EVM chain. Its owner can add, update, reactivate, or remove verified ERC-20s. Removal deactivates a token while preserving its audit trail. Native gas assets are configured by the app, not stored in the registry.
+
+Deploy the Arc registry:
+
+```bash
+RPC_URL="https://rpc.mainnet.arc.io" CHAIN_ID="5042" PRIVATE_KEY="0x..." REGISTRY_OWNER="0xYourOwner" pnpm run deploy:token-registry
+```
+
+Add Arc USDC:
+
+```bash
+RPC_URL="https://rpc.mainnet.arc.io" CHAIN_ID="5042" PRIVATE_KEY="0x..." TOKEN_REGISTRY_ADDRESS="0xRegistry" TOKEN_REGISTRY_ACTION="add" TOKEN_ADDRESS="0x3600000000000000000000000000000000000000" TOKEN_SYMBOL="USDC" TOKEN_NAME="USD Coin" TOKEN_DECIMALS="6" pnpm run token-registry:manage
+```
+
+Use `TOKEN_REGISTRY_ACTION="remove"` with `TOKEN_ADDRESS` to deactivate a token.
 
 ## Deploy And Approve
 

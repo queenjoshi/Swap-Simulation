@@ -67,6 +67,19 @@ export const optimism = {
   testnet: false,
 } as const;
 
+export const arc = {
+  id: 5042,
+  name: "Arc",
+  network: "arc",
+  nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://rpc.mainnet.arc.io"] },
+    public: { http: ["https://rpc.mainnet.arc.io"] },
+  },
+  blockExplorers: { default: { name: "Arc Explorer", url: "https://explorer.arc.io" } },
+  testnet: false,
+} as const;
+
 export const avalanche = {
   id: 43114,
   name: "Avalanche",
@@ -123,10 +136,11 @@ export const zora = {
   testnet: false,
 } as const;
 
-export const SUPPORTED_CHAIN_IDS = [base.id, mainnet.id, cronos.id, polygon.id, bsc.id, arbitrum.id, optimism.id, avalanche.id, unichain.id, robinhood.id, zora.id, linea.id, scroll.id, mantle.id, worldchain.id, sonic.id, berachain.id, ink.id, monad.id, hyperEvm.id, plasma.id] as const;
+export const SUPPORTED_CHAIN_IDS = [base.id, mainnet.id, cronos.id, polygon.id, bsc.id, arbitrum.id, optimism.id, arc.id, avalanche.id, unichain.id, robinhood.id, zora.id, linea.id, scroll.id, mantle.id, worldchain.id, sonic.id, berachain.id, ink.id, monad.id, hyperEvm.id, plasma.id] as const;
 export type SupportedChainId = (typeof SUPPORTED_CHAIN_IDS)[number];
 
 export const CHAIN_OPTIONS = [
+  { id: arc.id, label: "Arc", shortLabel: "Arc", swap: true },
   { id: arbitrum.id, label: "Arbitrum", shortLabel: "Arbitrum", swap: true },
   { id: avalanche.id, label: "Avalanche", shortLabel: "Avalanche", swap: true },
   { id: base.id, label: "Base", shortLabel: "Base", swap: true },
@@ -164,6 +178,7 @@ export function getChainName(chainId: number) {
   if (chainId === bsc.id) return "BNB Chain";
   if (chainId === arbitrum.id) return "Arbitrum";
   if (chainId === optimism.id) return "Optimism";
+  if (chainId === arc.id) return "Arc";
   if (chainId === avalanche.id) return "Avalanche";
   if (chainId === robinhood.id) return "Robinhood Chain";
   if (chainId === unichain.id) return "Unichain";
@@ -200,7 +215,7 @@ export function explorerName(chainId: number) {
   return "Explorer";
 }
 
-const NEW_EVM_CHAINS = [linea, scroll, mantle, worldchain, sonic, berachain, ink, monad, hyperEvm, plasma] as const;
+const NEW_EVM_CHAINS = [arc, linea, scroll, mantle, worldchain, sonic, berachain, ink, monad, hyperEvm, plasma] as const;
 
 function newChainExplorerUrl(chainId: number) {
   return NEW_EVM_CHAINS.find((chain) => chain.id === chainId)?.blockExplorers.default.url;

@@ -1,4 +1,4 @@
-import { arbitrum, avalanche, berachain, bsc, cronos, hyperEvm, ink, linea, mantle, monad, optimism, plasma, polygon, robinhood, scroll, sonic, unichain, worldchain } from "@/lib/chains";
+import { arc, arbitrum, avalanche, berachain, bsc, cronos, hyperEvm, ink, linea, mantle, monad, optimism, plasma, polygon, robinhood, scroll, sonic, unichain, worldchain } from "@/lib/chains";
 import { NATIVE_ETH_ADDRESS } from "@/lib/quote";
 import { isNative, type Token } from "@/lib/tokens";
 import { base, mainnet } from "wagmi/chains";
@@ -73,6 +73,7 @@ export const hojswapRouterAbi = [
 ] as const;
 
 const ROUTER_ENV_BY_CHAIN_ID: Record<number, `0x${string}` | undefined> = {
+  [arc.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_ARC, "0x2C5F372746330465C3f4084CE6C6aBce22a48B4d"),
   [arbitrum.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_ARBITRUM, SHARED_ROUTER),
   [avalanche.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_AVALANCHE, SHARED_ROUTER),
   [base.id]: configuredRouter(process.env.NEXT_PUBLIC_HOJSWAP_ROUTER_BASE, BASE_ROUTER),

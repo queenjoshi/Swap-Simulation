@@ -12,7 +12,7 @@ import {
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, avalanche, berachain, bsc, cronos, hyperEvm, ink, linea, mantle, monad, optimism, plasma, polygon, robinhood, scroll, sonic, unichain, worldchain, zora } from "@/lib/chains";
+import { arc, arbitrum, avalanche, berachain, bsc, cronos, hyperEvm, ink, linea, mantle, monad, optimism, plasma, polygon, robinhood, scroll, sonic, unichain, worldchain, zora } from "@/lib/chains";
 import { getRpcTransport } from "@/lib/rpc";
 
 const walletConnectProjectId =
@@ -39,6 +39,7 @@ export const wagmiConfig = getDefaultConfig({
     bsc as Chain,
     arbitrum as Chain,
     optimism as Chain,
+    arc as Chain,
     avalanche as Chain,
     robinhood as Chain,
     unichain as Chain,
@@ -54,6 +55,7 @@ export const wagmiConfig = getDefaultConfig({
     [bsc.id]: getRpcTransport(bsc.id),
     [arbitrum.id]: getRpcTransport(arbitrum.id),
     [optimism.id]: getRpcTransport(optimism.id),
+    [arc.id]: getRpcTransport(arc.id),
     [avalanche.id]: getRpcTransport(avalanche.id),
     [robinhood.id]: getRpcTransport(robinhood.id),
     [unichain.id]: getRpcTransport(unichain.id),

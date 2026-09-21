@@ -1,5 +1,5 @@
 import { base, mainnet } from "wagmi/chains";
-import { arbitrum, avalanche, berachain, bsc, cronos, hyperEvm, ink, linea, mantle, monad, optimism, plasma, polygon, robinhood, scroll, sonic, unichain, worldchain, zora } from "@/lib/chains";
+import { arc, arbitrum, avalanche, berachain, bsc, cronos, hyperEvm, ink, linea, mantle, monad, optimism, plasma, polygon, robinhood, scroll, sonic, unichain, worldchain, zora } from "@/lib/chains";
 import type { Chain } from "viem";
 import { fallback, http } from "viem";
 
@@ -38,6 +38,7 @@ export const RPC_URLS: Record<number, readonly string[]> = {
     "https://optimism-rpc.publicnode.com",
     "https://optimism.llamarpc.com",
   ],
+  [arc.id]: ["https://rpc.mainnet.arc.io"],
   [avalanche.id]: [
     "https://api.avax.network/ext/bc/C/rpc",
     "https://avalanche-c-chain-rpc.publicnode.com",
@@ -81,6 +82,7 @@ export function getViemChain(chainId: number) {
   if (chainId === bsc.id) return bsc as Chain;
   if (chainId === arbitrum.id) return arbitrum as Chain;
   if (chainId === optimism.id) return optimism as Chain;
+  if (chainId === arc.id) return arc as Chain;
   if (chainId === avalanche.id) return avalanche as Chain;
   if (chainId === robinhood.id) return robinhood as Chain;
   if (chainId === unichain.id) return unichain as Chain;
