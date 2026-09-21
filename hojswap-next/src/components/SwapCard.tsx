@@ -42,6 +42,7 @@ const BALANCE_PERCENTAGES = [25, 50, 75, 100] as const;
 const XRPL_NATIVE_ID = -1;
 const SOLANA_NATIVE_ID = -2;
 const CHAIN_LOGOS: Record<number, string> = {
+    5042: "https://cdn.prod.website-files.com/685311a976e7c248b5dfde95/68926aad995d4eae931403a4_arc-favicon-256x256.png",
     1: "https://assets.coingecko.com/coins/images/279/standard/ethereum.png",
     10: "https://assets.coingecko.com/coins/images/25244/standard/Optimism.png",
     25: "https://assets.coingecko.com/coins/images/7310/standard/cro_token_logo.png",
