@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createPublicClient, http, erc20Abi } from "viem";
+import { createPublicClient, http, erc20Abi, isAddress } from "viem";
+import { SUPPORTED_CHAIN_IDS } from "@/lib/chains";
 import { getRpcUrl, getViemChain } from "@/lib/rpc";
 
 export async function POST(request: Request) {
@@ -9,6 +10,9 @@ export async function POST(request: Request) {
       chainId: number;
     };
 
+    if (!SUPPORTED_CHAIN_IDS.some((id) => id === chainId) || !isAddress(tokenAddress)) {
+      return NextResponse.json({ error: "Invalid token address or unsupported chain" }, { status: 400 });
+    }
     const client = createPublicClient({
       chain: getViemChain(chainId),
       transport: http(getRpcUrl(chainId)),

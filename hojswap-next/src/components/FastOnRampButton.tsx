@@ -13,7 +13,7 @@ export function FastOnRampButton({ walletAddress, selectedChainId, onSuccess }: 
   const { showToast } = useToast();
   const transakRef = useRef<InstanceType<typeof Transak> | null>(null);
 
-  const getChainNameForTransak = (chainId: number): string => {
+  const getChainNameForTransak = (chainId: number): string | undefined => {
     const chainMap: Record<number, string> = {
       8453: "base",
       1: "ethereum",
@@ -26,10 +26,15 @@ export function FastOnRampButton({ walletAddress, selectedChainId, onSuccess }: 
       43114: "avalanche",
       130: "unichain",
     };
-    return chainMap[chainId] || "ethereum";
+    return chainMap[chainId];
   };
 
   const launchOnRamp = () => {
+    const network = getChainNameForTransak(selectedChainId);
+    if (!network) {
+      showToast({ kind: "info", title: "Card purchases unavailable", message: "Card purchases are not configured for this network. Fund your wallet on the selected network before swapping." });
+      return;
+    }
     const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY;
     if (!apiKey) {
       showToast({
@@ -48,7 +53,7 @@ export function FastOnRampButton({ walletAddress, selectedChainId, onSuccess }: 
         widgetHeight: "700px",
         fiatCurrency: "USD",
         cryptoCurrencyCode: "USDC",
-        network: getChainNameForTransak(selectedChainId),
+        network,
         paymentMethod: "credit_debit_card",
         walletAddress,
         disableWalletAddressForm: true,

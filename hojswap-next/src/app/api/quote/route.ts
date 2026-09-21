@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { getHojswapRouterAddress, ZERO_ADDRESS } from "@/lib/hojswap-router";
-import { HOUSE_WALLET, calculateRouterSellAmount } from "@/lib/swap-fee";
+import { calculateRouterSellAmount } from "@/lib/swap-fee";
 import type { QuoteResponse } from "@/lib/quote";
 import { consumeQuoteRequest } from "@/lib/server-rate-limit";
+import { invalidSwapRequest } from "@/lib/swap-request";
+import { validateRegistryPair } from "@/lib/token-registry";
+import { validateQuoteRoute } from "@/lib/router-preflight";
 
 const ZEROX_BASE_URL = "https://api.0x.org";
 const ZEROX_API_KEY = process.env.ZEROX_API_KEY ?? "";
@@ -25,18 +28,6 @@ function atomicRouterRequiredResponse() {
     },
     { status: 503 },
   );
-}
-
-function createMockQuoteResponse(sellAmount: string, sellToken: string, buyToken: string) {
-  return {
-    sellAmount,
-    buyAmount: sellAmount,
-    sellToken,
-    buyToken,
-    minBuyAmount: sellAmount,
-    liquidityAvailable: true,
-    transaction: { to: HOUSE_WALLET, data: "0x", value: "0" },
-  };
 }
 
 type SwapRequestBody = {
@@ -74,17 +65,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  if (!ZEROX_API_KEY) {
-    if (process.env.NODE_ENV === "production") {
-      return missingKeyResponse();
-    }
+  const invalid = invalidSwapRequest(body, true);
+  if (invalid) return NextResponse.json({ error: "invalid_swap", reason: invalid }, { status: 400 });
+  try {
+    await validateRegistryPair(Number(body.chainId), body.sellToken!, body.buyToken!);
+  } catch (error) {
+    return NextResponse.json({ error: "registry_check_failed", reason: error instanceof Error ? error.message : "Registry unavailable. Please retry." }, { status: 503 });
+  }
 
-    try {
-      const { sellToken, buyToken, sellAmount } = body;
-      return NextResponse.json(createMockQuoteResponse(String(sellAmount), String(sellToken), String(buyToken)));
-    } catch {
-      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
-    }
+  if (!ZEROX_API_KEY) {
+    return missingKeyResponse();
   }
 
   try {
@@ -116,6 +106,12 @@ export async function POST(request: Request) {
     });
 
     const data = await upstream.json();
+    if (upstream.ok) {
+      try { await validateQuoteRoute(Number(chainId), routerAddress, data, sellToken!); }
+      catch (error) {
+        return NextResponse.json({ error: "route_preflight_failed", reason: error instanceof Error ? error.message : "Route checks unavailable." }, { status: 503 });
+      }
+    }
 
     if (upstream.status === 401 || upstream.status === 403) {
       return NextResponse.json(

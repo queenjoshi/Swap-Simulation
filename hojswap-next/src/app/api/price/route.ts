@@ -3,6 +3,8 @@ import { getHojswapRouterAddress, ZERO_ADDRESS } from "@/lib/hojswap-router";
 import { calculateRouterSellAmount } from "@/lib/swap-fee";
 import type { PriceResponse, QuoteResponse } from "@/lib/quote";
 import { consumeQuoteRequest } from "@/lib/server-rate-limit";
+import { invalidSwapRequest } from "@/lib/swap-request";
+import { validateRegistryPair } from "@/lib/token-registry";
 
 const ZEROX_BASE_URL = "https://api.0x.org";
 const ZEROX_API_KEY = process.env.ZEROX_API_KEY ?? "";
@@ -25,15 +27,6 @@ function atomicRouterRequiredResponse() {
     },
     { status: 503 },
   );
-}
-
-function createMockPriceResponse(sellAmount: string) {
-  return {
-    sellAmount,
-    buyAmount: sellAmount,
-    liquidityAvailable: true,
-    totalNetworkFee: "0",
-  };
 }
 
 type SwapRequestBody = {
@@ -73,17 +66,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  if (!ZEROX_API_KEY) {
-    if (process.env.NODE_ENV === "production") {
-      return missingKeyResponse();
-    }
+  const invalid = invalidSwapRequest(body, false);
+  if (invalid) return NextResponse.json({ error: "invalid_swap", reason: invalid }, { status: 400 });
+  try {
+    await validateRegistryPair(Number(body.chainId), body.sellToken!, body.buyToken!);
+  } catch (error) {
+    return NextResponse.json({ error: "registry_check_failed", reason: error instanceof Error ? error.message : "Registry unavailable. Please retry." }, { status: 503 });
+  }
 
-    try {
-      const { sellAmount } = body;
-      return NextResponse.json(createMockPriceResponse(String(sellAmount)));
-    } catch {
-      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
-    }
+  if (!ZEROX_API_KEY) {
+    return missingKeyResponse();
   }
 
   try {

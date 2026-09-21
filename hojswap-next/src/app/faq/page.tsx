@@ -3,6 +3,14 @@ import Link from "next/link";
 
 const faqs = [
   {
+    question: "How do swaps on Arc work?",
+    answer: "Select Arc and keep USDC available for network fees as well as your trade. Arc swaps use the ERC-20 USDC representation with 6 decimals. Available routes depend on liquidity and router approvals. If House Guard simulation fails, the swap is blocked; refresh the quote and resolve the reported issue before signing.",
+  },
+  {
+    question: "Are discovered tokens automatically verified?",
+    answer: "No. Provider catalogs are discovery sources, not audits. On registry-enabled networks such as Arc, only active registry tokens can receive swap quotes. An optional screening worker rejects incomplete or risky reports before listing; it needs a separately configured trusted signer and deployment. A listing never guarantees sellability or safety.",
+  },
+  {
     question: "What is Hojswap?",
     answer:
       "Hojswap is a House of Joshi swap, bridge, and token-discovery interface across supported EVM networks, Solana, and the native XRP Ledger.",
@@ -15,7 +23,7 @@ const faqs = [
   {
     question: "Which chains are supported?",
     answer:
-      "The app lists Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Linea, Scroll, Mantle, World Chain, Sonic, Berachain, Ink, Monad, HyperEVM, Plasma, Cronos, Zora, Solana, and the native XRP Ledger. Swap availability depends on routing support and liquidity; Cronos and Zora are not currently enabled for same-chain swaps.",
+      "The app lists Arc, Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Linea, Scroll, Mantle, World Chain, Sonic, Berachain, Ink, Monad, HyperEVM, Plasma, Cronos, Zora, Solana, and the native XRP Ledger. Swap availability depends on routing support and liquidity; Cronos and Zora are not currently enabled for same-chain swaps.",
   },
   {
     question: "How do I swap a token?",

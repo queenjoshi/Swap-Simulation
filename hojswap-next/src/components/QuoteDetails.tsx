@@ -56,9 +56,9 @@ export function QuoteDetailsRows({
     for (const t of chainTokens) {
       if (t.address) m.set(t.address.toLowerCase(), t.symbol);
     }
-    m.set(NATIVE_ETH_ADDRESS.toLowerCase(), "ETH");
+    m.set(NATIVE_ETH_ADDRESS.toLowerCase(), nativeSymbol ?? "ETH");
     return m;
-  }, [chainTokens]);
+  }, [chainTokens, nativeSymbol]);
 
   const priceImpact = quote && price ? calcPriceImpactPercent(quote, price) : null;
   const gasEth = quote ? formatGasCostEth(quote.transaction) : null;

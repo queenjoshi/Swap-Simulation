@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAddress, isAddress } from "viem";
 import { SUPPORTED_CHAIN_IDS } from "@/lib/chains";
+import { registryTokens } from "@/lib/token-registry";
 
 const LIFI_TOKENS_API = "https://li.quest/v1/tokens";
 const MAX_TOKENS_PER_CHAIN = 2_500;
@@ -62,6 +63,11 @@ export async function GET(request: Request) {
   }
 
   try {
+    const registered = await registryTokens(chainId);
+    if (registered !== null) return NextResponse.json(
+      { tokens: registered, count: registered.length, source: "registry", registryEnforced: true },
+      { headers: { "Cache-Control": "no-store" } },
+    );
     const headers: Record<string, string> = { Accept: "application/json" };
     const apiKey = process.env.LIFI_API_KEY?.trim();
     if (apiKey) headers["x-lifi-api-key"] = apiKey;
@@ -112,8 +118,8 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("[TOKEN CATALOG API]", error);
     return NextResponse.json(
-      { tokens: [], count: 0, source: "fallback", warning: "Provider token catalog is temporarily unavailable" },
-      { headers: { "Cache-Control": "public, max-age=60" } },
+      { tokens: [], count: 0, source: "unavailable", warning: "Token catalog checks are temporarily unavailable" },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
     );
   }
 }

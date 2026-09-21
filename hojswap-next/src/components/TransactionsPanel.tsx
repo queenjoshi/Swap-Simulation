@@ -90,8 +90,12 @@ export function TransactionsPanel({
         const responses = await Promise.all(requests);
         const items: ExplorerHistoryItem[] = [];
         for (const res of responses) {
-          if (!res.ok) continue;
-          const data = (await res.json()) as { items?: ExplorerHistoryItem[] };
+          if (!res.ok) {
+            if (!cancelled) setLoadError("Some network history is unavailable. Saved transactions are still shown.");
+            continue;
+          }
+          const data = (await res.json()) as { items?: ExplorerHistoryItem[]; warning?: string };
+          if (data.warning && !cancelled) setLoadError(data.warning);
           if (Array.isArray(data.items)) items.push(...data.items);
         }
         if (!cancelled) setOnChain(scope === "swap" ? items.filter((item) => item.kind === "fee") : items);

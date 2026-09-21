@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { isAddress } from "viem";
+import { arcHistory } from "@/lib/arc-history";
 
 const ETHERSCAN_KEY = process.env.ETHERSCAN_API_KEY ?? "";
 const HOUSE_WALLET = "0x6736d2eA9807297F0e56967361B9410854B86a5f";
@@ -99,6 +101,10 @@ export async function GET(request: Request) {
     const address = searchParams.get("address") ?? "";
 
     const walletAddress = source === "house" ? HOUSE_WALLET : address;
+    if (chainId === 5042) {
+      if (!isAddress(walletAddress)) return NextResponse.json({ error: "Invalid wallet address" }, { status: 400 });
+      return NextResponse.json(await arcHistory(walletAddress, source === "house", searchParams.get("before")), { headers: { "Cache-Control": "no-store" } });
+    }
     if (!walletAddress) {
       return NextResponse.json({ items: [] });
     }
@@ -119,7 +125,8 @@ export async function GET(request: Request) {
       const key = `${tx.hash}-token-${tx.tokenSymbol}`;
       if (seen.has(key)) return null;
       seen.add(key);
-      const decimals = Number(tx.tokenDecimal) || 18;
+      const parsedDecimals = Number(tx.tokenDecimal);
+      const decimals = tx.tokenDecimal !== "" && Number.isInteger(parsedDecimals) && parsedDecimals >= 0 && parsedDecimals <= 255 ? parsedDecimals : 18;
       const amount = Number(tx.value) / 10 ** decimals;
       const amtStr =
         amount === 0
@@ -179,6 +186,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ items, total: items.length });
   } catch (err) {
     console.error("Error fetching transactions:", err);
-    return NextResponse.json({ items: [], total: 0 });
+    return NextResponse.json({ items: [], total: 0, error: "History unavailable. This does not mean there are no transactions." }, { status: 503 });
   }
 }

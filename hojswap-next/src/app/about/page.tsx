@@ -267,6 +267,7 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
 ];
 
 const networks = [
+  { name: "Arc", badge: "USDC Gas", desc: "Arc mainnet is available in the swap selector with USDC for network fees. Quotes use available 0x liquidity; each trade must pass transaction simulation before signing. Token discovery does not certify a token as safe." },
   { name: "XRP Ledger", badge: "Native Swap", desc: "XRP pairs for RLUSD, native USDC, SOLO, CasinoCoin, XRdoge, ARMY, DROP, FUZZY, PHNIX, SIGMA, SEAL, XRPH, and XPM through XRPL order-book and AMM liquidity using r-address wallets." },
   { name: "Solana", badge: "Live Discovery", desc: "Native SOL, stablecoins, NFT ecosystem assets, and verified community tokens discovered automatically, then routed through Jupiter Ultra." },
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity including ONDO, ENA, USDe, PENDLE, LDO, EIGEN, PYUSD, blue chips, community tokens, and stablecoins." },
@@ -449,7 +450,7 @@ export default function About() {
       <section className="mb-10 grid gap-3 sm:grid-cols-3">
         {[
           { title: "Automatic discovery", desc: "Trusted token registries continuously surface active Solana assets with original token artwork." },
-          { title: "Safety filtered", desc: "Tokens are validated, deduplicated by mint, and filtered by verification or meaningful market activity." },
+          { title: "Listing checks", desc: "Catalogs use metadata and market-activity filters. A listing is not a security audit, and liquidity can change." },
           { title: "Wallet-first", desc: "You sign every transaction directly from your own wallet." },
         ].map((item) => (
           <div key={item.title} className="hoj-panel rounded-2xl p-4">
@@ -477,6 +478,23 @@ export default function About() {
             </details>
           ))}
         </div>
+      </section>
+
+      <section className="hoj-panel mb-10 rounded-2xl p-5 sm:p-6">
+        <div className="flex items-center gap-3">
+          <TokenLogo symbol="Arc" logo="https://cdn.prod.website-files.com/685311a976e7c248b5dfde95/68926aad995d4eae931403a4_arc-favicon-256x256.png" />
+          <h2 className="hoj-display text-xl text-white/90">Arc, with USDC for gas</h2>
+        </div>
+        <p className="mt-4 text-sm leading-7 text-white/60">
+          Select Arc to explore available token pairs. Keep USDC available for both your trade and network fees,
+          review the minimum received, and allow House Guard to simulate the transaction before you sign.
+          A quote shows current route availability; it does not guarantee execution.
+        </p>
+        <p className="mt-3 text-xs leading-6 text-white/50">
+          Arc token selection and quotes use the active on-chain registry. Automated listing requires a
+          separately configured screening worker; neither a registry listing nor a screening result is a security guarantee.
+        </p>
+        <a className="mt-4 inline-block text-sm text-[rgba(212,175,55,0.9)] underline" href="https://explorer.arc.io/address/0x2C5F372746330465C3f4084CE6C6aBce22a48B4d" target="_blank" rel="noopener noreferrer">View the Arc swap router</a>
       </section>
 
       <section className="mb-10 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">

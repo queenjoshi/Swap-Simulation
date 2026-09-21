@@ -30,6 +30,7 @@ import { TrendingTokens } from "@/components/TrendingTokens";
 import { SwapCoach } from "@/components/SwapCoach";
 import { HouseGuard, type HouseGuardReceiptData, type HouseGuardVerification } from "@/components/HouseGuard";
 import { useToast } from "@/components/Toast";
+import { simulationError } from "@/lib/simulation-error";
 import { saveTransaction } from "@/lib/transactions";
 import { useNativeTokenPrice, getNativeSymbol, formatNetworkFee } from "@/lib/gas";
 import { hojswapRouterAbi, tokenToRouterAddress } from "@/lib/hojswap-router";
@@ -159,13 +160,17 @@ function SwapCardInner() {
     const [zoraProfileTokens, setZoraProfileTokens] = useState<Token[]>([]);
     const [trendingTokens, setTrendingTokens] = useState<Token[]>([]);
     const [providerTokens, setProviderTokens] = useState<Token[]>([]);
-    const availableTokens = useMemo(() => mergeTokenCatalogs(
+    const [registryChain, setRegistryChain] = useState<number | null>(null);
+    const [catalogChain, setCatalogChain] = useState<number | null>(null);
+    const availableTokens = useMemo(() => catalogChain !== selectedChainId ? [] : selectedChainId === 5042 || registryChain === selectedChainId
+      ? providerTokens.filter(token => token.chainId === selectedChainId)
+      : mergeTokenCatalogs(
         selectedChainId,
         tokensForChain(selectedChainId),
         zoraProfileTokens,
         trendingTokens,
         providerTokens,
-    ), [providerTokens, selectedChainId, trendingTokens, zoraProfileTokens]);
+    ), [providerTokens, selectedChainId, trendingTokens, zoraProfileTokens, registryChain, catalogChain]);
 
     const [sellToken, setSellToken] = useState<Token>(() => {
         const sellSymbol = searchParams.get("sell");
@@ -289,22 +294,32 @@ function SwapCardInner() {
     useEffect(() => {
         const controller = new AbortController();
         setProviderTokens([]);
-        fetch(`/api/token-catalog?chainId=${selectedChainId}`, {
+        setCatalogChain(null);
+        const refreshCatalog = () => fetch(`/api/token-catalog?chainId=${selectedChainId}`, {
             cache: "no-store",
             signal: controller.signal,
         })
-            .then(async (response) => response.ok
-                ? await response.json() as { tokens?: Token[] }
-                : { tokens: [] })
+            .then(async (response) => {
+                if (!response.ok) throw new Error("Token catalog checks unavailable");
+                return await response.json() as { tokens?: Token[]; registryEnforced?: boolean };
+            })
             .then((payload) => {
                 if (!controller.signal.aborted && Array.isArray(payload.tokens)) {
                     setProviderTokens(payload.tokens);
+                    setRegistryChain("registryEnforced" in payload && payload.registryEnforced ? selectedChainId : null);
+                    setCatalogChain(selectedChainId);
                 }
             })
             .catch((error) => {
-                if (!controller.signal.aborted) console.error("Error loading provider token catalog:", error);
+                if (!controller.signal.aborted) {
+                    setProviderTokens([]);
+                    setCatalogChain(null);
+                    console.error("Error loading provider token catalog:", error);
+                }
             });
-        return () => controller.abort();
+        void refreshCatalog();
+        const refreshTimer = setInterval(refreshCatalog, 60_000);
+        return () => { controller.abort(); clearInterval(refreshTimer); };
     }, [selectedChainId]);
 
     // Auto-switch to bridge tab if swap is not supported on the selected chain
@@ -528,6 +543,7 @@ function SwapCardInner() {
                     const err = (priceData as any)?.error as string;
                     if (err === "api_key_missing") setApiKeyError("api_key_missing");
                     else if (err === "api_key_invalid") setApiKeyError("api_key_invalid");
+                    else setQuoteError((priceData as any)?.reason ?? "Price checks are temporarily unavailable.");
                     setPrice(null);
                 } else if (!priceRes.ok || !priceData) {
                     setQuoteError((priceData as any)?.reason ?? (priceData as any)?.error ?? "Failed to fetch price");
@@ -553,7 +569,7 @@ function SwapCardInner() {
                 const err = (quoteData as any)?.error as string;
                 if (err === "api_key_missing") setApiKeyError("api_key_missing");
                 else if (err === "api_key_invalid") setApiKeyError("api_key_invalid");
-                setQuoteError(null);
+                setQuoteError(err === "api_key_missing" || err === "api_key_invalid" ? null : quoteData?.reason ?? "Quote checks are temporarily unavailable.");
                 setQuote(null);
                 setPrice(null);
                 return null;
@@ -790,9 +806,7 @@ function SwapCardInner() {
             setGuardVerification({ quoteKey, status: "verified", blockNumber });
             return blockNumber;
         } catch (error: unknown) {
-            const detail = error instanceof Error && error.message
-                ? error.message.split("\n")[0].slice(0, 180)
-                : "The chain rejected the simulated transaction";
+            const detail = simulationError(error);
             setGuardVerification({
                 quoteKey,
                 status: "failed",
@@ -1361,6 +1375,13 @@ function SwapCardInner() {
                     </div>
                 ) : isSwapSupported && activeTab === "swap" ? (
                     <>
+                        {(selectedChainId === 5042 || registryChain === selectedChainId) && availableTokens.length < 2 && (
+                            <p role="status" className="rounded-2xl border border-amber-400/20 bg-amber-400/[0.07] px-4 py-3 text-xs leading-5 text-amber-100/80">
+                                {catalogChain !== selectedChainId
+                                    ? "Checking the token registry. Swaps require a successful registry check."
+                                    : "This registry has fewer than two active tokens. A second reviewed token must be admitted before swaps are available."}
+                            </p>
+                        )}
                         <div className="relative !z-30">
                             <div className="hoj-panel rounded-[22px] p-3.5 sm:rounded-[24px] sm:p-4">
                                 <div className="mb-2 flex items-start justify-between gap-3 sm:mb-2.5">

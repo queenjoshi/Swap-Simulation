@@ -135,10 +135,7 @@ export function formatFeeAmount(
     addr === NATIVE_ETH_ADDRESS.toLowerCase()
       ? 18
       : decimalsByAddress.get(addr);
-  const symbol =
-    addr === NATIVE_ETH_ADDRESS.toLowerCase()
-      ? "ETH"
-      : symbolByAddress.get(addr) ?? "token";
+  const symbol = symbolByAddress.get(addr) ?? (addr === NATIVE_ETH_ADDRESS.toLowerCase() ? "native" : "token");
   if (decimals == null) return null;
   try {
     const amt = Number(fee.amount) / 10 ** decimals;
