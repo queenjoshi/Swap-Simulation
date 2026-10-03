@@ -7,6 +7,7 @@ import { tokenLogoCandidates } from "@/components/TokenSelect";
 import { CHAIN_OPTIONS } from "@/lib/chains";
 import { dedupeTokens, TOKENS } from "@/lib/tokens";
 import { XRPL_ASSETS } from "@/lib/xrpl-native";
+import { STELLAR_TOKENS } from "@/lib/stellar";
 import { dedupeSolanaTokens, solanaTokenLogoCandidates, SOLANA_CORE_FALLBACK, type SolanaToken } from "@/lib/solana";
 
 type Token = {
@@ -264,9 +265,17 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
       chainId: undefined,
     })),
   },
+  {
+    title: "Stellar Tokens",
+    eyebrow: "Native Stellar",
+    tokens: STELLAR_TOKENS.map((token) => ({
+      symbol: token.symbol, name: token.name, logo: token.logo, address: undefined, chainId: undefined,
+    })),
+  },
 ];
 
 const networks = [
+  { name: "Stellar", badge: "Native XLM", desc: "Native XLM and Circle USDC with Freighter wallet support and Stellar path-payment quotes. Swap signing requires the configured House Stellar fee wallet; XLM pays network fees and account reserves." },
   { name: "Arc", badge: "USDC Gas", desc: "Arc mainnet is available in the swap selector with USDC for network fees. Quotes use available 0x liquidity; each trade must pass transaction simulation before signing. Token discovery does not certify a token as safe." },
   { name: "XRP Ledger", badge: "Native Swap", desc: "XRP pairs for RLUSD, native USDC, SOLO, CasinoCoin, XRdoge, ARMY, DROP, FUZZY, PHNIX, SIGMA, SEAL, XRPH, and XPM through XRPL order-book and AMM liquidity using r-address wallets." },
   { name: "Solana", badge: "Live Discovery", desc: "Native SOL, stablecoins, NFT ecosystem assets, and verified community tokens discovered automatically, then routed through Jupiter Ultra." },
@@ -391,7 +400,7 @@ export default function About() {
   }), [lightspeedTokens, solanaTokens]);
 
   const highlights = useMemo(() => [
-    { value: String(CHAIN_OPTIONS.length + 2), label: "Networks shown" },
+    { value: String(CHAIN_OPTIONS.length + 3), label: "Networks shown" },
     {
       value: String(automaticCatalogCount ?? displayedTokenGroups.reduce((total, group) => total + group.tokens.length, 0)),
       label: automaticCatalogCount == null ? "Shown assets" : "Live assets",

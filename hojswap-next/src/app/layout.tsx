@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   applicationName: "House of Joshi",
   title: "House of Joshi — Swap & Bridge",
   description:
-    "Discover assets across 22 EVM networks, including Arc, plus Solana and the XRP Ledger. Swap and bridge availability depends on the network and available liquidity.",
+    "Discover assets across 22 EVM networks, including Arc, plus Solana, Stellar and the XRP Ledger. Swap and bridge availability depends on the network and available liquidity.",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     siteName: "House of Joshi",
     title: "House of Joshi — Swap & Bridge",
     description:
-      "Discover assets across 22 EVM networks, including Arc, plus Solana and the XRP Ledger. Swap and bridge availability depends on the network and available liquidity.",
+      "Discover assets across 22 EVM networks, including Arc, plus Solana, Stellar and the XRP Ledger. Swap and bridge availability depends on the network and available liquidity.",
     images: [
       {
         url: "/social/hojswap-share-cover.png",
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "House of Joshi — Swap & Bridge",
     description:
-      "Discover assets across 22 EVM networks, including Arc, plus Solana and the XRP Ledger. Swap and bridge availability depends on the network and available liquidity.",
+      "Discover assets across 22 EVM networks, including Arc, plus Solana, Stellar and the XRP Ledger. Swap and bridge availability depends on the network and available liquidity.",
     images: ["/social/hojswap-share-cover.png"],
   },
 };

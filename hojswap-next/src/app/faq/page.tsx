@@ -3,6 +3,10 @@ import Link from "next/link";
 
 const faqs = [
   {
+    question: "How do Stellar XLM swaps work?",
+    answer: "Select Stellar and connect Freighter on mainnet. XLM and Circle USDC quotes use Stellar path payments, which enforce the minimum received amount. Keep XLM for network fees and account reserves, and add Circle USDC's trustline before receiving it. Swap signing becomes available once the House Stellar fee wallet is configured; the 1% fee and swap are included in one transaction.",
+  },
+  {
     question: "How do swaps on Arc work?",
     answer: "Select Arc and keep USDC available for network fees as well as your trade. Arc swaps use the ERC-20 USDC representation with 6 decimals. Available routes depend on liquidity and router approvals. If House Guard simulation fails, the swap is blocked; refresh the quote and resolve the reported issue before signing.",
   },
@@ -13,7 +17,7 @@ const faqs = [
   {
     question: "What is Hojswap?",
     answer:
-      "Hojswap is a House of Joshi swap, bridge, and token-discovery interface across supported EVM networks, Solana, and the native XRP Ledger.",
+      "Hojswap is a House of Joshi swap, bridge, and token-discovery interface across supported EVM networks, Solana, Stellar, and the native XRP Ledger.",
   },
   {
     question: "Do I need to create an account?",
@@ -23,7 +27,7 @@ const faqs = [
   {
     question: "Which chains are supported?",
     answer:
-      "The app lists Arc, Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Linea, Scroll, Mantle, World Chain, Sonic, Berachain, Ink, Monad, HyperEVM, Plasma, Cronos, Zora, Solana, and the native XRP Ledger. Swap availability depends on routing support and liquidity; Cronos and Zora are not currently enabled for same-chain swaps.",
+      "The app lists Arc, Ethereum, Base, Polygon, BNB Chain, Arbitrum, Optimism, Avalanche, Unichain, Robinhood Chain, Linea, Scroll, Mantle, World Chain, Sonic, Berachain, Ink, Monad, HyperEVM, Plasma, Cronos, Zora, Solana, Stellar, and the native XRP Ledger. Swap availability depends on routing support and liquidity; Cronos and Zora are not currently enabled for same-chain swaps.",
   },
   {
     question: "How do I swap a token?",
@@ -43,7 +47,7 @@ const faqs = [
   {
     question: "Where do the swap prices come from?",
     answer:
-      "EVM swap quotes are routed through 0x where supported, Solana swaps use Jupiter, and native XRP Ledger swaps use XRPL liquidity. Bridge routes use Stargate and Li.Fi where available.",
+      "EVM swap quotes are routed through 0x where supported, Solana swaps use Jupiter, Stellar swaps use native path payments, and native XRP Ledger swaps use XRPL liquidity. Bridge routes use Stargate and Li.Fi where available.",
   },
   {
     question: "Why do I need to approve a token?",

@@ -37,6 +37,8 @@ import { hojswapRouterAbi, tokenToRouterAddress } from "@/lib/hojswap-router";
 import { HOUSE_WALLET } from "@/lib/swap-fee";
 import { NativeXrplSwap } from "@/components/NativeXrplSwap";
 import { NativeSolanaSwap } from "@/components/NativeSolanaSwap";
+import { NativeStellarSwap } from "@/components/NativeStellarSwap";
+import { STELLAR_NETWORK_ID, STELLAR_LOGO } from "@/lib/stellar";
 
 const DEBOUNCE_MS = 750;
 const BALANCE_PERCENTAGES = [25, 50, 75, 100] as const;
@@ -157,6 +159,7 @@ function SwapCardInner() {
     const [chainMenuOpen, setChainMenuOpen] = useState(false);
     const [nativeXrplMode, setNativeXrplMode] = useState(false);
     const [nativeSolanaMode, setNativeSolanaMode] = useState(false);
+    const [nativeStellarMode, setNativeStellarMode] = useState(false);
     const [zoraProfileTokens, setZoraProfileTokens] = useState<Token[]>([]);
     const [trendingTokens, setTrendingTokens] = useState<Token[]>([]);
     const [providerTokens, setProviderTokens] = useState<Token[]>([]);
@@ -217,6 +220,12 @@ function SwapCardInner() {
     function pickChain(newChainId: number) {
         setChainMenuOpen(false);
         setChainMenuRect(null);
+        setNativeStellarMode(newChainId === STELLAR_NETWORK_ID);
+        if (newChainId === STELLAR_NETWORK_ID) {
+            setNativeXrplMode(false);
+            setNativeSolanaMode(false);
+            return;
+        }
         if (newChainId === XRPL_NATIVE_ID) {
             setNativeXrplMode(true);
             setNativeSolanaMode(false);
@@ -1167,6 +1176,7 @@ function SwapCardInner() {
     const hasNativeGas = !isConnected ? null : nativeBalanceData ? nativeBalanceData.value > 0n : null;
 
     const CHAINS = [
+        { id: STELLAR_NETWORK_ID, name: "Stellar", ticker: "XLM", mode: "Native DEX", logo: STELLAR_LOGO },
         {
             id: SOLANA_NATIVE_ID,
             name: "Solana",
@@ -1189,7 +1199,7 @@ function SwapCardInner() {
             logo: CHAIN_LOGOS[id],
         })),
     ];
-    const activeChainId = nativeSolanaMode ? SOLANA_NATIVE_ID : nativeXrplMode ? XRPL_NATIVE_ID : selectedChainId;
+    const activeChainId = nativeStellarMode ? STELLAR_NETWORK_ID : nativeSolanaMode ? SOLANA_NATIVE_ID : nativeXrplMode ? XRPL_NATIVE_ID : selectedChainId;
     const selectedChainOption = CHAINS.find((chain) => chain.id === activeChainId) ?? CHAINS[0];
 
     const TABS: { id: ActiveTab; label: string }[] = [
@@ -1197,8 +1207,11 @@ function SwapCardInner() {
         { id: "bridge", label: "Bridge" },
     ];
 
+    if (nativeStellarMode) {
+        return <NativeStellarSwap networks={CHAINS} onNetworkChange={pickChain} />;
+    }
     if (nativeXrplMode) {
-        return <NativeXrplSwap onBack={() => setNativeXrplMode(false)} />;
+        return <NativeXrplSwap networks={CHAINS} onNetworkChange={pickChain} />;
     }
 
     if (nativeSolanaMode) {

@@ -1,10 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import type { Transaction } from "xrpl";
 import type { WalletManager } from "xrpl-connect";
 import { TokenLogo } from "@/components/TokenLogo";
+import { NativeSwapGuard, NativeSwapHeader } from "./NativeSwapChrome";
+import type { SolanaNetworkOption } from "./NativeSolanaSwap";
 import { XRPL_ASSETS, XRPL_HOUSE_WALLET, xrplAssetId, type XrplAsset } from "@/lib/xrpl-native";
 import { getXrplWalletManager } from "@/lib/xrpl-wallet";
 import { saveTransaction } from "@/lib/transactions";
@@ -25,7 +28,7 @@ type AccountState = {
   assetTrustlines: Record<string, boolean>;
 };
 
-export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
+export function NativeXrplSwap({ networks, onNetworkChange }: { networks: SolanaNetworkOption[]; onNetworkChange: (id: number) => void }) {
   const [address, setAddress] = useState<string | null>(null);
   const [sell, setSell] = useState<XrplAsset>(XRPL_ASSETS[0]!);
   const [buy, setBuy] = useState<XrplAsset>(XRPL_ASSETS[1]!);
@@ -207,17 +210,9 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <div className="w-full max-w-[480px]">
-      <div className="hoj-card space-y-3 rounded-[28px] p-3">
-        <div className="flex items-center justify-between px-1 py-1">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Native swap</p>
-            <p className="text-sm font-semibold text-white/80">XRP Ledger</p>
-          </div>
-          <button type="button" onClick={onBack} className="rounded-full border border-white/10 px-3 py-2 text-xs text-white/60 hover:text-white">
-            Other networks
-          </button>
-        </div>
+    <div className="w-full max-w-[450px]">
+      <div className="hoj-card space-y-2 rounded-[24px] p-2 sm:rounded-[26px] sm:p-2.5">
+        <NativeSwapHeader networks={networks} activeId={-1} onNetworkChange={onNetworkChange} disabled={busy} />
 
         {address && (
           <div className="rounded-xl border border-white/8 bg-black/20 px-3 py-2 text-xs text-white/50">
@@ -226,41 +221,62 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
           </div>
         )}
 
-        <div className="hoj-panel rounded-[24px] p-4">
-          <div className="flex items-center justify-between gap-3">
+        <div className="hoj-panel rounded-[22px] p-3.5 sm:rounded-[24px] sm:p-4">
+          <div className="mb-2 flex items-start justify-between gap-3 sm:mb-2.5">
+            <span className="text-[15px] font-semibold text-white/55">Sell</span>
+            <AssetButton asset={sell} disabled={busy} expanded={selecting === "sell"} label="Sell asset" onClick={() => setSelecting(selecting === "sell" ? null : "sell")} />
+          </div>
             <input
+              aria-label="Sell amount"
+              disabled={busy}
               inputMode="decimal"
               value={amount}
               onChange={(event) => {
                 setAmount(event.target.value.replace(/[^0-9.]/g, ""));
                 setQuote(null);
               }}
-              placeholder="0"
-              className="min-w-0 flex-1 bg-transparent text-4xl font-semibold text-white outline-none placeholder:text-white/20"
+              placeholder="0.0"
+              className="hoj-input w-full min-w-0 bg-transparent text-[2.65rem] font-semibold leading-none text-white outline-none placeholder:text-white/25 sm:text-5xl"
             />
-            <AssetButton asset={sell} onClick={() => setSelecting(selecting === "sell" ? null : "sell")} />
+          <div className="mt-3 grid grid-cols-4 gap-1.5 sm:gap-2" aria-label="Choose percentage of issued-token balance">
+            {[25, 50, 75, 100].map(percent => <button key={percent} type="button" disabled={busy || !sell.issuer || !sellBalance || sellBalance <= 0}
+              title={!sell.issuer ? "XRP percentage controls require a reserve-aware spendable balance" : undefined}
+              onClick={() => { setAmount(((sellBalance ?? 0) * percent / 100).toLocaleString("en-US", { useGrouping: false, maximumSignificantDigits: 15 })); setQuote(null); }}
+              className="min-h-9 rounded-xl border border-white/10 bg-white/[0.04] px-1.5 py-1.5 text-[11px] font-semibold tabular-nums text-white/60 transition hover:border-[rgba(212,175,55,0.45)] hover:bg-[rgba(212,175,55,0.1)] disabled:cursor-not-allowed disabled:opacity-30 sm:px-2 sm:text-xs">{percent}%</button>)}
           </div>
-          {sellBalance != null && <p className="mt-2 text-xs text-white/40">Balance: {sellBalance.toLocaleString()} {sell.symbol}</p>}
+          {sellBalance != null && <p className="mt-2 text-[11px] text-white/45">Balance: {sellBalance.toLocaleString()} {sell.symbol}</p>}
         </div>
 
-        {selecting === "sell" && <AssetSelector selected={sell} onChoose={(asset) => chooseAsset("sell", asset)} />}
 
-        <button type="button" onClick={flip} className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-[#19191b] text-[rgba(212,175,55,0.95)]">↓</button>
+        <button type="button" disabled={busy} onClick={flip} aria-label="Flip XRP tokens" className="relative z-10 mx-auto !-my-2.5 flex h-10 w-10 items-center justify-center rounded-xl border-[3px] border-[#101012] bg-[#19191b] text-xl text-[rgba(212,175,55,0.95)] shadow-[0_12px_24px_rgba(0,0,0,0.45)] transition hover:bg-[#202022] sm:h-11 sm:w-11 sm:rounded-2xl sm:text-2xl">↓</button>
 
-        <div className="hoj-panel rounded-[24px] p-4">
-          <div className="flex items-center justify-between gap-3">
-            <span className="truncate text-3xl font-semibold text-white/85">{quote?.receiveAmount ?? "—"}</span>
-            <AssetButton asset={buy} onClick={() => setSelecting(selecting === "buy" ? null : "buy")} />
+        <div className="hoj-panel rounded-[22px] p-3.5 pt-6 sm:rounded-[24px] sm:p-4 sm:pt-7">
+          <div className="mb-2 flex items-start justify-between gap-3 sm:mb-2.5">
+            <span className="text-[15px] font-semibold text-white/55">Buy</span>
+            <AssetButton asset={buy} disabled={busy} expanded={selecting === "buy"} label="Buy asset" onClick={() => setSelecting(selecting === "buy" ? null : "buy")} />
           </div>
-          {quote && <p className="mt-2 text-xs text-white/40">Minimum received: {quote.minimumReceive} {buy.symbol} · 0.5% slippage</p>}
-          {quote && <p className="mt-1 text-xs text-white/40">House fee: {quote.houseFeeXrp} XRP (1%, requested after swap validation)</p>}
+          <div className="truncate text-[2.25rem] font-semibold leading-none tabular-nums text-white/90 sm:text-[2.65rem]">{quote?.receiveAmount ?? "—"}</div>
+          <p className="mt-1 truncate text-xs text-white/45">{quote ? `Minimum: ${quote.minimumReceive} ${buy.symbol}` : "Connect a wallet and enter an amount"}</p>
+          {account && <p className="mt-2 text-[11px] text-white/45">Balance: {(buy.issuer ? account.assetBalances?.[xrplAssetId(buy)] ?? 0 : account.xrpBalance).toLocaleString()} {buy.symbol}</p>}
         </div>
 
-        {selecting === "buy" && <AssetSelector selected={buy} onChoose={(asset) => chooseAsset("buy", asset)} />}
 
-        <div className="rounded-xl border border-amber-400/15 bg-amber-400/[0.06] px-3 py-2 text-xs leading-5 text-amber-100/65">
-          Uses native XRPL DEX and AMM liquidity. Token identity includes its issuer address and swaps use XRPL-native transactions rather than an EVM contract.
-        </div>
+        <div className="flex items-center justify-between px-1 text-[11px] text-white/45"><span>House fee · 1%</span><span className="font-mono">{quote ? `${quote.houseFeeXrp} XRP` : "—"}</span></div>
+        <NativeSwapGuard>
+          {quote ? <p>Quoted minimum: {quote.minimumReceive} {buy.symbol} · 0.5% slippage.</p> : <p>Connect a native XRP wallet to quote XRPL DEX and AMM liquidity.</p>}
+          <p>Approval: native XRPL signing; no ERC-20 allowance or EVM simulation.</p>
+          <p>The swap is validated first. The 1% House fee is requested separately afterward.</p>
+        </NativeSwapGuard>
+        <details className="group hoj-panel rounded-2xl">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-[11px] uppercase tracking-[0.16em] text-white/55">Show more <span>▾</span></summary>
+          <div className="space-y-3 border-t border-white/10 px-4 py-3 text-[11px] leading-5 text-white/45">
+            <div className="flex justify-between"><span>Provider</span><span>XRPL DEX / AMM</span></div>
+            <div className="flex justify-between"><span>Slippage tolerance</span><span>0.5%</span></div>
+            <p>Token identity includes its issuer address. Receiving issued assets requires a trust line.</p>
+            <p>Keep XRP for account reserves, trust lines, and fees. XRP percentage controls remain disabled until a reserve-aware spendable balance is available.</p>
+          </div>
+        </details>
+        {status && <p role="status" className="px-1 text-xs text-white/55">{status}</p>}
 
         {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div>}
         {hash && <a href={`https://livenet.xrpl.org/transactions/${hash}`} target="_blank" rel="noopener noreferrer" className="block truncate text-center text-xs text-[rgba(212,175,55,0.9)] underline">View XRPL transaction</a>}
@@ -289,11 +305,12 @@ export function NativeXrplSwap({ onBack }: { onBack: () => void }) {
           type="button"
           onClick={!address ? () => setShowWallets((visible) => !visible) : needsTrustline ? enableTrustline : swap}
           disabled={!manager || busy || Boolean(address && !needsTrustline && (!quote || insufficient))}
-          className="w-full rounded-[22px] bg-[rgba(255,222,85,0.98)] px-4 py-4 text-base font-bold text-black disabled:opacity-50"
+          className="min-h-12 w-full rounded-[20px] bg-[rgba(212,175,55,0.95)] px-4 py-3 text-sm font-semibold text-black disabled:opacity-40"
         >
           {!manager ? "Loading XRP wallets…" : insufficient ? `Insufficient ${sell.symbol}` : primaryLabel}
         </button>
       </div>
+      {selecting && <AssetDialog selected={selecting === "sell" ? sell : buy} onClose={() => setSelecting(null)} onChoose={asset => chooseAsset(selecting, asset)} />}
     </div>
   );
 }
@@ -313,12 +330,12 @@ async function waitForValidatedSwap(hash: string) {
   throw new Error("Swap validation timed out; no House fee was charged")
 }
 
-function AssetButton({ asset, onClick }: { asset: XrplAsset; onClick: () => void }) {
+function AssetButton({ asset, onClick, disabled, expanded, label }: { asset: XrplAsset; onClick: () => void; disabled?: boolean; expanded: boolean; label: string }) {
   return (
-    <button type="button" onClick={onClick} className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-black/35 px-3 py-2 hover:border-amber-300/40">
+    <button type="button" disabled={disabled} aria-label={label} aria-haspopup="listbox" aria-expanded={expanded} onClick={onClick} className="flex w-[8.5rem] shrink-0 items-center gap-2 rounded-full border border-white/10 bg-black/45 px-2.5 py-2 text-left transition hover:border-[rgba(212,175,55,0.25)] focus:border-[rgba(212,175,55,0.45)] sm:w-[9.25rem]">
       <TokenLogo symbol={asset.symbol} logo={asset.logo} size="xs" />
-      <span className="text-sm font-semibold text-white">{asset.symbol}</span>
-      <span className="text-[10px] text-white/45">▼</span>
+      <span className="min-w-0 flex-1 truncate text-sm font-semibold text-white">{asset.symbol}</span>
+      <span className="text-xs text-[rgba(212,175,55,0.9)]">▾</span>
     </button>
   );
 }
@@ -329,10 +346,12 @@ function AssetSelector({ selected, onChoose }: { selected: XrplAsset; onChoose: 
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [registryOffset, setRegistryOffset] = useState(0);
+  const [registryError, setRegistryError] = useState<string | null>(null);
 
   async function loadMore() {
     if (loading || !hasMore) return;
     setLoading(true);
+    setRegistryError(null);
     try {
       const response = await fetch(`/api/xrpl/tokens?offset=${registryOffset}&limit=50`, { cache: "no-store" });
       const payload = await response.json() as { tokens?: XrplAsset[]; nextOffset?: number; hasMore?: boolean };
@@ -344,6 +363,8 @@ function AssetSelector({ selected, onChoose }: { selected: XrplAsset; onChoose: 
       });
       setRegistryOffset(Number(payload.nextOffset ?? registryOffset + 50));
       setHasMore(Boolean(payload.hasMore));
+    } catch {
+      setRegistryError("The token registry is unavailable. Curated assets are still shown.");
     } finally {
       setLoading(false);
     }
@@ -381,11 +402,13 @@ function AssetSelector({ selected, onChoose }: { selected: XrplAsset; onChoose: 
         placeholder="Search name, ticker, issuer or currency"
         className="mb-2 w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-base text-white outline-none placeholder:text-white/30 focus:border-amber-300/40 sm:text-sm"
       />
-      <div className="grid max-h-72 grid-cols-1 gap-1 overflow-y-auto sm:grid-cols-2">
+      <div role="listbox" aria-label="XRP assets" className="grid max-h-72 grid-cols-1 gap-1 overflow-y-auto">
       {assets.map((asset) => (
         <button
           key={xrplAssetId(asset)}
           type="button"
+          role="option"
+          aria-selected={xrplAssetId(selected) === xrplAssetId(asset)}
           onClick={() => onChoose(asset)}
           className={`flex items-center gap-3 rounded-xl px-3 py-2 text-left hover:bg-white/8 ${xrplAssetId(selected) === xrplAssetId(asset) ? "bg-amber-300/10" : ""}`}
         >
@@ -399,8 +422,23 @@ function AssetSelector({ selected, onChoose }: { selected: XrplAsset; onChoose: 
         </button>
       ))}
       </div>
+      {registryError && <p role="status" className="px-2 py-2 text-xs text-amber-200">{registryError}</p>}
       {hasMore && !query && <button type="button" onClick={() => void loadMore()} disabled={loading} className="mt-2 w-full rounded-xl border border-white/10 px-3 py-2 text-xs text-white/55 hover:border-amber-300/35 disabled:opacity-50">{loading ? "Loading XRPL tokens…" : "Load more XRPL tokens"}</button>}
       <p className="px-2 py-2 text-[10px] leading-4 text-white/35">Only curated assets and registry-verified issuers are shown. Always confirm the issuer address; swaps remain limited to pairs with live XRP liquidity.</p>
     </div>
   );
+}
+
+function AssetDialog({ selected, onChoose, onClose }: { selected: XrplAsset; onChoose: (asset: XrplAsset) => void; onClose: () => void }) {
+  useEffect(() => {
+    function escape(event: KeyboardEvent) { if (event.key === "Escape") onClose(); }
+    window.addEventListener("keydown", escape);
+    return () => window.removeEventListener("keydown", escape);
+  }, [onClose]);
+  return createPortal(<div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onMouseDown={onClose}>
+    <div role="dialog" aria-modal="true" aria-label="Select XRP token" onMouseDown={event => event.stopPropagation()} className="max-h-[80vh] w-full max-w-md overflow-y-auto rounded-[24px] border border-white/10 bg-[#151517] p-3 shadow-2xl">
+      <div className="mb-3 flex items-center justify-between px-1"><span className="text-sm font-semibold text-white/90">Select a token · XRP Ledger</span><button type="button" aria-label="Close token selector" onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-white/55">×</button></div>
+      <AssetSelector selected={selected} onChoose={onChoose} />
+    </div>
+  </div>, document.body);
 }

@@ -169,6 +169,7 @@ export const SWAP_SUPPORTED_CHAIN_IDS: readonly number[] = CHAIN_OPTIONS
   .map((chain) => chain.id);
 
 export function getChainName(chainId: number) {
+  if (chainId === -3) return "Stellar";
   if (chainId === -2 || chainId === 1151111081099710) return "Solana";
   if (chainId === -1) return "XRP Ledger";
   if (chainId === mainnet.id) return "Ethereum";
@@ -197,6 +198,7 @@ export function getChainName(chainId: number) {
 }
 
 export function explorerName(chainId: number) {
+  if (chainId === -3) return "Stellar Expert";
   if (chainId === -2) return "Solscan";
   if (chainId === -1) return "XRPL Explorer";
   if (chainId === mainnet.id) return "Etherscan";
@@ -222,6 +224,7 @@ function newChainExplorerUrl(chainId: number) {
 }
 
 export function explorerTxUrl(chainId: number, hash: string) {
+  if (chainId === -3) return `https://stellar.expert/explorer/public/tx/${hash}`;
   if (chainId === -2) return `https://solscan.io/tx/${hash}`;
   if (chainId === -1) return `https://livenet.xrpl.org/transactions/${hash}`;
   if (chainId === mainnet.id) return `https://etherscan.io/tx/${hash}`;
@@ -241,6 +244,7 @@ export function explorerTxUrl(chainId: number, hash: string) {
 }
 
 export function explorerAddressUrl(chainId: number, address: string) {
+  if (chainId === -3) return `https://stellar.expert/explorer/public/account/${address}`;
   if (chainId === mainnet.id) return `https://etherscan.io/address/${address}`;
   if (chainId === base.id) return `https://basescan.org/address/${address}`;
   if (chainId === cronos.id) return `https://cronoscan.com/address/${address}`;

@@ -6,6 +6,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Connection, PublicKey, VersionedTransaction, clusterApiUrl } from "@solana/web3.js";
 import { TokenLogo } from "@/components/TokenLogo";
+import { NativeSwapGuard, NativeSwapHeader } from "./NativeSwapChrome";
 import { dedupeSolanaTokens, solanaTokenLogoCandidates, SOLANA_CORE_FALLBACK, SOL_MINT, type SolanaToken } from "@/lib/solana";
 import { saveTransaction } from "@/lib/transactions";
 
@@ -70,7 +71,6 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
   const [swapping, setSwapping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
-  const [networkOpen, setNetworkOpen] = useState(false);
   const [balances, setBalances] = useState<Record<string, bigint>>({});
   const [loadingBalances, setLoadingBalances] = useState(false);
   const [slippageBps, setSlippageBps] = useState<number | null>(null);
@@ -185,7 +185,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [amount, buy.mint, connectedWallet, sell.decimals, sell.mint, slippageBps]);
+  }, [amount, buy.mint, connectedWallet?.account.address, sell.decimals, sell.mint, slippageBps]);
 
   const output = useMemo(() => fromAtomic(order?.outAmount, buy.decimals), [buy.decimals, order?.outAmount]);
   const sellBalance = balances[sell.mint];
@@ -251,41 +251,26 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
 
   return (
     <div className="w-full max-w-[450px]">
-      <div className="hoj-card space-y-2 rounded-[24px] p-2.5 sm:rounded-[26px]">
-        <div className="flex items-center justify-between gap-2 px-1 pb-1">
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Trade</p>
-            <p className="truncate text-sm font-semibold text-white/80">Solana</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setNetworkOpen(true)}
-            className="flex min-w-[8.75rem] items-center justify-between gap-2 rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-2 text-left transition hover:border-[rgba(212,175,55,0.3)] focus:border-[rgba(212,175,55,0.55)] focus:outline-none"
-            aria-haspopup="dialog"
-          >
-            <span className="flex min-w-0 items-center gap-2">
-              <TokenLogo symbol="SOL" logo="https://assets.coingecko.com/coins/images/4128/standard/solana.png" size="xs" />
-              <span className="truncate text-xs font-semibold text-white/80">Solana</span>
-            </span>
-            <span className="text-xs text-[rgba(212,175,55,0.9)]">▾</span>
-          </button>
-        </div>
+      <div className="hoj-card space-y-2 rounded-[24px] p-2 sm:rounded-[26px] sm:p-2.5">
+        <NativeSwapHeader networks={networks} activeId={-2} onNetworkChange={onNetworkChange} disabled={swapping} />
 
-        <div className="hoj-panel rounded-[22px] p-3.5 sm:p-4">
-          <div className="mb-2 flex items-start justify-between gap-3">
-            <span className="text-sm font-semibold text-white/50">Sell</span>
-            <SolanaTokenSelect tokens={tokens} value={sell} onSearch={setTokenSearch} onChange={(token) => token.mint !== buy.mint && setSell(token)} />
+        <div className="hoj-panel rounded-[22px] p-3.5 sm:rounded-[24px] sm:p-4">
+          <div className="mb-2 flex items-start justify-between gap-3 sm:mb-2.5">
+            <span className="text-[15px] font-semibold text-white/55">Sell</span>
+            <SolanaTokenSelect disabled={swapping} label="Sell asset" tokens={tokens} value={sell} onSearch={setTokenSearch} onChange={(token) => token.mint !== buy.mint && setSell(token)} />
           </div>
           <input
+            aria-label="Sell amount"
+            disabled={swapping}
             inputMode="decimal"
             value={amount}
             onChange={(event) => /^\d*(\.\d*)?$/.test(event.target.value) && setAmount(event.target.value)}
-            placeholder="0"
-            className="w-full bg-transparent text-[2.65rem] font-semibold leading-none text-white outline-none placeholder:text-white/20 sm:text-5xl"
+            placeholder="0.0"
+            className="hoj-input w-full min-w-0 bg-transparent text-[2.65rem] font-semibold leading-none text-white outline-none placeholder:text-white/25 sm:text-5xl"
           />
           <div className="mt-3 grid grid-cols-4 gap-1.5 sm:gap-2" aria-label="Choose percentage of Solana balance to swap">
             {[25, 50, 75, 100].map((percent) => (
-              <button key={percent} type="button" onClick={() => applyBalancePercentage(percent)} disabled={!connectedWallet || sellBalance == null || sellBalance === 0n} className="min-h-9 rounded-xl border border-white/10 bg-white/[0.04] px-1.5 py-1.5 text-[11px] font-semibold tabular-nums text-white/60 transition hover:border-[rgba(212,175,55,0.45)] hover:bg-[rgba(212,175,55,0.1)] hover:text-[rgba(255,222,85,0.95)] disabled:cursor-not-allowed disabled:opacity-30 sm:text-xs">{percent}%</button>
+              <button key={percent} type="button" onClick={() => applyBalancePercentage(percent)} disabled={swapping || !connectedWallet || sellBalance == null || sellBalance === 0n} className="min-h-9 rounded-xl border border-white/10 bg-white/[0.04] px-1.5 py-1.5 text-[11px] font-semibold tabular-nums text-white/60 transition hover:border-[rgba(212,175,55,0.45)] hover:bg-[rgba(212,175,55,0.1)] hover:text-[rgba(255,222,85,0.95)] disabled:cursor-not-allowed disabled:opacity-30 sm:text-xs">{percent}%</button>
             ))}
           </div>
           <div className="mt-2 flex items-center justify-between text-[11px] text-white/38">
@@ -295,32 +280,43 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
           {insufficientBalance && <p className="mt-1 text-right text-[10px] text-rose-300/85">Insufficient {sell.symbol} balance</p>}
         </div>
 
-        <button type="button" onClick={flip} className="relative z-10 mx-auto -my-2.5 flex h-10 w-10 items-center justify-center rounded-xl border-[3px] border-[#101012] bg-[#19191b] text-xl text-[rgba(212,175,55,0.95)] shadow-[0_12px_24px_rgba(0,0,0,0.45)] transition hover:bg-[#202022] hover:text-[rgba(255,222,85,1)] sm:h-11 sm:w-11 sm:rounded-2xl sm:text-2xl" aria-label="Flip Solana tokens">↓</button>
+        <button type="button" disabled={swapping} onClick={flip} className="relative z-10 mx-auto !-my-2.5 flex h-10 w-10 items-center justify-center rounded-xl border-[3px] border-[#101012] bg-[#19191b] text-xl text-[rgba(212,175,55,0.95)] shadow-[0_12px_24px_rgba(0,0,0,0.45)] transition hover:bg-[#202022] hover:text-[rgba(255,222,85,1)] sm:h-11 sm:w-11 sm:rounded-2xl sm:text-2xl" aria-label="Flip Solana tokens">↓</button>
 
-        <div className="hoj-panel rounded-[22px] p-3.5 pt-6 sm:p-4 sm:pt-7">
-          <div className="flex items-start justify-between gap-3">
-            <span className="text-sm font-semibold text-white/50">Buy</span>
-            <SolanaTokenSelect tokens={tokens} value={buy} onSearch={setTokenSearch} onChange={(token) => token.mint !== sell.mint && setBuy(token)} />
+        <div className="hoj-panel rounded-[22px] p-3.5 pt-6 sm:rounded-[24px] sm:p-4 sm:pt-7">
+          <div className="mb-2 flex items-start justify-between gap-3 sm:mb-2.5">
+            <span className="text-[15px] font-semibold text-white/55">Buy</span>
+            <SolanaTokenSelect disabled={swapping} label="Buy asset" tokens={tokens} value={buy} onSearch={setTokenSearch} onChange={(token) => token.mint !== sell.mint && setBuy(token)} />
           </div>
-          <p className="mt-3 truncate text-[2.25rem] font-semibold leading-none text-white/85 sm:text-[2.65rem]" title={output}>{quoting ? "…" : output}</p>
+          <p className="truncate text-[2.25rem] font-semibold leading-none tabular-nums text-white/90 sm:text-[2.65rem]" title={output}>{quoting ? "…" : output}</p>
           <div className="mt-2 flex items-center justify-between text-[11px] text-white/38">
             <span>Balance</span>
             <span className="font-mono tabular-nums">{!connectedWallet ? "Connect wallet" : loadingBalances && buyBalance == null ? "Loading…" : `${fromAtomic((buyBalance ?? 0n).toString(), buy.decimals)} ${buy.symbol}`}</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/8 bg-black/20 px-4 py-3 text-xs leading-5 text-white/45">
+        <div className="flex items-center justify-between px-1 text-[11px] text-white/45"><span>House fee · 1%</span><span>Jupiter Ultra</span></div>
+        <NativeSwapGuard>
+          <p>{order ? `Expected: ${output} ${buy.symbol}.` : "Enter an amount to get a Jupiter quote."}</p>
+          <p>Approval: a native Solana transaction, not an ERC-20 allowance.</p>
+          <p>Review the route, token amounts, and fees in your wallet before signing. No EVM simulation is performed here.</p>
+        </NativeSwapGuard>
+        <details className="group hoj-panel rounded-2xl">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-[11px] uppercase tracking-[0.16em] text-white/55">Show more <span>▾</span></summary>
+        <div className="space-y-3 border-t border-white/10 px-4 py-3 text-xs leading-5 text-white/45">
           <div className="flex justify-between gap-3"><span>Provider</span><span className="font-semibold text-white/65">Jupiter Ultra</span></div>
           <div className="mt-1 flex justify-between gap-3"><span>House fee</span><span className="font-semibold text-white/65">1%</span></div>
           <div className="mt-1 flex items-center justify-between gap-3">
             <span>Slippage</span>
             <div className="flex gap-1">
               {([{ label: "Auto", value: null }, { label: "0.5%", value: 50 }, { label: "1%", value: 100 }] as const).map((option) => (
-                <button key={option.label} type="button" onClick={() => setSlippageBps(option.value)} className={`rounded-lg border px-2 py-0.5 text-[10px] font-semibold transition ${slippageBps === option.value ? "border-[rgba(212,175,55,0.45)] bg-[rgba(212,175,55,0.12)] text-[#e7c45b]" : "border-white/8 text-white/40 hover:text-white/65"}`}>{option.label}</button>
+                <button key={option.label} type="button" disabled={swapping} onClick={() => setSlippageBps(option.value)} className={`rounded-lg border px-2 py-0.5 text-[10px] font-semibold transition ${slippageBps === option.value ? "border-[rgba(212,175,55,0.45)] bg-[rgba(212,175,55,0.12)] text-[#e7c45b]" : "border-white/8 text-white/40 hover:text-white/65"}`}>{option.label}</button>
               ))}
             </div>
           </div>
+          <p className="text-[11px] leading-5 text-white/40">Keep SOL for network fees and token-account creation. Max SOL leaves a 0.005 SOL buffer.</p>
+          {loadingTokens && <p className="text-[11px] text-white/40">Updating Jupiter token list…</p>}
         </div>
+        </details>
 
         {order && !order.feeReady && (
           <div className="rounded-2xl border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-xs leading-5 text-amber-100/75">
@@ -334,7 +330,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
 
         {!connectedWallet ? (
           <div className="space-y-2.5">
-            <button type="button" onClick={() => setWalletModalVisible(true)} disabled={connecting} className="w-full rounded-2xl bg-[linear-gradient(135deg,#e7c45b,#b78312)] px-5 py-3.5 text-sm font-semibold text-black disabled:opacity-50">{connecting ? "Connecting…" : "Connect Solana wallet"}</button>
+            <button type="button" onClick={() => setWalletModalVisible(true)} disabled={connecting} className="min-h-12 w-full rounded-[20px] bg-[rgba(212,175,55,0.95)] px-4 py-3 text-sm font-semibold text-black disabled:opacity-40">{connecting ? "Connecting…" : "Connect Solana wallet"}</button>
             <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 text-[10px] text-white/35">
               <span>All Wallet Standard wallets</span><span aria-hidden="true">·</span><span>Desktop</span><span aria-hidden="true">·</span><span>Mobile</span>
             </div>
@@ -346,7 +342,7 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
             type="button"
             onClick={executeSwap}
             disabled={!order?.transaction || !order.feeReady || swapping || quoting || insufficientBalance}
-            className="w-full rounded-2xl bg-[linear-gradient(135deg,#e7c45b,#b78312)] px-5 py-3.5 text-sm font-semibold text-black disabled:cursor-not-allowed disabled:opacity-45"
+            className="min-h-12 w-full rounded-[20px] bg-[rgba(212,175,55,0.95)] px-4 py-3 text-sm font-semibold text-black disabled:cursor-not-allowed disabled:opacity-40"
           >
             {swapping ? "Signing and swapping…" : !order?.feeReady && order ? "Referral setup required" : "Swap with Jupiter"}
           </button>
@@ -354,40 +350,11 @@ export function NativeSolanaSwap({ networks, onNetworkChange }: { networks: Sola
           </div>
         )}
       </div>
-      {networkOpen && typeof document !== "undefined" && createPortal(
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="presentation" onMouseDown={() => setNetworkOpen(false)}>
-          <div role="dialog" aria-modal="true" aria-label="Select network" onMouseDown={(event) => event.stopPropagation()} className="w-full max-w-sm overflow-hidden rounded-[24px] border border-white/10 bg-[#111113] shadow-[0_28px_90px_rgba(0,0,0,0.8)]">
-            <div className="flex items-center justify-between border-b border-white/8 px-4 py-3.5">
-              <div>
-                <p className="text-sm font-semibold text-white/90">Select network</p>
-                <p className="mt-0.5 text-[10px] uppercase tracking-wider text-white/35">Swap and token networks</p>
-              </div>
-              <button type="button" onClick={() => setNetworkOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-sm text-white/55 hover:text-white" aria-label="Close network selector">×</button>
-            </div>
-            <div className="max-h-[min(68vh,32rem)] overflow-y-auto p-2">
-              {networks.map((network) => {
-                const selected = network.id === -2;
-                return (
-                  <button key={network.id} type="button" onClick={() => { setNetworkOpen(false); onNetworkChange(network.id); }} className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${selected ? "bg-[rgba(212,175,55,0.14)]" : "hover:bg-white/[0.06]"}`}>
-                    <TokenLogo symbol={network.ticker} logo={network.logo} size="sm" />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-semibold text-white/88">{network.name}</span>
-                      <span className="block text-[10px] uppercase tracking-wider text-white/35">{network.mode}</span>
-                    </span>
-                    {selected && <span className="text-xs text-[#e7c45b]">✓</span>}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>,
-        document.body,
-      )}
     </div>
   );
 }
 
-function SolanaTokenSelect({ tokens, value, onChange, onSearch }: { tokens: SolanaToken[]; value: SolanaToken; onChange: (token: SolanaToken) => void; onSearch: (query: string) => void }) {
+function SolanaTokenSelect({ tokens, value, onChange, onSearch, disabled, label }: { tokens: SolanaToken[]; value: SolanaToken; onChange: (token: SolanaToken) => void; onSearch: (query: string) => void; disabled?: boolean; label: string }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const filteredTokens = useMemo(() => {
@@ -412,9 +379,11 @@ function SolanaTokenSelect({ tokens, value, onChange, onSearch }: { tokens: Sola
   }, [open]);
 
   return (
-    <div className="relative w-[9.5rem] sm:w-[10.5rem]">
+    <div className="relative w-[8.5rem] shrink-0 sm:w-[9.25rem]">
       <button
         type="button"
+        disabled={disabled}
+        aria-label={label}
         onClick={() => setOpen((current) => !current)}
         className="flex w-full items-center justify-between gap-2 rounded-full border border-white/10 bg-black/45 px-2.5 py-2 text-left text-white transition hover:border-[rgba(212,175,55,0.25)] focus:border-[rgba(212,175,55,0.45)] focus:outline-none"
         aria-haspopup="listbox"

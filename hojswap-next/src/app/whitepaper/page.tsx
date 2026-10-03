@@ -51,7 +51,7 @@ export default function WhitepaperPage() {
       <section className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           ["12 pages", "Technical product documentation"],
-          ["23 networks", "21 EVM networks plus Solana and XRPL"],
+          ["25 app networks", "22 EVM networks plus Solana, Stellar and XRPL"],
           ["Transparent fees", "Current 1% House fee model"],
           ["No protocol token", "No token sale or yield promise"],
         ].map(([title, description]) => (
