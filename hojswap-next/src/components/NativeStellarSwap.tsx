@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { TokenLogo } from "@/components/TokenLogo";
 import { NativeSwapHeader } from "./NativeSwapChrome";
 import { saveTransaction } from "@/lib/transactions";
@@ -18,6 +18,8 @@ export function NativeStellarSwap({ networks, onNetworkChange }: {
   const [slippage, setSlippage] = useState(100);
   const [quote, setQuote] = useState<StellarQuote | null>(null);
   const [busy, setBusy] = useState(false);
+  const [quoting, setQuoting] = useState(false);
+  const quoteRequest = useRef<AbortController | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hash, setHash] = useState<string | null>(null);
   const [assetOpen, setAssetOpen] = useState<"sell" | "buy" | null>(null);
@@ -73,7 +75,10 @@ export function NativeStellarSwap({ networks, onNetworkChange }: {
     if (!spendable) return;
     setAmount(stellarDecimal((spendable[sell] ?? 0n) * BigInt(percent) / 100n)); reset();
   }
-  function reset() { setQuote(null); setError(null); setHash(null); }
+  function reset() {
+    quoteRequest.current?.abort(); setQuoting(false);
+    setQuote(null); setError(null); setHash(null);
+  }
   async function wallet() {
     const api = await import("@stellar/freighter-api");
     const connected = await api.isConnected();
@@ -92,17 +97,32 @@ export function NativeStellarSwap({ networks, onNetworkChange }: {
     } catch (e) { setError(e instanceof Error ? e.message : "Unable to connect Freighter."); }
     finally { setBusy(false); }
   }
-  async function requestQuote() {
-    setBusy(true); reset();
+  const requestQuote = useCallback(async () => {
+    quoteRequest.current?.abort();
+    const controller = new AbortController();
+    quoteRequest.current = controller;
+    setQuoting(true); setQuote(null); setError(null);
     try {
       const response = await fetch("/api/stellar/quote", { method: "POST", headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({ sell, buy, amount, slippageBps: slippage, ...(address ? { account: address } : {}) }) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? "Unable to quote this Stellar pair.");
-      setQuote(result);
-    } catch (e) { setError(e instanceof Error ? e.message : "Quote failed."); }
-    finally { setBusy(false); }
-  }
+      if (!controller.signal.aborted) setQuote(result);
+    } catch (e) {
+      if (!controller.signal.aborted) setError(e instanceof Error ? e.message : "Quote failed.");
+    } finally { if (!controller.signal.aborted) setQuoting(false); }
+  }, [sell, buy, amount, slippage, address]);
+  useEffect(() => {
+    setQuoting(false);
+    if (busy) return;
+    setQuote(null);
+    let validAmount = false;
+    try { validAmount = stellarAtomic(amount) > 0n; } catch { /* Incomplete input is not quoted. */ }
+    if (!validAmount) return;
+    const timer = window.setTimeout(() => { void requestQuote(); }, 500);
+    return () => { window.clearTimeout(timer); quoteRequest.current?.abort(); };
+  }, [requestQuote, amount, busy]);
   async function swap() {
     if (!quote?.transaction || !address) return;
     setBusy(true); setError(null);
@@ -175,8 +195,8 @@ export function NativeStellarSwap({ networks, onNetworkChange }: {
       <button type="button" disabled={busy} aria-label="Flip Stellar assets" onClick={() => { setSell(buy); setBuy(sell); reset(); }} className="relative z-50 mx-auto !-my-2.5 flex h-10 w-10 items-center justify-center rounded-xl border-[3px] border-[#101012] bg-[#19191b] text-xl text-[rgba(212,175,55,0.95)] shadow-[0_12px_24px_rgba(0,0,0,0.45)] transition hover:bg-[#202022] sm:h-11 sm:w-11 sm:rounded-2xl sm:text-2xl">↓</button>
       <div className="hoj-panel relative z-30 rounded-[22px] p-3.5 pt-6 sm:rounded-[24px] sm:p-4 sm:pt-7">
         <div className="mb-2 flex items-start justify-between gap-3 sm:mb-2.5"><span className="text-[15px] font-semibold text-white/55">Buy</span>{assetSelector("buy")}</div>
-        <div className="truncate text-[2.25rem] font-semibold leading-none tabular-nums text-white/90 sm:text-[2.65rem]">{quote?.expectedReceive ?? "0.0"}</div>
-        <p className="mt-1 truncate text-xs text-white/45">{quote ? `Minimum: ${quote.minimumReceive} ${buy}` : "Enter an amount to get a quote"}</p>
+        <div aria-label="Estimated receive amount" aria-live="polite" aria-busy={quoting} className="truncate text-[2.25rem] font-semibold leading-none tabular-nums text-white/90 sm:text-[2.65rem]">{quoting ? "…" : quote?.expectedReceive ?? "—"}</div>
+        <p className="mt-1 truncate text-xs text-white/45">{quoting ? "Fetching live Stellar quote…" : quote ? `Minimum: ${quote.minimumReceive} ${buy}` : "Enter an amount to get a quote"}</p>
         {address && <p className="mt-2 text-[11px] text-white/45">Balance: {balances ? `${balances[buy]} ${buy}` : "unavailable"}</p>}
       </div>
       <div className="flex items-center justify-between px-1 text-[11px] text-white/45"><span>House fee · 1%</span><span className="font-mono tabular-nums">{quote ? `${quote.houseFee} ${sell}` : "—"}</span></div>
@@ -198,7 +218,7 @@ export function NativeStellarSwap({ networks, onNetworkChange }: {
       {quote?.warning && <p role="status" className="rounded-xl border border-amber-300/20 bg-amber-300/5 p-3 text-xs leading-5 text-amber-200">{quote.warning}</p>}
       {error && <p role="alert" className="rounded-xl bg-red-400/10 p-3 text-xs leading-5 text-red-200">{error}</p>}
       {hash && <a className="block p-2 text-sm text-amber-200 underline" href={"https://stellar.expert/explorer/public/tx/" + hash} target="_blank" rel="noopener noreferrer">View Stellar transaction</a>}
-      <button type="button" disabled={busy || !amount} onClick={quote?.transaction ? swap : requestQuote} className="min-h-12 w-full rounded-[20px] bg-[rgba(212,175,55,0.95)] px-4 py-3 text-sm font-semibold text-black disabled:opacity-40">{busy ? "Working…" : quote?.transaction ? "Review and sign swap" : quote ? "Refresh quote" : "Get quote"}</button>
+      <button type="button" disabled={busy || quoting || !amount} onClick={quote?.transaction ? swap : requestQuote} className="min-h-12 w-full rounded-[20px] bg-[rgba(212,175,55,0.95)] px-4 py-3 text-sm font-semibold text-black disabled:opacity-40">{busy ? "Working…" : quoting ? "Getting quote…" : quote?.transaction ? "Review and sign swap" : quote ? "Refresh quote" : "Get quote"}</button>
       <button type="button" disabled={busy} onClick={address ? () => { setAddress(null); reset(); } : connect} className="min-h-12 w-full rounded-[20px] border border-[rgba(212,175,55,0.3)] px-4 py-3 text-sm font-semibold text-[rgba(212,175,55,0.95)]">{address ? address.slice(0, 8) + "…" + address.slice(-6) + " · Disconnect" : "Connect Freighter"}</button>
     </div>
   </div>;
