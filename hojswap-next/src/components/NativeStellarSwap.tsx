@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { TokenLogo } from "@/components/TokenLogo";
+import { NativeSwapHeader } from "./NativeSwapChrome";
 import { saveTransaction } from "@/lib/transactions";
-import { STELLAR_HORIZON, STELLAR_LOGO, STELLAR_NETWORK_ID, STELLAR_PASSPHRASE, STELLAR_TOKENS,
+import { STELLAR_HORIZON, STELLAR_NETWORK_ID, STELLAR_PASSPHRASE, STELLAR_TOKENS,
   stellarAtomic, stellarDecimal, type StellarQuote } from "@/lib/stellar";
 import type { SolanaNetworkOption } from "./NativeSolanaSwap";
 
@@ -19,17 +20,16 @@ export function NativeStellarSwap({ networks, onNetworkChange }: {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hash, setHash] = useState<string | null>(null);
-  const [networkOpen, setNetworkOpen] = useState(false);
   const [assetOpen, setAssetOpen] = useState<"sell" | "buy" | null>(null);
   const [balances, setBalances] = useState<Record<string, string> | null>(null);
   const [spendable, setSpendable] = useState<Record<string, bigint> | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     function close(event: PointerEvent) {
-      if (!menuRef.current?.contains(event.target as Node)) { setNetworkOpen(false); setAssetOpen(null); }
+      if (!menuRef.current?.contains(event.target as Node)) setAssetOpen(null);
     }
     function escape(event: KeyboardEvent) {
-      if (event.key === "Escape") { setNetworkOpen(false); setAssetOpen(null); }
+      if (event.key === "Escape") setAssetOpen(null);
     }
     document.addEventListener("pointerdown", close);
     document.addEventListener("keydown", escape);
@@ -147,7 +147,7 @@ export function NativeStellarSwap({ networks, onNetworkChange }: {
     const token = STELLAR_TOKENS.find(t => t.symbol === symbol)!;
     return <div className="relative w-[8.5rem] shrink-0 sm:w-[9.25rem]">
       <button type="button" disabled={busy} aria-label={`${side === "sell" ? "Sell" : "Buy"} asset`} aria-haspopup="listbox" aria-expanded={assetOpen === side}
-        onClick={() => { setNetworkOpen(false); setAssetOpen(assetOpen === side ? null : side); }}
+        onClick={() => setAssetOpen(assetOpen === side ? null : side)}
         className="flex w-full items-center justify-between gap-2 rounded-full border border-white/10 bg-black/45 px-2.5 py-2 text-left text-white transition hover:border-[rgba(212,175,55,0.25)] focus:border-[rgba(212,175,55,0.45)]">
         <span className="flex min-w-0 items-center gap-2"><TokenLogo symbol={symbol} logo={token.logo} size="xs" /><span className="truncate text-sm font-semibold">{symbol}</span></span>
         <span className="text-xs text-[rgba(212,175,55,0.9)]">▾</span>
@@ -163,25 +163,7 @@ export function NativeStellarSwap({ networks, onNetworkChange }: {
   }
   return <div ref={menuRef} className="w-full max-w-[450px]">
     <div className="hoj-card space-y-2 rounded-[24px] p-2 sm:rounded-[26px] sm:p-2.5">
-      <div className="relative z-[90] flex items-center justify-between gap-2 px-1 pb-1">
-        <div className="min-w-0"><p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Trade</p><p className="truncate text-sm font-semibold text-white/80">Stellar</p></div>
-        <div className="relative">
-          <button type="button" disabled={busy} aria-label="Select network" aria-haspopup="listbox" aria-expanded={networkOpen} onClick={() => { setAssetOpen(null); setNetworkOpen(!networkOpen); }}
-            className="flex min-w-[8.25rem] items-center justify-between gap-2 rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-1.5 text-left transition hover:border-[rgba(212,175,55,0.3)] sm:min-w-[8.75rem] sm:py-2">
-            <span className="flex items-center gap-2"><TokenLogo symbol="XLM" logo={STELLAR_LOGO} size="xs" /><span className="text-xs font-semibold text-white/80">Stellar</span></span><span className="text-xs text-[rgba(212,175,55,0.9)]">▾</span>
-          </button>
-          {networkOpen && <div role="listbox" aria-label="Networks" className="absolute right-0 top-full z-[100] mt-2 max-h-72 w-[min(20rem,calc(100vw-3rem))] overflow-y-auto rounded-2xl border border-white/10 bg-[#111113] p-1.5 shadow-2xl">
-            {networks.map(n => <button type="button" key={n.id} role="option" aria-selected={n.id === STELLAR_NETWORK_ID} onClick={() => { setNetworkOpen(false); onNetworkChange(n.id); }}
-              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left ${n.id === STELLAR_NETWORK_ID ? "bg-[rgba(212,175,55,0.14)] text-white" : "text-white/80 hover:bg-white/[0.06]"}`}>
-              <TokenLogo symbol={n.ticker} logo={n.logo} size="sm" /><span className="min-w-0 flex-1"><span className="block text-sm font-semibold">{n.name}</span><span className="block text-xs text-white/40">{n.ticker}</span></span><span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-white/40">{n.mode}</span>
-            </button>)}
-          </div>}
-        </div>
-      </div>
-      <div className="flex gap-1 rounded-full border border-white/8 bg-black/25 p-1">
-        <button type="button" className="min-w-0 flex-1 rounded-full bg-[rgba(212,175,55,0.95)] px-2 py-1.5 text-[12px] font-semibold text-black sm:px-3 sm:py-2">Swap</button>
-        <button type="button" disabled title="Stellar bridging is not available" className="min-w-0 flex-1 rounded-full px-2 py-1.5 text-[12px] font-semibold text-white/30 sm:px-3 sm:py-2">Bridge</button>
-      </div>
+      <NativeSwapHeader networks={networks} activeId={STELLAR_NETWORK_ID} onNetworkChange={onNetworkChange} disabled={busy} onOpen={() => setAssetOpen(null)} />
       <div className="hoj-panel relative z-40 rounded-[22px] p-3.5 sm:rounded-[24px] sm:p-4">
         <div className="mb-2 flex items-start justify-between gap-3 sm:mb-2.5"><span className="text-[15px] font-semibold text-white/55">Sell</span>{assetSelector("sell")}</div>
         <input aria-label="Sell amount" inputMode="decimal" value={amount} disabled={busy} onChange={e => { setAmount(e.target.value); reset(); }} placeholder="0.0" className="hoj-input w-full min-w-0 bg-transparent text-[2.65rem] font-semibold leading-none text-white outline-none placeholder:text-white/25 sm:text-5xl" />

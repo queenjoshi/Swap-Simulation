@@ -58,9 +58,12 @@ body {
   display: none;
 }
 
-.hoj-card > * {
-  position: relative;
-  z-index: 1;
+/* Card defaults must not override utility z-indexes on menus and flip controls. */
+@layer components {
+  .hoj-card > * {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 .hoj-panel {

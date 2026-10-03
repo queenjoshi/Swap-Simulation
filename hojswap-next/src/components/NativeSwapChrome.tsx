@@ -7,8 +7,8 @@ import { TokenLogo } from "./TokenLogo";
 type NetworkOption = { id: number; name: string; ticker: string; mode: string; logo?: string };
 
 /** Shared presentation only: each native network retains its own execution flow. */
-export function NativeSwapHeader({ networks, activeId, onNetworkChange, disabled = false }: {
-  networks: NetworkOption[]; activeId: number; onNetworkChange: (id: number) => void; disabled?: boolean;
+export function NativeSwapHeader({ networks, activeId, onNetworkChange, disabled = false, onOpen }: {
+  networks: NetworkOption[]; activeId: number; onNetworkChange: (id: number) => void; disabled?: boolean; onOpen?: () => void;
 }) {
   const selected = networks.find(network => network.id === activeId)!;
   const button = useRef<HTMLButtonElement>(null);
@@ -41,6 +41,7 @@ export function NativeSwapHeader({ networks, activeId, onNetworkChange, disabled
       <button ref={button} type="button" disabled={disabled} aria-label="Select network" aria-haspopup="listbox" aria-expanded={Boolean(position)}
         onClick={() => {
           if (position) { setPosition(null); return; }
+          onOpen?.();
           const rect = button.current!.getBoundingClientRect();
           const width = Math.min(320, window.innerWidth - 32);
           const height = Math.min(288, window.innerHeight - 32);
