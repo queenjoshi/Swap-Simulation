@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { TokenLogo } from "@/components/TokenLogo";
 import { tokenLogoCandidates } from "@/components/TokenSelect";
 import { CHAIN_OPTIONS } from "@/lib/chains";
-import { dedupeTokens, TOKENS } from "@/lib/tokens";
+import { dedupeTokens, TOKENS, type Token as EvmToken } from "@/lib/tokens";
 import { XRPL_ASSETS } from "@/lib/xrpl-native";
 import { STELLAR_TOKENS } from "@/lib/stellar";
 import { dedupeSolanaTokens, solanaTokenLogoCandidates, SOLANA_CORE_FALLBACK, type SolanaToken } from "@/lib/solana";
@@ -224,8 +224,7 @@ function sortTokensAlphabetically(tokens: Token[]) {
   );
 }
 
-// Keep this page in sync with the swap registry instead of maintaining a
-// second, incomplete token list by hand.
+// Static catalogs are presentation fallbacks, not proof of registry admission.
 const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = [
   ...CHAIN_OPTIONS.map((chain) => ({
     title: `${chain.label} Tokens`,
@@ -276,7 +275,7 @@ const tokenGroups: Array<{ title: string; eyebrow: string; tokens: Token[] }> = 
 
 const networks = [
   { name: "Stellar", badge: "Native XLM", desc: "Native XLM and Circle USDC with Freighter wallet support and Stellar path-payment quotes. Swap signing requires the configured House Stellar fee wallet; XLM pays network fees and account reserves." },
-  { name: "Arc", badge: "USDC Gas", desc: "Arc mainnet is available in the swap selector with USDC for network fees. Quotes use available 0x liquidity; each trade must pass transaction simulation before signing. Token discovery does not certify a token as safe." },
+  { name: "Arc", badge: "Registry gated", desc: "Arc uses USDC for network fees. Only active on-chain registry tokens are selectable; at least two admitted tokens and an available liquidity route are needed for swaps. Executable trades must pass House Guard simulation before signing." },
   { name: "XRP Ledger", badge: "Native Swap", desc: "XRP pairs for RLUSD, native USDC, SOLO, CasinoCoin, XRdoge, ARMY, DROP, FUZZY, PHNIX, SIGMA, SEAL, XRPH, and XPM through XRPL order-book and AMM liquidity using r-address wallets." },
   { name: "Solana", badge: "Live Discovery", desc: "Native SOL, stablecoins, NFT ecosystem assets, and verified community tokens discovered automatically, then routed through Jupiter Ultra." },
   { name: "Ethereum", badge: "Swap + Bridge", desc: "Deep liquidity including ONDO, ENA, USDe, PENDLE, LDO, EIGEN, PYUSD, blue chips, community tokens, and stablecoins." },
@@ -306,6 +305,35 @@ export default function About() {
   const [lightspeedTokens, setLightspeedTokens] = useState<Token[]>([]);
   const [solanaTokens, setSolanaTokens] = useState<SolanaToken[]>(SOLANA_CORE_FALLBACK);
   const [automaticCatalogCount, setAutomaticCatalogCount] = useState<number | null>(null);
+  const [arcTokens, setArcTokens] = useState<EvmToken[] | null>(null);
+  const [arcCatalogError, setArcCatalogError] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const refresh = async () => {
+      try {
+        const response = await fetch("/api/token-catalog?chainId=5042", {
+          cache: "no-store", signal: controller.signal,
+        });
+        const payload = await response.json() as { tokens?: EvmToken[]; registryEnforced?: boolean };
+        if (!response.ok || !payload.registryEnforced || !Array.isArray(payload.tokens)) {
+          throw new Error("Arc registry unavailable");
+        }
+        if (!controller.signal.aborted) {
+          setArcTokens(payload.tokens);
+          setArcCatalogError(false);
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setArcTokens(null);
+          setArcCatalogError(true);
+        }
+      }
+    };
+    void refresh();
+    const timer = setInterval(refresh, 60_000);
+    return () => { controller.abort(); clearInterval(timer); };
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -373,6 +401,15 @@ export default function About() {
   }, []);
 
   const displayedTokenGroups = useMemo(() => tokenGroups.map((group) => {
+    if (group.eyebrow === "Arc") {
+      return {
+        ...group,
+        tokens: sortTokensAlphabetically((arcTokens ?? []).map((token) => ({
+          ...token,
+          logo: tokenLogoCandidates(token),
+        }))),
+      };
+    }
     if (group.eyebrow === "Native Solana") {
       return {
         ...group,
@@ -397,13 +434,13 @@ export default function About() {
       if (!tokensById.has(id)) tokensById.set(id, token);
     }
     return { ...group, tokens: sortTokensAlphabetically(Array.from(tokensById.values())) };
-  }), [lightspeedTokens, solanaTokens]);
+  }), [lightspeedTokens, solanaTokens, arcTokens]);
 
   const highlights = useMemo(() => [
     { value: String(CHAIN_OPTIONS.length + 3), label: "Networks shown" },
     {
       value: String(automaticCatalogCount ?? displayedTokenGroups.reduce((total, group) => total + group.tokens.length, 0)),
-      label: automaticCatalogCount == null ? "Shown assets" : "Live assets",
+      label: automaticCatalogCount == null ? "Shown assets" : "Catalog assets",
     },
     { value: "1%", label: "House fee" },
   ], [automaticCatalogCount, displayedTokenGroups]);
@@ -419,7 +456,7 @@ export default function About() {
             House of Joshi across every chain that matters.
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-white/66 sm:text-base">
-            Trade and discover community tokens, blue-chip assets, stablecoins, and chain-native coins across {CHAIN_OPTIONS.length + 2} network catalogs from one non-custodial interface.
+            Trade and discover community tokens, blue-chip assets, stablecoins, and chain-native coins across {CHAIN_OPTIONS.length + 3} network catalogs from one non-custodial interface. A catalog listing does not guarantee an executable swap route.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
@@ -495,15 +532,25 @@ export default function About() {
           <h2 className="hoj-display text-xl text-white/90">Arc, with USDC for gas</h2>
         </div>
         <p className="mt-4 text-sm leading-7 text-white/60">
-          Select Arc to explore available token pairs. Keep USDC available for both your trade and network fees,
+          Select Arc to view active registry tokens. Keep USDC available for both your trade and network fees,
           review the minimum received, and allow House Guard to simulate the transaction before you sign.
           A quote shows current route availability; it does not guarantee execution.
+        </p>
+        <p role="status" className="mt-3 text-sm leading-7 text-[rgba(212,175,55,0.9)]">
+          {arcCatalogError
+            ? "The Arc registry cannot be checked right now. Token availability is unknown and swaps remain blocked until checks succeed."
+            : arcTokens === null
+              ? "Checking the active Arc token registry…"
+              : arcTokens.length < 2
+                ? `Active registry tokens: ${arcTokens.map(token => token.symbol).join(", ") || "none"}. Swaps require a second reviewed token to be admitted by the registry owner.`
+                : `${arcTokens.length} active registry tokens. Quotes still depend on liquidity; a listing is not a guarantee of execution or safety.`}
         </p>
         <p className="mt-3 text-xs leading-6 text-white/50">
           Arc token selection and quotes use the active on-chain registry. Automated listing requires a
           separately configured screening worker; neither a registry listing nor a screening result is a security guarantee.
         </p>
         <a className="mt-4 inline-block text-sm text-[rgba(212,175,55,0.9)] underline" href="https://explorer.arc.io/address/0x2C5F372746330465C3f4084CE6C6aBce22a48B4d" target="_blank" rel="noopener noreferrer">View the Arc swap router</a>
+        <a className="ml-4 mt-4 inline-block text-sm text-[rgba(212,175,55,0.9)] underline" href="https://explorer.arc.io/address/0x6aCaf964bCf4551CC55Afaf12d6e6a8ef7138875" target="_blank" rel="noopener noreferrer">View the Arc token registry</a>
       </section>
 
       <section className="mb-10 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">

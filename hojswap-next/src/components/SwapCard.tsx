@@ -20,6 +20,7 @@ import { calculateHouseFeeAmount, tokenTo0xParam, type QuoteResponse, type Price
 import { erc20Abi } from "@/lib/erc20";
 import { defaultBuyForChain, defaultSellForChain, isNative, mergeTokenCatalogs, tokenDecimals, tokensForChain, type Token } from "@/lib/tokens";
 import { effectiveSlippageBps, isSameToken, otherToken } from "@/lib/swap-utils";
+import { selectRegistryPair } from "@/lib/registry-selection";
 import { loadSlippageBps } from "@/components/SlippageSettings";
 import { SwapShowMore } from "@/components/SwapShowMore";
 import { TokenBalance } from "@/components/TokenBalance";
@@ -165,6 +166,7 @@ function SwapCardInner() {
     const [providerTokens, setProviderTokens] = useState<Token[]>([]);
     const [registryChain, setRegistryChain] = useState<number | null>(null);
     const [catalogChain, setCatalogChain] = useState<number | null>(null);
+    const [catalogError, setCatalogError] = useState(false);
     const availableTokens = useMemo(() => catalogChain !== selectedChainId ? [] : selectedChainId === 5042 || registryChain === selectedChainId
       ? providerTokens.filter(token => token.chainId === selectedChainId)
       : mergeTokenCatalogs(
@@ -174,6 +176,8 @@ function SwapCardInner() {
         trendingTokens,
         providerTokens,
     ), [providerTokens, selectedChainId, trendingTokens, zoraProfileTokens, registryChain, catalogChain]);
+    const registryRequired = selectedChainId === 5042 || registryChain === selectedChainId;
+    const registryBlocked = registryRequired && (catalogChain !== selectedChainId || availableTokens.length < 2);
 
     const [sellToken, setSellToken] = useState<Token>(() => {
         const sellSymbol = searchParams.get("sell");
@@ -304,6 +308,7 @@ function SwapCardInner() {
         const controller = new AbortController();
         setProviderTokens([]);
         setCatalogChain(null);
+        setCatalogError(false);
         const refreshCatalog = () => fetch(`/api/token-catalog?chainId=${selectedChainId}`, {
             cache: "no-store",
             signal: controller.signal,
@@ -317,12 +322,14 @@ function SwapCardInner() {
                     setProviderTokens(payload.tokens);
                     setRegistryChain("registryEnforced" in payload && payload.registryEnforced ? selectedChainId : null);
                     setCatalogChain(selectedChainId);
+                    setCatalogError(false);
                 }
             })
             .catch((error) => {
                 if (!controller.signal.aborted) {
                     setProviderTokens([]);
                     setCatalogChain(null);
+                    setCatalogError(true);
                     console.error("Error loading provider token catalog:", error);
                 }
             });
@@ -330,6 +337,23 @@ function SwapCardInner() {
         const refreshTimer = setInterval(refreshCatalog, 60_000);
         return () => { controller.abort(); clearInterval(refreshTimer); };
     }, [selectedChainId]);
+
+    // A newly admitted registry token must become a usable distinct pair,
+    // not leave Arc displaying USDC on both sides. Removed selections are reset.
+    useEffect(() => {
+        if (!registryRequired || catalogChain !== selectedChainId || availableTokens.length === 0) return;
+        const pair = selectRegistryPair(availableTokens, sellToken, buyToken);
+        if (!pair) return;
+        const { sell: nextSell, buy: nextBuy } = pair;
+        if (!isSameToken(nextSell, sellToken) || !isSameToken(nextBuy, buyToken)) {
+            quoteAbort.current?.abort();
+            setSellToken(nextSell);
+            setBuyToken(nextBuy);
+            setQuote(null);
+            setPrice(null);
+            setQuoteError(null);
+        }
+    }, [registryRequired, catalogChain, selectedChainId, availableTokens, sellToken, buyToken]);
 
     // Auto-switch to bridge tab if swap is not supported on the selected chain
     useEffect(() => {
@@ -515,6 +539,7 @@ function SwapCardInner() {
 
     const fetchQuoteForTrade = useCallback(
         async (signal?: AbortSignal): Promise<QuoteResponse | null> => {
+            if (registryBlocked) return null;
             if (!sellAmountInput || Number(sellAmountInput) === 0) return null;
 
             const dec = sellDecimals ?? tokenDecimals(sellToken);
@@ -608,12 +633,13 @@ function SwapCardInner() {
             setPrice(priceRes.ok ? priceData : null);
             return quoteData;
         },
-        [sellAmountInput, sellDecimals, sellToken, buyToken, slippageBps, selectedChainId, isConnected, address],
+        [sellAmountInput, sellDecimals, sellToken, buyToken, slippageBps, selectedChainId, isConnected, address, registryBlocked],
     );
 
     useEffect(() => {
         if (quoteDebounce.current) clearTimeout(quoteDebounce.current);
-        if (!sellAmountInput || Number(sellAmountInput) === 0) {
+        if (registryBlocked || !sellAmountInput || Number(sellAmountInput) === 0) {
+            quoteAbort.current?.abort();
             setQuote(null);
             setPrice(null);
             setIsQuoting(false);
@@ -639,8 +665,11 @@ function SwapCardInner() {
                 setIsQuoting(false);
             }
         }, DEBOUNCE_MS);
-        return () => { if (quoteDebounce.current) clearTimeout(quoteDebounce.current); };
-    }, [sellAmountInput, fetchQuoteForTrade]);
+        return () => {
+            if (quoteDebounce.current) clearTimeout(quoteDebounce.current);
+            quoteAbort.current?.abort();
+        };
+    }, [sellAmountInput, fetchQuoteForTrade, registryBlocked]);
 
     const buyAmountRaw = useMemo(() => {
         const raw = quote?.buyAmount ?? price?.buyAmount;
@@ -826,6 +855,7 @@ function SwapCardInner() {
     }
 
     async function approveAndSwap() {
+        if (registryBlocked) return;
         if (!sellToken.address || !approvalSpender) return;
         const approvalAmount =
             routerAddress && quote?.hojswapRouter?.enabled
@@ -916,6 +946,7 @@ function SwapCardInner() {
     }
 
     async function swap(quoteToSwap: QuoteResponse = quote as QuoteResponse) {
+        if (registryBlocked) return;
         if (!quoteToSwap?.transaction) return;
         setIsSwapping(true);
 
@@ -1142,6 +1173,7 @@ function SwapCardInner() {
     }
 
     const primaryLabel = useMemo(() => {
+        if (registryBlocked) return catalogError ? "Registry unavailable" : catalogChain !== selectedChainId ? "Checking registry…" : "Awaiting reviewed tokens";
         if (!sellAmountInput || Number(sellAmountInput) === 0) return "Enter amount";
         if (isQuoting) return "Getting quote…";
         if (isApproving) {
@@ -1157,9 +1189,10 @@ function SwapCardInner() {
         if (needsApproval) return `Approve & swap ${sellToken.symbol}`;
         if (!quote?.transaction) return "Enter amount";
         return `Verify & swap ${sellToken.symbol} → ${buyToken.symbol}`;
-    }, [sellAmountInput, isQuoting, isApproving, swapStep, isSwapping, swapTxHash, needsApproval, sellToken.symbol, buyToken.symbol, quote?.transaction]);
+    }, [sellAmountInput, isQuoting, isApproving, swapStep, isSwapping, swapTxHash, needsApproval, sellToken.symbol, buyToken.symbol, quote?.transaction, registryBlocked, catalogError, catalogChain, selectedChainId]);
 
     const primaryDisabled =
+        registryBlocked ||
         !sellAmountInput || Number(sellAmountInput) === 0 ||
         isQuoting || isApproving || isSwapping || !!swapTxHash ||
         insufficientBalance || (!needsApproval && !quote?.transaction);
@@ -1388,9 +1421,11 @@ function SwapCardInner() {
                     </div>
                 ) : isSwapSupported && activeTab === "swap" ? (
                     <>
-                        {(selectedChainId === 5042 || registryChain === selectedChainId) && availableTokens.length < 2 && (
+                        {registryBlocked && (
                             <p role="status" className="rounded-2xl border border-amber-400/20 bg-amber-400/[0.07] px-4 py-3 text-xs leading-5 text-amber-100/80">
-                                {catalogChain !== selectedChainId
+                                {catalogError
+                                    ? "The token registry is unavailable. Swaps are blocked until the active token list can be checked. Please try again shortly."
+                                    : catalogChain !== selectedChainId
                                     ? "Checking the token registry. Swaps require a successful registry check."
                                     : "This registry has fewer than two active tokens. A second reviewed token must be admitted before swaps are available."}
                             </p>
