@@ -79,6 +79,14 @@ export const TOKENS: Token[] = [
   },
 
   // ─── Base ────────────────────────────────────────────────
+  // Contract metadata checked on Base (8453); listing is not a safety or liquidity endorsement.
+  {
+    symbol: "KABOOM",
+    name: "KABOOM",
+    address: getAddress("0x44a76199e0bda48e715b8204c2d231dd712c2693"),
+    chainId: base.id,
+    decimals: 18,
+  },
   {
     symbol: "ETH",
     name: "Ether",
